@@ -1,0 +1,51 @@
+import { Provider } from '@txnlab/use-wallet'
+import { useState } from 'react'
+import Button from './Button'
+
+interface DropDownOption {
+  buttonText: string
+  options: Provider[] | null
+}
+
+const DropDown = ({ options, buttonText }: DropDownOption) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const dropDownButtonRenderer = () => {
+    return (
+      <div>
+        <Button buttonText={buttonText} buttonFunction={handleOpenDropDown} />
+      </div>
+    )
+  }
+
+  const optionRenderer = () => {
+    if (options) {
+      return options.map((option) => (
+        <div>
+          <button className="border hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
+            {option.metadata.name}
+          </button>
+        </div>
+      ))
+    }
+
+    return null
+  }
+
+  const handleOpenDropDown = () => {
+    setIsOpen(!isOpen)
+  }
+
+  return (
+    <div onClick={handleOpenDropDown}>
+      <button className="p-2">
+        <div className="flex flex-col relative">
+          {dropDownButtonRenderer()}
+          {isOpen ? <div className="absolute top-10 flex flex-col w-full bg-white border-gray-900 border-2">{optionRenderer()}</div> : null}
+        </div>
+      </button>
+    </div>
+  )
+}
+
+export { DropDown }
