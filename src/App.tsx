@@ -6,6 +6,7 @@ import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
 import { useEffect, useState } from 'react'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
+import Footer from './components/Footer'
 import NavBar from './components/NavBar'
 import Home from './pages/Home'
 import { Feed } from './services/Feed'
@@ -79,6 +80,7 @@ export default function App() {
         <>
           <NavBar />
           <Outlet context={{ algod, userData }} />
+          <Footer />
         </>
       ),
       children: [{ path: '/', element: <Home postsList={postsList} setPosts={setPosts} /> }],
