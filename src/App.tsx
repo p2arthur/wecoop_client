@@ -7,11 +7,10 @@ import { SnackbarProvider } from 'notistack'
 import { useEffect, useState } from 'react'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import NavBar from './components/NavBar'
+import Home from './pages/Home'
 import { Feed } from './services/Feed'
 import { PostProps } from './services/Post'
-import { ellipseAddress } from './utils/ellipseAddress'
-import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
-import Home from './pages/Home'
+import { User, UserInterface } from './services/User'
 
 let providersArray: ProvidersArray
 
@@ -25,13 +24,15 @@ providersArray = [
 ]
 
 export default function App() {
-  const { activeAccount } = useWallet()
+  const { activeAccount, providers } = useWallet()
+  const [userData, setUserData] = useState<UserInterface>({ address: '' })
   const [postsList, setPostsList] = useState<PostProps[]>([])
 
   const feed = new Feed()
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
+    console.log(data)
     setPostsList(data)
   }
 
@@ -39,17 +40,24 @@ export default function App() {
     getAllPosts()
   }, [])
 
-  useEffect(() => {}, [activeAccount])
+  useEffect(() => {
+    if (activeAccount) {
+      setUserData({ address: activeAccount.address })
+      console.log('providers', providers)
+      const user = new User(activeAccount)
+      user.signTransaction()
+    }
+  }, [activeAccount])
 
-  const algodConfig = getAlgodConfigFromViteEnvironment()
+  const algod = new algosdk.Algodv2('a'.repeat(64), 'https://testnet-api.algonode.cloud', '')
 
   const walletProviders = useInitializeProviders({
     providers: providersArray,
     nodeConfig: {
-      network: algodConfig.network,
-      nodeServer: algodConfig.server,
-      nodePort: String(algodConfig.port),
-      nodeToken: String(algodConfig.token),
+      network: 'testnet',
+      nodeServer: 'https://testnet-api.algonode.cloud',
+      nodePort: '',
+      nodeToken: 'a'.repeat(64),
     },
     algosdkStatic: algosdk,
   })
@@ -59,7 +67,7 @@ export default function App() {
       element: (
         <>
           <NavBar />
-          <Outlet />
+          <Outlet context={{ algod, userData }} />
         </>
       ),
       children: [{ path: '/', element: <Home postsList={postsList} /> }],

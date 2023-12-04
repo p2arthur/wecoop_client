@@ -10,14 +10,12 @@ export class Post {
 
   private decryptPostNote(note: string): string {
     const decodedString = atob(note)
-    console.log(decodedString)
     return decodedString
   }
 
   public setPostData(postDataInput: PostProps): PostProps {
     const text = this.decryptPostNote(postDataInput.text!)
     this.postData = { text, creator_address: postDataInput.creator_address, transaction_id: postDataInput.transaction_id }
-    console.log(this.postData)
     return this.postData
   }
 }

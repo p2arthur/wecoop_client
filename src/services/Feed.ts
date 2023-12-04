@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { Post, PostProps } from './Post'
-import algosdk from 'algosdk'
 
 export class Feed {
   feedData: PostProps[] = []

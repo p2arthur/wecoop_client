@@ -6,9 +6,7 @@ import { DropDown } from './DropDown'
 const ConnectWallet = () => {
   const { providers, activeAccount } = useWallet()
 
-  useEffect(() => {
-    console.log(activeAccount?.address)
-  }, [activeAccount])
+  useEffect(() => {}, [activeAccount])
 
   return (
     <div>

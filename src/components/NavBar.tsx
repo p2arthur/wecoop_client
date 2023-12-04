@@ -2,8 +2,8 @@ import ConnectWallet from './ConnectWallet'
 
 const NavBar = () => {
   return (
-    <div className="p-3 border border-gray-900 flex  border-b-2 justify-between items-center">
-      <p className="font-bold">SCOOP</p>
+    <div className="p-3 border-b-4 border-gray-900 flex justify-between items-center">
+      <p className="font-bold text-3xl">$COOP</p>
       <ConnectWallet />
     </div>
   )
