@@ -16,25 +16,26 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
   return (
     <>
       {postsList
-        ? postsList?.map((post) => {
+        ? postsList?.map((post, index) => {
             return (
-              <div>
+              <div key={index}>
                 {post.status === 'accepted' ? (
-                  <div
-                    key={post.text}
-                    className="border-2 border-gray-900 flex flex-col gap-3 p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer min-h-[120px]"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 rounded-full border-2 border-gray-900">
-                          <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
+                  <a target="_blank" href={`https://testnet.algoexplorer.io/tx/${post.transaction_id}`}>
+                    <div className="border-2 border-gray-900 flex flex-col gap-3 p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer min-h-[120px]">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 rounded-full border-2 border-gray-900">
+                            <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
+                          </div>
+                          <a target="_blank" href={`https://testnet.algoexplorer.io/address/${post.creator_address}`}>
+                            <h2 className="font-bold text-xl h-full hover:underline">{ellipseAddress(post.creator_address)}</h2>
+                          </a>
                         </div>
-                        <h2 className="font-bold text-xl h-full">{ellipseAddress(post.creator_address)}</h2>
+                        <div>{`${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure}`}</div>
                       </div>
-                      <div>{`${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure}`}</div>
+                      <p className="w-full tracking-wide">{post.text}</p>
                     </div>
-                    <p className="w-full tracking-wide">{post.text}</p>
-                  </div>
+                  </a>
                 ) : post.status === 'loading' ? (
                   <div
                     key={post.text}

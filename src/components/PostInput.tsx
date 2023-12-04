@@ -17,7 +17,7 @@ interface PostPropsInterface {
 }
 
 const PostInput = ({ setPosts }: PostPropsInterface) => {
-  const { signTransactions, sendTransactions } = useWallet()
+  const { signTransactions, sendTransactions, activeAccount } = useWallet()
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
 
@@ -57,11 +57,12 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     <form onSubmit={handleSubmit} action="">
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4">
         <textarea
+          maxLength={300}
           onChange={handleChange}
           placeholder="Enter your message"
           className="w-full border-2 border-gray-400 align-top text-start break-all whitespace-normal h-32 p-2 resize-none"
         />
-        <Button buttonText="Send your message" />
+        {activeAccount?.address ? <Button buttonText="Send your message" /> : <Button inactive={true} buttonText="Send message" />}
       </div>
     </form>
   )
