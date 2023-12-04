@@ -1,11 +1,10 @@
 import axios from 'axios'
-export interface Post {
-  text?: string
-  creator_address?: string
-}
+import { Post, PostProps } from './Post'
+import algosdk from 'algosdk'
 
 export class Feed {
-  feedData: Post[] = []
+  feedData: PostProps[] = []
+  constructor(private post: Post = new Post()) {}
 
   public async getAllPosts() {
     const { data } = await axios.get(
@@ -14,12 +13,16 @@ export class Feed {
 
     const { transactions } = data
 
-    let postData: Post = {}
+    let postData: PostProps = {}
 
     for (let transaction of transactions) {
       if (transaction.note) {
-        postData = { text: transaction.note, creator_address: transaction.sender }
-        this.feedData.push(postData)
+        const { note, sender, id } = transaction
+
+        postData = { text: note, creator_address: sender, transaction_id: id }
+
+        const post = this.post.setPostData(postData)
+        this.feedData.push(post)
       }
     }
 
