@@ -18,13 +18,20 @@ export class Feed {
       if (transaction.note) {
         const { note, sender, id } = transaction
 
-        postData = { text: note, creator_address: sender, transaction_id: id }
+        postData = { text: note, creator_address: sender, transaction_id: id, status: 'accepted' }
+        console.log('post data', postData)
 
         const post = this.post.setPostData(postData)
+        console.log('post', post)
         this.feedData.push(post)
+        console.log('first', this.feedData)
       }
     }
 
     return this.feedData
+  }
+
+  public setAllPosts(post: PostProps) {
+    this.feedData.push(post)
   }
 }

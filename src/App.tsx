@@ -10,7 +10,7 @@ import NavBar from './components/NavBar'
 import Home from './pages/Home'
 import { Feed } from './services/Feed'
 import { PostProps } from './services/Post'
-import { User, UserInterface } from './services/User'
+import { UserInterface } from './services/User'
 
 let providersArray: ProvidersArray
 
@@ -32,8 +32,13 @@ export default function App() {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
-    console.log(data)
+    console.log('app data', data)
     setPostsList(data)
+  }
+
+  const setPosts = (newPost: PostProps) => {
+    setPostsList([newPost, ...postsList])
+    console.log('app2', postsList)
   }
 
   useEffect(() => {
@@ -44,10 +49,12 @@ export default function App() {
     if (activeAccount) {
       setUserData({ address: activeAccount.address })
       console.log('providers', providers)
-      const user = new User(activeAccount)
-      user.signTransaction()
     }
   }, [activeAccount])
+
+  useEffect(() => {
+    console.log('change', postsList)
+  }, [postsList])
 
   const algod = new algosdk.Algodv2('a'.repeat(64), 'https://testnet-api.algonode.cloud', '')
 
@@ -70,7 +77,7 @@ export default function App() {
           <Outlet context={{ algod, userData }} />
         </>
       ),
-      children: [{ path: '/', element: <Home postsList={postsList} /> }],
+      children: [{ path: '/', element: <Home postsList={postsList} setPosts={setPosts} /> }],
     },
   ])
 
