@@ -1,5 +1,6 @@
 import { useWallet } from '@txnlab/use-wallet'
 import { useEffect } from 'react'
+import { ellipseAddress } from '../utils/ellipseAddress'
 import { DropDown } from './DropDown'
 
 const ConnectWallet = () => {
@@ -12,7 +13,7 @@ const ConnectWallet = () => {
   return (
     <div>
       {activeAccount ? (
-        <DropDown options={providers} buttonText={activeAccount.address} />
+        <DropDown options={providers} buttonText={ellipseAddress(activeAccount.address)} />
       ) : (
         <DropDown options={providers} buttonText="Connect Wallet" />
       )}
