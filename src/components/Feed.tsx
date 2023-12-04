@@ -31,7 +31,12 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                             <h2 className="font-bold text-xl h-full hover:underline">{ellipseAddress(post.creator_address)}</h2>
                           </a>
                         </div>
-                        <div>{`${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure}`}</div>
+                        <div className="flex gap-2">
+                          {post.country ? <p>{post.country}</p> : null}
+                          <p>{`${formatDateFromTimestamp(post.timestamp!).time} ${
+                            formatDateFromTimestamp(post.timestamp!).measure
+                          } ago`}</p>
+                        </div>
                       </div>
                       <p className="w-full tracking-wide">{post.text}</p>
                     </div>

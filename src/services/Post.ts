@@ -4,6 +4,7 @@ export interface PostProps {
   transaction_id?: string
   status?: 'loading' | 'accepted' | 'denied'
   timestamp?: number
+  country?: string
 }
 
 export class Post {
@@ -17,17 +18,17 @@ export class Post {
 
   public setPostData(postDataInput: PostProps): PostProps {
     const text = this.decryptPostNote(postDataInput.text!)
-    const unicodeMatches = text.match(/[\u009Fâ]/i)
-    console.log(unicodeMatches)
-    const convertedText = text.replace(/[\u009Fâ]/i, (match) => String.fromCodePoint(match.codePointAt(0)!))
-    console.log('convertedp', convertedText)
+
+    const allText = text.split('-')
+    console.log('all text', allText)
 
     this.postData = {
-      text: text,
+      text: allText[1] || allText[0],
       creator_address: postDataInput.creator_address,
       transaction_id: postDataInput.transaction_id,
       status: postDataInput.status,
       timestamp: postDataInput.timestamp! * 1000,
+      country: allText[1] ? allText[0] : undefined,
     }
     return this.postData
   }

@@ -1,5 +1,6 @@
 import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import axios from 'axios'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { PostProps } from '../services/Post'
@@ -29,15 +30,25 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     setInputText(text)
   }
 
+  const getUserCountry = async () => {
+    const { data } = await axios.get('https://api.country.is/')
+    const { country } = data
+    return country
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     console.log(inputText)
     setPosts({ text: inputText, creator_address: userData.address, status: 'loading' })
+    const country = await getUserCountry()
+    console.log(country)
+    const note = `${country} - ${inputText}`
+
     const transaction = await transactionServices.createTransaction(
       userData.address,
       'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
       1000,
-      inputText,
+      note,
     )
 
     try {
@@ -46,8 +57,9 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
       console.log('transaction signed', signedTransactions)
       const waitRoundsToConfirm = 4
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+
       console.log('Transaction id', id)
-      setPosts({ creator_address: userData.address, text: inputText, status: 'accepted' })
+      setPosts({ creator_address: userData.address, text: inputText, status: 'accepted', transaction_id: id, country })
     } catch (error) {
       console.error(error)
       setTimeout(() => setPosts({ text: inputText, status: 'denied' }), 1000)
