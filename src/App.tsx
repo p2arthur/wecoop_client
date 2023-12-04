@@ -33,13 +33,11 @@ export default function App() {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
-    console.log('all posts', data)
     setPostsList(data)
   }
 
   const setPosts = (newPost: PostProps) => {
     setPostsList([newPost, ...postsList])
-    console.log('app2', postsList)
   }
 
   useEffect(() => {
@@ -49,17 +47,10 @@ export default function App() {
   useEffect(() => {
     if (activeAccount) {
       const userServices = new User({ address: activeAccount.address })
-
       const userData = userServices.setUser()
-      console.log('userData from app', userData)
-
       setUserData(userData)
     }
   }, [activeAccount])
-
-  useEffect(() => {
-    console.log('change', postsList)
-  }, [postsList])
 
   const algod = new algosdk.Algodv2('a'.repeat(64), 'https://testnet-api.algonode.cloud', '')
 

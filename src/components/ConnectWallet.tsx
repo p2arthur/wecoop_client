@@ -23,7 +23,9 @@ const ConnectWallet = () => {
           <DropDown icon={svgUri} options={providers} buttonText={ellipseAddress(activeAccount.address)} />
         </div>
       ) : (
-        <DropDown options={providers} buttonText="Connect Wallet" />
+        <div>
+          <DropDown options={providers} buttonText="Connect Wallet" />
+        </div>
       )}
     </div>
   )

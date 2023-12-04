@@ -16,7 +16,6 @@ export class Feed {
 
     for (let transaction of transactions) {
       if (transaction.note) {
-        console.log(transaction)
         const { note, sender, id } = transaction
         const roundTime = transaction['round-time']
         postData = { text: note, creator_address: sender, transaction_id: id, timestamp: roundTime, status: 'accepted' }

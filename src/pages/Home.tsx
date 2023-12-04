@@ -9,13 +9,8 @@ interface HomeInterface {
 
 const Home = ({ postsList, setPosts }: HomeInterface) => {
   const handleSetPosts = (newPost: PostProps) => {
-    console.log('setposts')
-    console.log(newPost)
-    console.log('postlist', postsList)
     setPosts(newPost)
   }
-
-  console.log(postsList)
 
   return (
     <div className="flex flex-col gap-4 p-2">

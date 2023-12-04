@@ -17,13 +17,13 @@ export class Post {
 
   public setPostData(postDataInput: PostProps): PostProps {
     const text = this.decryptPostNote(postDataInput.text!)
-
-    const date = new Date(1701579074 * 1000)
-
-    console.log(date)
+    const unicodeMatches = text.match(/[\u009Fâ]/i)
+    console.log(unicodeMatches)
+    const convertedText = text.replace(/[\u009Fâ]/i, (match) => String.fromCodePoint(match.codePointAt(0)!))
+    console.log('convertedp', convertedText)
 
     this.postData = {
-      text,
+      text: text,
       creator_address: postDataInput.creator_address,
       transaction_id: postDataInput.transaction_id,
       status: postDataInput.status,

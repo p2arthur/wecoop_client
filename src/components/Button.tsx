@@ -2,14 +2,18 @@ interface ButtonProps {
   buttonText: string
   buttonFunction?(): void
   icon?: string
+  inactive?: boolean
 }
 
-const Button = ({ buttonText, buttonFunction, icon }: ButtonProps) => {
+const Button = ({ buttonText, buttonFunction, icon, inactive }: ButtonProps) => {
   return (
     <div>
       <button
-        className="border-2 border-gray-900 p-1 bg-white font-bold hover:bg-gray-200 active:bg-gray-300 flex items-center"
+        className={`${
+          inactive ? 'opacity-30' : 'null'
+        } border-2 border-gray-900 p-1 bg-white font-bold hover:bg-gray-200 active:bg-gray-300 flex items-center`}
         onClick={buttonFunction}
+        disabled={inactive}
       >
         {icon ? <img className="w-6" src={icon} alt="" /> : null}
         {buttonText}
