@@ -23,14 +23,10 @@ export class User {
 
     this.userData = { address: this.userData.address, avatarUri }
 
-    console.log('this.userData', this.userData)
-
     return this.userData
   }
 
   public generateIdIcon(creatorAddress: string): string {
-    console.log('generating svg')
-
     const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
 
     console.log(svgURI)

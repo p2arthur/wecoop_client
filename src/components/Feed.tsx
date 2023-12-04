@@ -1,6 +1,7 @@
 import { minidenticon } from 'minidenticons'
 import { FaSpinner } from 'react-icons/fa6'
 import { PostProps } from '../services/Post'
+import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 
 interface FeedPropsInterface {
@@ -9,12 +10,7 @@ interface FeedPropsInterface {
 
 const Feed = ({ postsList }: FeedPropsInterface) => {
   const generateIdIcon = (creatorAddress: string) => {
-    console.log('generating svg')
-
     const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
-
-    console.log('svg-uri', svgURI)
-
     return svgURI
   }
   return (
@@ -28,11 +24,14 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                     key={post.text}
                     className="border-2 border-gray-900 flex flex-col gap-3 p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer min-h-[120px]"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 rounded-full border-2 border-gray-900">
-                        <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 rounded-full border-2 border-gray-900">
+                          <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
+                        </div>
+                        <h2 className="font-bold text-xl h-full">{ellipseAddress(post.creator_address)}</h2>
                       </div>
-                      <h2 className="font-bold text-xl h-full">{ellipseAddress(post.creator_address)}</h2>
+                      <div>{`${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure}`}</div>
                     </div>
                     <p className="w-full tracking-wide">{post.text}</p>
                   </div>

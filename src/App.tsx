@@ -32,7 +32,7 @@ export default function App() {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
-    console.log('app data', data)
+    console.log('all posts', data)
     setPostsList(data)
   }
 

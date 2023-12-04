@@ -16,15 +16,13 @@ export class Feed {
 
     for (let transaction of transactions) {
       if (transaction.note) {
+        console.log(transaction)
         const { note, sender, id } = transaction
-
-        postData = { text: note, creator_address: sender, transaction_id: id, status: 'accepted' }
-        console.log('post data', postData)
+        const roundTime = transaction['round-time']
+        postData = { text: note, creator_address: sender, transaction_id: id, timestamp: roundTime, status: 'accepted' }
 
         const post = this.post.setPostData(postData)
-        console.log('post', post)
         this.feedData.push(post)
-        console.log('first', this.feedData)
       }
     }
 
