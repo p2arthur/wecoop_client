@@ -10,7 +10,7 @@ import NavBar from './components/NavBar'
 import Home from './pages/Home'
 import { Feed } from './services/Feed'
 import { PostProps } from './services/Post'
-import { UserInterface } from './services/User'
+import { User, UserInterface } from './services/User'
 
 let providersArray: ProvidersArray
 
@@ -25,7 +25,7 @@ providersArray = [
 
 export default function App() {
   const { activeAccount, providers } = useWallet()
-  const [userData, setUserData] = useState<UserInterface>({ address: '' })
+  const [userData, setUserData] = useState<UserInterface>({ address: '', avatarUri: '' })
   const [postsList, setPostsList] = useState<PostProps[]>([])
 
   const feed = new Feed()
@@ -47,8 +47,12 @@ export default function App() {
 
   useEffect(() => {
     if (activeAccount) {
-      setUserData({ address: activeAccount.address })
-      console.log('providers', providers)
+      const userServices = new User({ address: activeAccount.address })
+
+      const userData = userServices.setUser()
+      console.log('userData from app', userData)
+
+      setUserData(userData)
     }
   }, [activeAccount])
 

@@ -24,7 +24,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
   const transactionServices = new Transaction(algod)
   const userServices = new User({ address: userData.address })
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = event.target.value
     setInputText(text)
   }
@@ -56,11 +56,10 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
   return (
     <form onSubmit={handleSubmit} action="">
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4">
-        <input
+        <textarea
           onChange={handleChange}
-          type="text"
           placeholder="Enter your message"
-          className="w-full border-2 text-left break-all whitespace-normal h-32 p-2"
+          className="w-full border-2 border-gray-400 align-top text-start break-all whitespace-normal h-32 p-2 resize-none"
         />
         <Button buttonText="Send your message" />
       </div>

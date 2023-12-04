@@ -5,15 +5,16 @@ import Button from './Button'
 interface DropDownOption {
   buttonText: string
   options: Provider[] | null
+  icon?: string
 }
 
-const DropDown = ({ options, buttonText }: DropDownOption) => {
+const DropDown = ({ options, buttonText, icon }: DropDownOption) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const dropDownButtonRenderer = () => {
     return (
       <div>
-        <Button buttonText={buttonText} buttonFunction={handleOpenDropDown} />
+        <Button icon={icon} buttonText={buttonText} buttonFunction={handleOpenDropDown} />
       </div>
     )
   }
@@ -22,7 +23,7 @@ const DropDown = ({ options, buttonText }: DropDownOption) => {
     if (options) {
       return options.map((option) => (
         <div>
-          <button className="border hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
+          <button className="border-2 hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
             {option.metadata.name}
           </button>
         </div>
