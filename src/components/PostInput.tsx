@@ -47,7 +47,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
       const waitRoundsToConfirm = 4
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
       console.log('Transaction id', id)
-      setPosts({ text: inputText, status: 'accepted' })
+      setPosts({ creator_address: userData.address, text: inputText, status: 'accepted' })
     } catch (error) {
       console.error(error)
       setTimeout(() => setPosts({ text: inputText, status: 'denied' }), 1000)
