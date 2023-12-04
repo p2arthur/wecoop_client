@@ -1,6 +1,6 @@
 interface ButtonProps {
   buttonText: string
-  buttonFunction(): void
+  buttonFunction?(): void
 }
 
 const Button = ({ buttonText, buttonFunction }: ButtonProps) => {

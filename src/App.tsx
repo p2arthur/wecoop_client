@@ -5,9 +5,13 @@ import { PROVIDER_ID, ProvidersArray, WalletProvider, useInitializeProviders, us
 import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
 import { useEffect, useState } from 'react'
+import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import NavBar from './components/NavBar'
-import { Feed, Post } from './services/Feed'
+import { Feed } from './services/Feed'
+import { PostProps } from './services/Post'
+import { ellipseAddress } from './utils/ellipseAddress'
 import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
+import Home from './pages/Home'
 
 let providersArray: ProvidersArray
 
@@ -22,7 +26,7 @@ providersArray = [
 
 export default function App() {
   const { activeAccount } = useWallet()
-  const [postsList, setPostsList] = useState<Post[]>()
+  const [postsList, setPostsList] = useState<PostProps[]>([])
 
   const feed = new Feed()
 
@@ -50,19 +54,22 @@ export default function App() {
     algosdkStatic: algosdk,
   })
 
+  const router = createBrowserRouter([
+    {
+      element: (
+        <>
+          <NavBar />
+          <Outlet />
+        </>
+      ),
+      children: [{ path: '/', element: <Home postsList={postsList} /> }],
+    },
+  ])
+
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider value={walletProviders}>
-        <NavBar />
-        <div className="flex flex-col gap-10 h-screen">
-          {postsList?.map((post) => {
-            return (
-              <div className="border-2 flex flex-col break-words">
-                <p className="w-screen ">{post.text}</p>
-              </div>
-            )
-          })}
-        </div>
+        <RouterProvider router={router} />
       </WalletProvider>
     </SnackbarProvider>
   )
