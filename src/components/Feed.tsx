@@ -13,6 +13,7 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
     const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
     return svgURI
   }
+  console.log(postsList)
   return (
     <>
       {postsList
@@ -32,7 +33,14 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                           </a>
                         </div>
                         <div className="flex gap-2">
-                          {post.country ? <p>{post.country}</p> : null}
+                          {post.country ? (
+                            <div className="flex gap-0 flex-col justify-center">
+                              <div className="w-6 rounded-full overflow-hidden">
+                                <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
+                              </div>
+                              <p className="w-full text-center">{post.country}</p>
+                            </div>
+                          ) : null}
                           <p>{`${formatDateFromTimestamp(post.timestamp!).time} ${
                             formatDateFromTimestamp(post.timestamp!).measure
                           } ago`}</p>

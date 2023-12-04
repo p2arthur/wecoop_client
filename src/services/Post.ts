@@ -19,8 +19,7 @@ export class Post {
   public setPostData(postDataInput: PostProps): PostProps {
     const text = this.decryptPostNote(postDataInput.text!)
 
-    const allText = text.split('-')
-    console.log('all text', allText)
+    const allText = text.split(' - ')
 
     this.postData = {
       text: allText[1] || allText[0],
