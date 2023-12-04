@@ -1,3 +1,5 @@
+import { minidenticon } from 'minidenticons'
+import { useMemo } from 'react'
 import { FaSpinner } from 'react-icons/fa6'
 import { PostProps } from '../services/Post'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -7,6 +9,15 @@ interface FeedPropsInterface {
 }
 
 const Feed = ({ postsList }: FeedPropsInterface) => {
+  const generateIdIcon = (creatorAddress: string) => {
+    console.log('generating svg')
+
+    const svgURI = useMemo(() => 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress)), [creatorAddress])
+
+    console.log('svg-uri', svgURI)
+
+    return svgURI
+  }
   return (
     <>
       {postsList
@@ -16,10 +27,15 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                 {post.status === 'accepted' ? (
                   <div
                     key={post.text}
-                    className="border-2 border-gray-900 flex flex-col p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer"
+                    className="border-2 border-gray-900 flex flex-col gap-3 p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer min-h-[120px]"
                   >
-                    <h2>{ellipseAddress(post.creator_address)}</h2>
-                    <p className="w-full">{post.text}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 rounded-full border-2 border-gray-900">
+                        <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
+                      </div>
+                      <h2 className="font-bold text-xl">{ellipseAddress(post.creator_address)}</h2>
+                    </div>
+                    <p className="w-full tracking-wide">{post.text}</p>
                   </div>
                 ) : post.status === 'loading' ? (
                   <div
