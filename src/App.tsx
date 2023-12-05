@@ -13,9 +13,7 @@ import { Feed } from './services/Feed'
 import { PostProps } from './services/Post'
 import { User, UserInterface } from './services/User'
 
-let providersArray: ProvidersArray
-
-providersArray = [
+const providersArray: ProvidersArray = [
   { id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect },
   { id: PROVIDER_ID.PERA, clientStatic: PeraWalletConnect },
   { id: PROVIDER_ID.DAFFI, clientStatic: DaffiWalletConnect },
@@ -25,7 +23,7 @@ providersArray = [
 ]
 
 export default function App() {
-  const { activeAccount, providers } = useWallet()
+  const { activeAccount } = useWallet()
   const [userData, setUserData] = useState<UserInterface>({ address: '', avatarUri: '' })
   const [postsList, setPostsList] = useState<PostProps[]>([])
 

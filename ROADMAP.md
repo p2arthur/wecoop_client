@@ -19,7 +19,9 @@
 # Non functional requirements:
 
 - Platform wallets
+
   - SCOOP Feed - Mainnet
+
 - Testing wallets
   - Sender wallet
   - SCOOP Feed - Testnet
