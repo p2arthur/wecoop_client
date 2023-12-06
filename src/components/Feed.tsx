@@ -66,7 +66,9 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                         <div className="w-10 rounded-full border-2 border-gray-900">
                           <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                         </div>
-                        <h2 className="font-bold text-xl h-full">{ellipseAddress(post.creator_address)}</h2>
+                        <h2 className="font-bold text-xl h-full">
+                          {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
+                        </h2>
                       </div>
                       <p className="w-full">{post.text}</p>
                     </div>
@@ -79,7 +81,7 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                     key={post.text}
                     className="border-2 opacity-40 border-red-900 flex-col p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
                   >
-                    <h2>{ellipseAddress(post.creator_address)}</h2>
+                    <h2>{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
                     <p className="w-full">{post.text}</p>
                   </div>
                 )}
