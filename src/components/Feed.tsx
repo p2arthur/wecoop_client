@@ -13,11 +13,16 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
     const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
     return svgURI
   }
+
+  const sortedPostList = postsList.sort((a, b) => {
+    return b.timestamp! - a.timestamp!
+  })
+
   console.log(postsList)
   return (
     <>
       {postsList
-        ? postsList?.map((post, index) => {
+        ? sortedPostList?.map((post, index) => {
             return (
               <div key={index}>
                 {post.status === 'accepted' ? (
@@ -29,7 +34,9 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                             <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                           </div>
                           <a target="_blank" href={`https://testnet.algoexplorer.io/address/${post.creator_address}`}>
-                            <h2 className="font-bold text-xl h-full hover:underline">{ellipseAddress(post.creator_address)}</h2>
+                            <h2 className="font-bold text-xl h-full hover:underline">
+                              {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
+                            </h2>
                           </a>
                         </div>
                         <div className="flex gap-2">
@@ -59,7 +66,9 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                         <div className="w-10 rounded-full border-2 border-gray-900">
                           <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                         </div>
-                        <h2 className="font-bold text-xl h-full">{ellipseAddress(post.creator_address)}</h2>
+                        <h2 className="font-bold text-xl h-full">
+                          {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
+                        </h2>
                       </div>
                       <p className="w-full">{post.text}</p>
                     </div>
@@ -72,7 +81,7 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                     key={post.text}
                     className="border-2 opacity-40 border-red-900 flex-col p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
                   >
-                    <h2>{ellipseAddress(post.creator_address)}</h2>
+                    <h2>{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
                     <p className="w-full">{post.text}</p>
                   </div>
                 )}

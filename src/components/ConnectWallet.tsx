@@ -1,26 +1,25 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { useOutletContext } from 'react-router-dom'
-import { User, UserInterface } from '../services/User'
+import { useEffect } from 'react'
+import { UserInterface } from '../services/User'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { DropDown } from './DropDown'
 
-interface ConnectWalletOutletContext {
-  userData: UserInterface | null
+interface ConnectWalletProps {
+  user: UserInterface
 }
 
-const ConnectWallet = () => {
+const ConnectWallet = ({ user }: ConnectWalletProps) => {
   const { providers, activeAccount } = useWallet()
-  const outletContext = useOutletContext() as ConnectWalletOutletContext
 
-  const userServices = new User({ address: activeAccount?.address! })
-
-  const svgUri = userServices.generateIdIcon(activeAccount?.address!)
+  useEffect(() => {
+    console.log('userData from connect wallet', user)
+  }, [user])
 
   return (
     <div>
       {activeAccount ? (
         <div>
-          <DropDown icon={svgUri} options={providers} buttonText={ellipseAddress(activeAccount.address)} />
+          <DropDown icon={user.avatarUri} options={providers} buttonText={!user.nfd ? ellipseAddress(activeAccount.address) : user.nfd} />
         </div>
       ) : (
         <div>

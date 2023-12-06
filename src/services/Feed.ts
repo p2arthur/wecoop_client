@@ -7,7 +7,7 @@ export class Feed {
 
   public async getAllPosts() {
     const { data } = await axios.get(
-      'https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?asset-id=10458941',
+      'https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?limit=500&asset-id=10458941',
     )
 
     const { transactions } = data
@@ -21,7 +21,7 @@ export class Feed {
         const roundTime = transaction['round-time']
         postData = { text: note, creator_address: sender, transaction_id: id, timestamp: roundTime, status: 'accepted' }
 
-        const post = this.post.setPostData(postData)
+        const post = await this.post.setPostData(postData)
         this.feedData.push(post)
       }
     }
