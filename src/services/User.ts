@@ -41,7 +41,7 @@ export class User {
       return nfd
     } catch (error) {
       console.error(error)
-      throw new Error("Couldn't get user nfd")
+      return null
     }
   }
 }

@@ -13,10 +13,16 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
     const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
     return svgURI
   }
+
+  const sortedPostList = postsList.sort((a, b) => {
+    return b.timestamp! - a.timestamp!
+  })
+
+  console.log(postsList)
   return (
     <>
       {postsList
-        ? postsList?.map((post, index) => {
+        ? sortedPostList?.map((post, index) => {
             return (
               <div key={index}>
                 {post.status === 'accepted' ? (
@@ -28,7 +34,9 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                             <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                           </div>
                           <a target="_blank" href={`https://testnet.algoexplorer.io/address/${post.creator_address}`}>
-                            <h2 className="font-bold text-xl h-full hover:underline">{ellipseAddress(post.creator_address)}</h2>
+                            <h2 className="font-bold text-xl h-full hover:underline">
+                              {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
+                            </h2>
                           </a>
                         </div>
                         <div className="flex gap-2">
