@@ -38,10 +38,8 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    console.log(inputText)
     setPosts({ text: inputText, creator_address: userData.address, status: 'loading' })
     const country = await getUserCountry()
-    console.log(country)
     const note = `${country} - ${inputText}`
 
     const transaction = await transactionServices.createTransaction(
@@ -54,11 +52,8 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     try {
       userServices.signTransaction({ text: inputText })
       const signedTransactions = await signTransactions([transaction])
-      console.log('transaction signed', signedTransactions)
       const waitRoundsToConfirm = 4
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-
-      console.log('Transaction id', id)
       setPosts({ creator_address: userData.address, text: inputText, status: 'accepted', transaction_id: id, country })
     } catch (error) {
       console.error(error)

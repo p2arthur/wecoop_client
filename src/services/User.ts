@@ -15,7 +15,6 @@ export class User {
 
   async signTransaction(post: PostProps) {
     this.feedServices.setAllPosts(post)
-    console.log('user sign transaction')
   }
 
   public setUser() {

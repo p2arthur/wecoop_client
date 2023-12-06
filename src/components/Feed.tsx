@@ -13,7 +13,6 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
     const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
     return svgURI
   }
-  console.log(postsList)
   return (
     <>
       {postsList
