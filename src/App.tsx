@@ -43,10 +43,15 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (activeAccount) {
-      const userServices = new User({ address: activeAccount.address })
-      const userData = userServices.setUser()
+    async function appendUserDate() {
+      const userServices = new User({ address: activeAccount?.address! })
+      const userData = await userServices.setUser()
+      console.log(userData)
       setUserData(userData)
+    }
+
+    if (activeAccount) {
+      appendUserDate()
     }
   }, [activeAccount])
 
@@ -67,7 +72,7 @@ export default function App() {
     {
       element: (
         <>
-          <NavBar />
+          <NavBar user={userData} />
           <Outlet context={{ algod, userData }} />
           <Footer />
         </>
