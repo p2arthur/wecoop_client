@@ -10,7 +10,7 @@ interface FeedPropsInterface {
 
 const Feed = ({ postsList }: FeedPropsInterface) => {
   const generateIdIcon = (creatorAddress: string) => {
-    const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
+    const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
     return svgURI
   }
 
@@ -27,7 +27,7 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
               <div key={index}>
                 {post.status === 'accepted' ? (
                   <a target="_blank" href={`https://testnet.algoexplorer.io/tx/${post.transaction_id}`}>
-                    <div className="border-2 border-gray-900 flex flex-col gap-3 p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer min-h-[120px]">
+                    <div className="border-2 border-gray-900 flex flex-col gap-3 p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer min-h-[120px] post">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 rounded-full border-2 border-gray-900">

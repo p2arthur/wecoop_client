@@ -23,7 +23,7 @@ const DropDown = ({ options, buttonText, icon }: DropDownOption) => {
     if (options) {
       return options.map((option) => (
         <div>
-          <button className="border-2 hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
+          <button className="border-2 w-full hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
             {option.metadata.name}
           </button>
         </div>
