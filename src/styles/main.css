@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.dark {
+  background-color: #000;
+  color: #fff;
+
+  textarea {
+    background-color: #000;
+    color: #fff;
+  }
+  button {
+    background-color: #000;
+    color: #fff;
+  }
+  button:hover {
+    color: #000;
+  }
+
+  .post:hover {
+    background-color: #fff;
+    color: #000;
+  }
+
+  .switch-theme {
+    border-color: #fff;
+    background-color: #fff;
+    .moon {
+      background-color: #000;
+    }
+    .sun {
+      background-color: #fff;
+    }
+  }
+}

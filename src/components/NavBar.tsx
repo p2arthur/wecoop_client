@@ -1,5 +1,6 @@
 import { UserInterface } from '../services/User'
 import ConnectWallet from './ConnectWallet'
+import ThemeSwitcher from './ThemeSwitcher'
 
 interface NavBarProps {
   user: UserInterface
@@ -11,7 +12,10 @@ const NavBar = ({ user }: NavBarProps) => {
       <a href="/">
         <p className="font-bold text-3xl">$COOP</p>
       </a>
-      <ConnectWallet user={user} />
+      <div className="flex items-center">
+        <ThemeSwitcher />
+        <ConnectWallet user={user} />
+      </div>
     </div>
   )
 }

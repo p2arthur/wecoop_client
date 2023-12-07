@@ -13,7 +13,7 @@ const Home = ({ postsList, setPosts }: HomeInterface) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-2">
+    <div className="flex flex-col gap-4 p-2 ">
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed</p>
       <Feed postsList={postsList} />
