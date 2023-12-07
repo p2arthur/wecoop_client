@@ -1,14 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
+    <meta name="description" content="Web site created using create-react-app" />
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -20,7 +17,19 @@
     -->
     <title>React App</title>
   </head>
-  <body>
+  <body class="bg-body">
+    <script>
+      if (
+        localStorage.getItem('dark-mode') === 'true' ||
+        (!('dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        console.log('DARK')
+        document.querySelector('html').classList.add('dark')
+      } else {
+        console.log('LIGHT')
+        document.querySelector('html').classList.remove('dark')
+      }
+    </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--
