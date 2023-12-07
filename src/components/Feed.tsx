@@ -27,10 +27,10 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
               <div key={index}>
                 {post.status === 'accepted' ? (
                   <a target="_blank" href={`https://testnet.algoexplorer.io/tx/${post.transaction_id}`}>
-                    <div className="border-2 border-gray-900 flex flex-col gap-3 p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer min-h-[120px] post">
+                    <div className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-800">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 rounded-full border-2 border-gray-900">
+                          <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
                             <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                           </div>
                           <a target="_blank" href={`https://testnet.algoexplorer.io/address/${post.creator_address}`}>
@@ -79,7 +79,7 @@ const Feed = ({ postsList }: FeedPropsInterface) => {
                 ) : (
                   <div
                     key={post.text}
-                    className="border-2 opacity-40 border-red-900 flex-col p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
+                    className="border-2 opacity-40 border-red-900 flex-col p-2   hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
                   >
                     <h2>{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
                     <p className="w-full">{post.text}</p>

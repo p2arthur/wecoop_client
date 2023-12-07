@@ -67,7 +67,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
       } else {
         setPlaceholderIndex((prevIndex) => prevIndex + 1)
       }
-    }, 100)
+    }, 50)
 
     return () => {
       clearInterval(intr)
@@ -114,12 +114,12 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
   }
   return (
     <form onSubmit={handleSubmit} action="">
-      <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4">
+      <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-800">
         <textarea
           maxLength={300}
           onChange={handleChange}
           placeholder={placeholder}
-          className="w-full border-2 border-gray-400 align-top text-start break-all whitespace-normal h-32 p-2 resize-none"
+          className="w-full border-2 border-gray-400 align-top text-start break-all whitespace-normal h-32 p-2 resize-none dark:border-gray-800"
         />
         {activeAccount?.address ? <Button buttonText="Send your message" /> : <Button inactive={true} buttonText="Send message" />}
       </div>
