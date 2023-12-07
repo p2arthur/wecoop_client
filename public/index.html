@@ -23,10 +23,8 @@
         localStorage.getItem('dark-mode') === 'true' ||
         (!('dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
       ) {
-        console.log('DARK')
         document.querySelector('html').classList.add('dark')
       } else {
-        console.log('LIGHT')
         document.querySelector('html').classList.remove('dark')
       }
     </script>
