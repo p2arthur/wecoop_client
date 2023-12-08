@@ -5,6 +5,10 @@ const Footer = () => {
         Made by{' '}
         <a className="underline text-blue-700 hover:text-blue-500" target="_blank" href="https://twitter.com/iam_p2">
           @iam_p2
+        </a>{' '}
+        and{' '}
+        <a className="underline text-blue-700 hover:text-blue-500" target="_blank" href="https://twitter.com/iam_p2">
+          Felipin
         </a>
       </div>
       <p className="text-xs text-gray-500">$COOP is not responsible for any post created on the platform</p>

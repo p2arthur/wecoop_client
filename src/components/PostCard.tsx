@@ -1,5 +1,5 @@
 import { minidenticon } from 'minidenticons'
-import { FaSpinner } from 'react-icons/fa6'
+import { FaCircleDollarToSlot, FaSpinner } from 'react-icons/fa6'
 import { PostProps } from '../services/Post'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -31,9 +31,9 @@ const PostCard = ({ post }: PostPropsInterface) => {
                     </h2>
                   </a>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col md:flex-row md:gap-2">
                   {post.country ? (
-                    <div className="flex gap-0 flex-col justify-center">
+                    <div className="flex gap-0 flex-col items-center justify-center">
                       <div className="w-6 rounded-full overflow-hidden">
                         <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
                       </div>
@@ -44,6 +44,17 @@ const PostCard = ({ post }: PostPropsInterface) => {
                 </div>
               </div>
               <p className="w-full tracking-wide">{post.text}</p>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => {
+                    event?.preventDefault()
+                    console.log('donate')
+                  }}
+                >
+                  <FaCircleDollarToSlot className="text-2xl" />
+                </button>
+              </div>
             </div>
           </a>
         ) : post.status === 'loading' ? (
