@@ -7,7 +7,7 @@ export class Feed {
 
   public async getAllPosts() {
     const { data } = await axios.get(
-      'https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?limit=500&asset-id=10458941',
+      'https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29wOnBvc3Q%3D',
     )
 
     const { transactions } = data

@@ -40,7 +40,11 @@ const PostCard = ({ post }: PostPropsInterface) => {
                       <p className="w-full text-center">{post.country}</p>
                     </div>
                   ) : null}
-                  <p>{`${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure} ago`}</p>
+                  <p>
+                    {!formatDateFromTimestamp(post.timestamp!).time
+                      ? 'Just now'
+                      : `${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure} ago`}
+                  </p>
                 </div>
               </div>
               <p className="w-full tracking-wide">{post.text}</p>
