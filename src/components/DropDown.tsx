@@ -1,15 +1,18 @@
 import { Provider } from '@txnlab/use-wallet'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Button from './Button'
 
 interface DropDownOption {
   buttonText: string
   options: Provider[] | null
   icon?: string
+  type: string
 }
 
-const DropDown = ({ options, buttonText, icon }: DropDownOption) => {
+const DropDown = ({ options, buttonText, icon, type }: DropDownOption) => {
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
 
   const dropDownButtonRenderer = () => {
     return (
@@ -21,13 +24,24 @@ const DropDown = ({ options, buttonText, icon }: DropDownOption) => {
 
   const optionRenderer = () => {
     if (options) {
-      return options.map((option) => (
-        <div>
-          <button className="border-2 w-full hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
-            {option.metadata.name}
-          </button>
-        </div>
-      ))
+      return options.map((option) => {
+        return type === 'connect' ? (
+          <div>
+            <button className="border-2 w-full hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
+              {option.metadata.name}
+            </button>
+          </div>
+        ) : (
+          <div>
+            <button className="border-2 w-full hover:bg-gray-300" onClick={option.disconnect} key={option.metadata.name}>
+              disconnect
+            </button>
+            <button className="border-2 w-full hover:bg-gray-300" onClick={() => navigate('/profile')} key={option.metadata.name}>
+              profile
+            </button>
+          </div>
+        )
+      })
     }
 
     return null

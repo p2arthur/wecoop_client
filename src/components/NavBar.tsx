@@ -10,7 +10,7 @@ const NavBar = ({ user }: NavBarProps) => {
   return (
     <div className="p-3 border-b-4 border-gray-900 flex justify-between items-center">
       <a href="/">
-        <p className="font-bold text-3xl">$COOP</p>
+        <p className="font-bold text-3xl">WeCOOP</p>
       </a>
       <div className="flex items-center">
         <ThemeSwitcher />
