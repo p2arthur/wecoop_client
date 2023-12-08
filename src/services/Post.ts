@@ -1,17 +1,18 @@
 import axios from 'axios'
+import base64 from 'base-64'
 
 export interface PostProps {
-  text?: string
-  creator_address?: string
-  transaction_id?: string
-  status?: 'loading' | 'accepted' | 'denied'
-  timestamp?: number
+  text: string
+  creator_address: string
+  transaction_id: string | null
+  status: 'loading' | 'accepted' | 'denied' | null
+  timestamp: number | null
   country?: string
   nfd?: string
 }
 
 export class Post {
-  postData: PostProps = {}
+  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null }
   constructor() {}
 
   private decryptPostNote(note: string): string {
@@ -50,5 +51,15 @@ export class Post {
       console.error(error)
       return null
     }
+  }
+
+  private async getPostLikes(transactionId: string) {
+    const notePrefix = base64.encode(`wecoop:like:${transactionId}`)
+
+    const { data } = await axios.get(
+      `https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=${notePrefix}`,
+    )
+
+    const { transactions } = data
   }
 }

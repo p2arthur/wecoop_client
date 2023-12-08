@@ -25,8 +25,6 @@ export class Transaction {
       suggestedParams,
     )
 
-    const encodedTransaction = algosdk.encodeUnsignedTransaction(ptxn)
-
-    return encodedTransaction
+    return ptxn
   }
 }

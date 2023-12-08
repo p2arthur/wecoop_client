@@ -1,17 +1,66 @@
+import { useWallet } from '@txnlab/use-wallet'
+import algosdk from 'algosdk'
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { useOutletContext } from 'react-router-dom'
 import { PostProps } from '../services/Post'
+import { Transaction } from '../services/Transaction'
+import { UserInterface } from '../services/User'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
+import { getUserCountry } from '../utils/userUtils'
 
 interface PostPropsInterface {
   post: PostProps
 }
 
+interface PostInputPropsInterface {
+  algod: AlgodClient
+  userData: UserInterface
+}
+
 const PostCard = ({ post }: PostPropsInterface) => {
+  const { sendTransactions, signTransactions } = useWallet()
+  const { algod, userData } = useOutletContext() as PostInputPropsInterface
+  const transactionService = new Transaction(algod)
+
   const generateIdIcon = (creatorAddress: string) => {
     const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
     return svgURI
+  }
+
+  const handlePostLike = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const country = await getUserCountry()
+    const note = `wecoop:like:${country}:${post.transaction_id}`
+    const scoopFeeTransaction = await transactionService.createTransaction(
+      userData.address,
+      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+      1000,
+      note,
+    )
+    const postCreatorFee = await transactionService.createTransaction(
+      userData.address,
+      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+      1000,
+      `creator-fee:${note}`,
+    )
+
+    const transactionsArray = [scoopFeeTransaction, postCreatorFee]
+    const groupedTransactions = algosdk.assignGroupID(transactionsArray)
+    console.log('groupedTransactions', groupedTransactions)
+    const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
+    const signedTransactions = await signTransactions(encodedGroupedTransactions)
+    const waitRoundsToConfirm = 4
+
+    console.log(signedTransactions)
+
+    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+
+    console.log('transactionId', id)
+
+    console.log('scoopFeeTransaction', scoopFeeTransaction, 'postCreatorFee', postCreatorFee)
   }
 
   return (
@@ -52,10 +101,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
               <div className="flex justify-end">
                 <button
                   className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
-                  onClick={() => {
-                    event?.preventDefault()
-                    console.log('donate')
-                  }}
+                  onClick={handlePostLike}
                 >
                   <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                 </button>

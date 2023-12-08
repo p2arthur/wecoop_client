@@ -31,6 +31,7 @@ export default function App() {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
+    console.log(data, 'de')
     setPostsList(data)
   }
 
@@ -77,7 +78,10 @@ export default function App() {
           <Footer />
         </>
       ),
-      children: [{ path: '/', element: <Home postsList={postsList} setPosts={setPosts} /> }],
+      children: [
+        { path: '/', element: <Home postsList={postsList} setPosts={setPosts} /> },
+        { path: '/profile/:walletAddress', element: <Home postsList={postsList} setPosts={setPosts} /> },
+      ],
     },
   ])
 

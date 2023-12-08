@@ -1,13 +1,13 @@
 import { useWallet } from '@txnlab/use-wallet'
+import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { PostProps } from '../services/Post'
 import { Transaction } from '../services/Transaction'
-import { User, UserInterface } from '../services/User'
+import { UserInterface } from '../services/User'
+import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
-import algosdk from 'algosdk'
 
 interface PostInputOutletContext {
   algod: AlgodClient
@@ -76,22 +76,14 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
   }, [placeholderIndex, placeholderSelected])
 
   const transactionServices = new Transaction(algod)
-  const userServices = new User({ address: userData.address })
-
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = event.target.value
     setInputText(text)
   }
 
-  const getUserCountry = async () => {
-    const { data } = await axios.get('https://api.country.is/')
-    const { country } = data
-    return country
-  }
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    setPosts({ text: inputText, creator_address: userData.address, status: 'loading' })
+    setPosts({ text: inputText, creator_address: userData.address, status: 'loading', timestamp: null, transaction_id: null })
     const country = await getUserCountry()
     const note = `wecoop:post:${country}:${inputText}`
 
@@ -103,14 +95,25 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     )
 
     try {
-      userServices.signTransaction({ text: inputText })
-      const signedTransactions = await signTransactions([transaction])
+      const encodedTransaction = algosdk.encodeUnsignedTransaction(transaction)
+      const signedTransactions = await signTransactions([encodedTransaction])
       const waitRoundsToConfirm = 4
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-      setPosts({ creator_address: userData.address, text: inputText, status: 'accepted', transaction_id: id, country, nfd: userData.nfd })
+      setPosts({
+        creator_address: userData.address,
+        text: inputText,
+        status: 'accepted',
+        transaction_id: id,
+        country,
+        nfd: userData.nfd,
+        timestamp: null,
+      })
     } catch (error) {
       console.error(error)
-      setTimeout(() => setPosts({ text: inputText, status: 'denied' }), 1000)
+      setTimeout(
+        () => setPosts({ text: inputText, creator_address: userData.address, status: 'denied', timestamp: null, transaction_id: null }),
+        1000,
+      )
     }
   }
   return (
