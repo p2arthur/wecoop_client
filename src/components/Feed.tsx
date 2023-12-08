@@ -4,14 +4,15 @@ import PostCard from './PostCard'
 
 interface FeedPropsInterface {
   postsList: PostProps[]
+  getAllPosts: () => Promise<void>
 }
 
-const Feed = ({ postsList }: FeedPropsInterface) => {
+const Feed = ({ postsList, getAllPosts }: FeedPropsInterface) => {
   const sortedPostList = postsList.sort((a, b) => {
     return b.timestamp! - a.timestamp!
   })
 
-  const renderedPosts = sortedPostList.map((post) => <PostCard post={post} />)
+  const renderedPosts = sortedPostList.map((post) => <PostCard post={post} getAllPosts={getAllPosts} />)
 
   return (
     <>

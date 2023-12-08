@@ -5,9 +5,10 @@ import { PostProps } from '../services/Post'
 interface HomeInterface {
   postsList: PostProps[]
   setPosts(posts: PostProps): void
+  getAllPosts(): Promise<void>
 }
 
-const Home = ({ postsList, setPosts }: HomeInterface) => {
+const Home = ({ postsList, setPosts, getAllPosts }: HomeInterface) => {
   const handleSetPosts = (newPost: PostProps) => {
     setPosts(newPost)
   }
@@ -16,7 +17,7 @@ const Home = ({ postsList, setPosts }: HomeInterface) => {
     <div className="flex flex-col gap-4 p-2 ">
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed</p>
-      <Feed postsList={postsList} />
+      <Feed postsList={postsList} getAllPosts={getAllPosts} />
     </div>
   )
 }

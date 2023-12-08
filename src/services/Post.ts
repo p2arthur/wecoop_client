@@ -1,5 +1,4 @@
 import axios from 'axios'
-import base64 from 'base-64'
 
 export interface PostProps {
   text: string
@@ -9,10 +8,11 @@ export interface PostProps {
   timestamp: number | null
   country?: string
   nfd?: string
+  likes?: number
 }
 
 export class Post {
-  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null }
+  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null, likes: null }
   constructor() {}
 
   private decryptPostNote(note: string): string {
@@ -24,7 +24,6 @@ export class Post {
   public async setPostData(postDataInput: PostProps): Promise<PostProps> {
     const text = this.decryptPostNote(postDataInput.text!)
     const allText = text.split(':')
-    console.log(allText)
     const nfd = await this.getPostNfd(postDataInput.creator_address!)
 
     this.postData = {
@@ -35,31 +34,20 @@ export class Post {
       timestamp: postDataInput.timestamp! * 1000,
       country: allText[2],
       nfd: nfd,
+      likes: postDataInput.likes,
     }
     return this.postData
   }
 
   private async getPostNfd(address: string) {
     try {
-      console.log('Getting nfd')
       const { data } = await axios.get(`https://api.testnet.nf.domains/nfd/lookup?address=${address}`)
 
       const nfd = data[address].name
-      console.log(nfd)
       return nfd
     } catch (error) {
       console.error(error)
       return null
     }
-  }
-
-  private async getPostLikes(transactionId: string) {
-    const notePrefix = base64.encode(`wecoop:like:${transactionId}`)
-
-    const { data } = await axios.get(
-      `https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=${notePrefix}`,
-    )
-
-    const { transactions } = data
   }
 }

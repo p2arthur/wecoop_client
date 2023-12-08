@@ -1,4 +1,6 @@
+import { Transaction } from 'algosdk'
 import axios from 'axios'
+import base64 from 'base-64'
 import { Post, PostProps } from './Post'
 
 export class Feed {
@@ -7,19 +9,36 @@ export class Feed {
 
   public async getAllPosts() {
     const { data } = await axios.get(
-      'https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29wOnBvc3Q%3D',
+      `https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=${base64.encode(
+        'wecoop',
+      )}`,
     )
 
     const { transactions } = data
 
+    const postsFiltered = transactions?.filter((transaction: Transaction) => base64.decode(transaction.note).includes('wecoop:post'))
+    const likesFiltered = transactions?.filter((transaction: Transaction) => base64.decode(transaction.note).includes('wecoop:like'))
+
     let postData: PostProps = {}
 
-    for (let transaction of transactions) {
+    for (const transaction of postsFiltered) {
       if (transaction.note) {
         const { note, sender, id } = transaction
 
+        const likes = likesFiltered.filter((likeTransaction: Transaction) => {
+          const noteDecoded = base64.decode(likeTransaction.note)?.split(':')
+          return noteDecoded[3] === id
+        })
+
         const roundTime = transaction['round-time']
-        postData = { text: note, creator_address: sender, transaction_id: id, timestamp: roundTime, status: 'accepted' }
+        postData = {
+          text: note,
+          creator_address: sender,
+          transaction_id: id,
+          timestamp: roundTime,
+          status: 'accepted',
+          likes: likes.length,
+        }
 
         const post = await this.post.setPostData(postData)
         this.feedData.push(post)

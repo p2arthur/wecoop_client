@@ -31,7 +31,6 @@ export default function App() {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
-    console.log(data, 'de')
     setPostsList(data)
   }
 
@@ -47,7 +46,6 @@ export default function App() {
     async function appendUserDate() {
       const userServices = new User({ address: activeAccount?.address! })
       const userData = await userServices.setUser()
-      console.log(userData)
       setUserData(userData)
     }
 
@@ -79,8 +77,8 @@ export default function App() {
         </>
       ),
       children: [
-        { path: '/', element: <Home postsList={postsList} setPosts={setPosts} /> },
-        { path: '/profile/:walletAddress', element: <Home postsList={postsList} setPosts={setPosts} /> },
+        { path: '/', element: <Home postsList={postsList} setPosts={setPosts} getAllPosts={getAllPosts} /> },
+        { path: '/profile/:walletAddress', element: <Home postsList={postsList} getAllPosts={getAllPosts} setPosts={setPosts} /> },
       ],
     },
   ])

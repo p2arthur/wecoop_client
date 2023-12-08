@@ -2,6 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
+import { useState } from 'react'
 import { FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
 import { PostProps } from '../services/Post'
@@ -13,6 +14,7 @@ import { getUserCountry } from '../utils/userUtils'
 
 interface PostPropsInterface {
   post: PostProps
+  getAllPosts: () => Promise<void>
 }
 
 interface PostInputPropsInterface {
@@ -20,8 +22,9 @@ interface PostInputPropsInterface {
   userData: UserInterface
 }
 
-const PostCard = ({ post }: PostPropsInterface) => {
+const PostCard = ({ post, getAllPosts }: PostPropsInterface) => {
   const { sendTransactions, signTransactions } = useWallet()
+  const [isLoadingLike, setIsLoadingLike] = useState(false)
   const { algod, userData } = useOutletContext() as PostInputPropsInterface
   const transactionService = new Transaction(algod)
 
@@ -31,6 +34,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
   }
 
   const handlePostLike = async (event: React.FormEvent) => {
+    setIsLoadingLike(true)
     event.preventDefault()
     const country = await getUserCountry()
     const note = `wecoop:like:${country}:${post.transaction_id}`
@@ -49,18 +53,13 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]
     const groupedTransactions = algosdk.assignGroupID(transactionsArray)
-    console.log('groupedTransactions', groupedTransactions)
     const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
 
-    console.log(signedTransactions)
-
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-
-    console.log('transactionId', id)
-
-    console.log('scoopFeeTransaction', scoopFeeTransaction, 'postCreatorFee', postCreatorFee)
+    await getAllPosts()
+    setIsLoadingLike(false)
   }
 
   return (
@@ -98,13 +97,20 @@ const PostCard = ({ post }: PostPropsInterface) => {
               </div>
               <p className="w-full tracking-wide">{post.text}</p>
 
-              <div className="flex justify-end">
-                <button
-                  className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
-                  onClick={handlePostLike}
-                >
-                  <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                </button>
+              <div className="flex justify-end items-center gap-1 text-md">
+                {isLoadingLike ? (
+                  <FaSpinner className="animate-spin text-2xl" />
+                ) : (
+                  <>
+                    <button
+                      className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                      onClick={handlePostLike}
+                    >
+                      <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                    </button>
+                    {post.likes && <p className="text-black">{post.likes}</p>}
+                  </>
+                )}
               </div>
             </div>
           </a>

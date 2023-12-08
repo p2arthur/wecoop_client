@@ -27,17 +27,15 @@ export class User {
   }
 
   public generateIdIcon(creatorAddress: string): string {
-    const svgURI = 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(creatorAddress))
+    const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
     return svgURI
   }
 
   private async getUserNfd(address: string) {
     try {
-      console.log('Getting nfd')
       const { data } = await axios.get(`https://api.testnet.nf.domains/nfd/lookup?address=${address}`)
 
       const nfd = data[address].name
-      console.log(nfd)
       return nfd
     } catch (error) {
       console.error(error)
