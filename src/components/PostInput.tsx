@@ -7,6 +7,7 @@ import { PostProps } from '../services/Post'
 import { Transaction } from '../services/Transaction'
 import { User, UserInterface } from '../services/User'
 import Button from './Button'
+import algosdk from 'algosdk'
 
 interface PostInputOutletContext {
   algod: AlgodClient
@@ -92,7 +93,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     event.preventDefault()
     setPosts({ text: inputText, creator_address: userData.address, status: 'loading' })
     const country = await getUserCountry()
-    const note = `${country} - ${inputText}`
+    const note = `wecoop:post:${country}:${inputText}`
 
     const transaction = await transactionServices.createTransaction(
       userData.address,
