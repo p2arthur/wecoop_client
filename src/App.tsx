@@ -9,6 +9,7 @@ import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Footer from './components/Footer'
 import NavBar from './components/NavBar'
 import Home from './pages/Home'
+import ProfilePage from './pages/ProfilePage'
 import { Feed } from './services/Feed'
 import { PostProps } from './services/Post'
 import { User, UserInterface } from './services/User'
@@ -31,7 +32,7 @@ export default function App() {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
-    console.log(data, 'de')
+    console.log(data, 'data')
     setPostsList(data)
   }
 
@@ -80,7 +81,7 @@ export default function App() {
       ),
       children: [
         { path: '/', element: <Home postsList={postsList} setPosts={setPosts} /> },
-        { path: '/profile/:walletAddress', element: <Home postsList={postsList} setPosts={setPosts} /> },
+        { path: '/profile/:walletAddress', element: <ProfilePage /> },
       ],
     },
   ])

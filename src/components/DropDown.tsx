@@ -1,4 +1,4 @@
-import { Provider } from '@txnlab/use-wallet'
+import { Provider, useWallet } from '@txnlab/use-wallet'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from './Button'
@@ -12,6 +12,7 @@ interface DropDownOption {
 
 const DropDown = ({ options, buttonText, icon, type }: DropDownOption) => {
   const [isOpen, setIsOpen] = useState(false)
+  const { activeAccount } = useWallet()
   const navigate = useNavigate()
 
   const dropDownButtonRenderer = () => {
@@ -36,7 +37,11 @@ const DropDown = ({ options, buttonText, icon, type }: DropDownOption) => {
             <button className="border-2 w-full hover:bg-gray-300" onClick={option.disconnect} key={option.metadata.name}>
               disconnect
             </button>
-            <button className="border-2 w-full hover:bg-gray-300" onClick={() => navigate('/profile')} key={option.metadata.name}>
+            <button
+              className="border-2 w-full hover:bg-gray-300"
+              onClick={() => navigate(`/profile/${activeAccount?.address}`)}
+              key={option.metadata.name}
+            >
               profile
             </button>
           </div>
