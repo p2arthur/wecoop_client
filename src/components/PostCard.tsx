@@ -1,5 +1,5 @@
 import { minidenticon } from 'minidenticons'
-import { FaCircleDollarToSlot, FaSpinner } from 'react-icons/fa6'
+import { FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { PostProps } from '../services/Post'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -47,12 +47,13 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
               <div className="flex justify-end">
                 <button
+                  className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
                   onClick={() => {
                     event?.preventDefault()
                     console.log('donate')
                   }}
                 >
-                  <FaCircleDollarToSlot className="text-2xl" />
+                  <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                 </button>
               </div>
             </div>
