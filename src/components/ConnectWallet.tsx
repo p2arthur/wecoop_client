@@ -11,6 +11,8 @@ interface ConnectWalletProps {
 const ConnectWallet = ({ user }: ConnectWalletProps) => {
   const { providers, activeAccount } = useWallet()
 
+  const actualProvider = providers?.find((provider) => provider.metadata.id === activeAccount?.providerId)
+
   useEffect(() => {
     console.log('userData from connect wallet', user)
   }, [user])
@@ -21,13 +23,14 @@ const ConnectWallet = ({ user }: ConnectWalletProps) => {
         <div>
           <DropDown
             icon={user.avatarUri}
-            options={providers}
+            options={[actualProvider!]}
+            type="activeAccount"
             buttonText={!user.nfd ? ellipseAddress(activeAccount.address) : user.nfd.toUpperCase()}
           />
         </div>
       ) : (
         <div>
-          <DropDown options={providers} buttonText="Connect Wallet" />
+          <DropDown type="connect" options={providers} buttonText="Connect Wallet" />
         </div>
       )}
     </div>
