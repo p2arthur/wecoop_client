@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { FaCheckToSlot, FaCircleCheck } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import Button from '../components/Button'
 import { Feed } from '../services/Feed'
@@ -49,13 +50,17 @@ const ProfilePage = () => {
             <div className="border-2 border-gray-900 rounded-full">
               <img className="w-16" src={user?.avatarUri} alt="profile-photo" />
             </div>
-            <div>
+            <div className="flex">
               <h3 className="text-3xl font-bold">{user?.nfd ? user.nfd : ellipseAddress(user?.address)}</h3>
+              {user?.nfd ? (
+                <span>
+                  <FaCircleCheck className="text-md text-orange-500" />
+                </span>
+              ) : null}
             </div>
           </div>
           <div className="flex gap-6 justify-end">
-            <Button buttonText="Donate $COOP" />
-            <Button buttonText="Donate $COOP" />
+            <Button buttonText="Donate $COOP" icon={<FaCheckToSlot />} />
           </div>
         </div>
       </section>
