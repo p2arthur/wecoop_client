@@ -1,7 +1,7 @@
 import { useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { useEffect, useState } from 'react'
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Footer from '../components/Footer'
 import NavBar from '../components/NavBar'
 import Home from '../pages/Home'
@@ -15,7 +15,7 @@ export const Router = () => {
 
   useEffect(() => {
     async function appendUserData() {
-      const userServices = new User({ address: activeAccount?.address! })
+      const userServices = new User({ address: activeAccount?.address ?? '' })
       const userData = await userServices.setUser()
       setUserData(userData)
     }
