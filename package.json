@@ -50,6 +50,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "test": "jest --coverage --passWithNoTests",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
     "preview": "vite preview"
