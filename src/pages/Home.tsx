@@ -11,7 +11,6 @@ const Home = () => {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
-    console.log('posts list from home', data)
     setPostsList(data)
   }
 

@@ -18,13 +18,9 @@ export class Feed {
 
       const { transactions } = data
 
-      console.log('data from feed class', transactions)
-
       const postsFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop:post'),
       )
-
-      console.log('posts filtered', postsFiltered)
 
       const likesFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop:like'),
@@ -68,11 +64,7 @@ export class Feed {
 
   public async getPostsByAddress(address: string) {
     const allPosts = await this.getAllPosts()
-    console.log('allposts', allPosts)
-    console.log(address)
     const postsByAdresss = allPosts.filter((post) => post.creator_address === address)
-
-    console.log('posts by address', postsByAdresss)
 
     return postsByAdresss
   }

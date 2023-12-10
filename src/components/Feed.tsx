@@ -8,12 +8,9 @@ interface FeedPropsInterface {
 }
 
 const FeedComponent = ({ postsList, getAllPosts }: FeedPropsInterface) => {
-  console.log('Feed props postsList', postsList)
   const sortedPostList = postsList.sort((a, b) => {
     return b.timestamp! - a.timestamp!
   })
-
-  console.log('feed component postlist', postsList)
 
   const renderedPosts = sortedPostList.map((post) => <PostCard post={post} getAllPosts={getAllPosts} />)
 

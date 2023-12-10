@@ -19,8 +19,7 @@ export class User {
     this.feedServices.setAllPosts(post)
   }
 
-  public async getUser(address: string) {
-    console.log('get user address', address)
+  public async getUser() {
     const user = await this.setUser()
     return user
   }

@@ -13,8 +13,6 @@ const ProfilePage = () => {
   const { userData } = useOutletContext() as ProfilePageOutletContext
   const { walletAddress } = useParams<{ walletAddress: string }>()
 
-  console.log('walletAddress', walletAddress)
-
   const [user, setUser] = useState<UserInterface | null>(null)
   const [postList, setPostList] = useState<PostProps[]>([])
 
@@ -24,11 +22,9 @@ const ProfilePage = () => {
         const userService = new User({ address: walletAddress! })
         const profileUser = await userService.getUser(walletAddress!)
         setUser(profileUser)
-        console.log('user from Profile page', profileUser)
 
         const feedServices = new Feed()
         const posts = await feedServices.getPostsByAddress(walletAddress!)
-        console.log('postsList from profile page', posts)
         setPostList(posts)
       } catch (error) {
         console.error('Error fetching user data or posts', error)
@@ -43,8 +39,6 @@ const ProfilePage = () => {
       <p>{post.text}</p>
     </div>
   ))
-
-  console.log('rendered', renderedUserPosts)
 
   return (
     <div className="flex flex-col ">
