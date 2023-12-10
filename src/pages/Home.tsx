@@ -1,8 +1,8 @@
+import { useEffect, useState } from 'react'
+import FeedComponent from '../components/Feed'
 import PostInput from '../components/PostInput'
+import { Feed } from '../services/Feed'
 import { PostProps } from '../services/Post'
-import {useEffect, useState} from "react";
-import {Feed} from "../services/Feed";
-import FeedComponent from "../components/Feed";
 
 const Home = () => {
   const [postsList, setPostsList] = useState<PostProps[]>([])
@@ -11,6 +11,7 @@ const Home = () => {
 
   const getAllPosts = async () => {
     const data = await feed.getAllPosts()
+    console.log('posts list from home', data)
     setPostsList(data)
   }
 
@@ -21,7 +22,6 @@ const Home = () => {
   useEffect(() => {
     getAllPosts()
   }, [])
-
 
   const handleSetPosts = (newPost: PostProps) => {
     setPosts(newPost)
