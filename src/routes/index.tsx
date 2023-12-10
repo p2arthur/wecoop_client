@@ -1,11 +1,12 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
-import Home from '../pages/Home'
-import NavBar from '../components/NavBar'
-import Footer from '../components/Footer'
+import { useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { useEffect, useState } from 'react'
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import Footer from '../components/Footer'
+import NavBar from '../components/NavBar'
+import Home from '../pages/Home'
+import ProfilePage from '../pages/ProfilePage'
 import { User, UserInterface } from '../services/User'
-import { useWallet } from '@txnlab/use-wallet'
 
 export const Router = () => {
   const { activeAccount } = useWallet()
@@ -37,7 +38,7 @@ export const Router = () => {
       ),
       children: [
         { path: '/', element: <Home /> },
-        { path: '/profile/:walletAddress', element: <Pro /> },
+        { path: '/profile/:walletAddress', element: <ProfilePage /> },
       ],
     },
   ])

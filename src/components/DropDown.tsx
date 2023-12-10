@@ -38,7 +38,11 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
             <button className="border-2 w-full hover:bg-gray-300" onClick={option.disconnect} key={option.metadata.name}>
               disconnect
             </button>
-            <button className="border-2 w-full hover:bg-gray-300" onClick={() => navigate(`/profile`)} key={option.metadata.name}>
+            <button
+              className="border-2 w-full hover:bg-gray-300"
+              onClick={() => navigate(`/profile/${address}`)}
+              key={option.metadata.name}
+            >
               profile
             </button>
           </div>
