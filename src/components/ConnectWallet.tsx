@@ -21,6 +21,7 @@ const ConnectWallet = ({ user }: ConnectWalletProps) => {
             options={[actualProvider!]}
             type="activeAccount"
             buttonText={!user.nfd ? ellipseAddress(activeAccount.address) : user.nfd.toUpperCase()}
+            address={activeAccount.address}
           />
         </div>
       ) : (

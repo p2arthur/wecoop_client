@@ -37,7 +37,7 @@ export const Router = () => {
       ),
       children: [
         { path: '/', element: <Home /> },
-        { path: '/profile/:walletAddress', element: <Home /> },
+        { path: '/profile/:walletAddress', element: <Pro /> },
       ],
     },
   ])

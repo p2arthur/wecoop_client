@@ -8,9 +8,10 @@ interface DropDownOption {
   options: Provider[] | null
   icon?: string
   type: string
+  address?: string
 }
 
-const DropDown = ({ options, buttonText, icon, type }: DropDownOption) => {
+const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -36,7 +37,7 @@ const DropDown = ({ options, buttonText, icon, type }: DropDownOption) => {
             <button className="border-2 w-full hover:bg-gray-300" onClick={option.disconnect} key={option.metadata.name}>
               disconnect
             </button>
-            <button className="border-2 w-full hover:bg-gray-300" onClick={() => navigate('/profile')} key={option.metadata.name}>
+            <button className="border-2 w-full hover:bg-gray-300" onClick={() => navigate(`/profile`)} key={option.metadata.name}>
               profile
             </button>
           </div>
