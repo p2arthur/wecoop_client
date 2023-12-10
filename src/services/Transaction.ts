@@ -1,6 +1,10 @@
 import * as algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 
+export interface TransactionInterface {
+  note: string
+}
+
 export class Transaction {
   constructor(private client: AlgodClient) {}
 
