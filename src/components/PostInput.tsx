@@ -2,6 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
+import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
 import { PostProps } from '../services/Post'
 import { Transaction } from '../services/Transaction'
@@ -112,13 +113,27 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
   return (
     <form onSubmit={handleSubmit} action="">
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-800">
-        <textarea
-          maxLength={300}
-          onChange={handleChange}
-          placeholder={placeholder}
-          className="w-full border-2 border-gray-400 align-top text-start break-all whitespace-normal h-32 p-2 resize-none dark:border-gray-800"
-        />
-        {activeAccount?.address ? <Button buttonText="Send your message" /> : <Button inactive={true} buttonText="Send message" />}
+        <div className="w-full relative ">
+          <textarea
+            maxLength={300}
+            onChange={handleChange}
+            placeholder={placeholder}
+            className="w-full border-2 border-gray-400 align-top text-start break-all whitespace-normal h-32 p-2 resize-none dark:border-gray-800 z-20"
+          />
+          <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
+        </div>
+        <div>
+          <div className="flex items-center text-red-600 gap-1">
+            <FaArrowRight />
+
+            <p>Note: All posts and interactions are permanently recorded on the Algorand blockchain.</p>
+          </div>
+        </div>
+        {activeAccount?.address && inputText !== '' && inputText.length <= 300 ? (
+          <Button buttonText="Send your message" />
+        ) : (
+          <Button inactive={true} buttonText="Send your message" />
+        )}
       </div>
     </form>
   )
