@@ -73,7 +73,7 @@ const PostCard = ({ post, getAllPosts }: PostPropsInterface) => {
                   <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
                     <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                   </div>
-                  <a target="_blank" href={`https://testnet.algoexplorer.io/address/${post.creator_address}`}>
+                  <a target="_blank" href={`/profile/${post.creator_address}`}>
                     <h2 className="font-bold text-xl h-full hover:underline">
                       {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
                     </h2>
