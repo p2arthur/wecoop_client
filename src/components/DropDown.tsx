@@ -27,18 +27,29 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
     if (options) {
       return options.map((option) => {
         return type === 'connect' ? (
-          <div>
-            <button className="border-2 w-full hover:bg-gray-300" onClick={option.connect} key={option.metadata.name}>
-              {option.metadata.name}
+          <div className="bg-gray-100">
+            <button
+              className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
+              onClick={option.connect}
+              key={option.metadata.name}
+            >
+              <div className="rounded-full overflow-hidden flex items-center justify-center w-5">
+                <img className="w-5" src={option.metadata.icon} alt="" />
+              </div>
+              <p className="font-bold">{option.metadata.name}</p>
             </button>
           </div>
         ) : (
           <div>
-            <button className="border-2 w-full hover:bg-gray-300" onClick={option.disconnect} key={option.metadata.name}>
+            <button
+              className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
+              onClick={option.disconnect}
+              key={option.metadata.name}
+            >
               disconnect
             </button>
             <button
-              className="border-2 w-full hover:bg-gray-300"
+              className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
               onClick={() => navigate(`/profile/${address}`)}
               key={option.metadata.name}
             >
@@ -59,9 +70,13 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
   return (
     <div onClick={handleOpenDropDown}>
       <button className="p-2">
-        <div className="flex flex-col relative">
+        <div className="flex flex-col relative z-50">
           {dropDownButtonRenderer()}
-          {isOpen ? <div className="absolute top-10 flex flex-col w-full bg-white border-gray-900 border-2">{optionRenderer()}</div> : null}
+          {isOpen ? (
+            <div className="absolute border-2 top-10 flex flex-col w-full bg-white border-gray-900 dark:border-gray-100 border-b-4">
+              {optionRenderer()}
+            </div>
+          ) : null}
         </div>
       </button>
     </div>
