@@ -20,7 +20,7 @@ const ProfilePage = () => {
     const fetchData = async () => {
       try {
         const userService = new User({ address: walletAddress! })
-        const profileUser = await userService.getUser(walletAddress!)
+        const profileUser = await userService.getUser()
         setUser(profileUser)
 
         const feedServices = new Feed()
