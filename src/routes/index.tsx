@@ -14,14 +14,14 @@ export const Router = () => {
   const [userData, setUserData] = useState<UserInterface>({ address: '', avatarUri: '' })
 
   useEffect(() => {
-    async function appendUserDate() {
+    async function appendUserData() {
       const userServices = new User({ address: activeAccount?.address! })
       const userData = await userServices.setUser()
       setUserData(userData)
     }
 
     if (activeAccount) {
-      appendUserDate()
+      appendUserData()
     }
   }, [activeAccount])
 

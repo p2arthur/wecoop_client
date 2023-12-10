@@ -49,10 +49,8 @@ export class Feed {
             likes: likes.length,
           }
 
-          console.log('feedData', this.feedData)
-
           const post = await this.post.setPostData(postData)
-          console.log('created post', post)
+
           this.feedData = [...this.feedData, post]
         }
       }
@@ -66,5 +64,16 @@ export class Feed {
 
   public setAllPosts(post: PostProps) {
     this.feedData.push(post)
+  }
+
+  public async getPostsByAddress(address: string) {
+    const allPosts = await this.getAllPosts()
+    console.log('allposts', allPosts)
+    console.log(address)
+    const postsByAdresss = allPosts.filter((post) => post.creator_address === address)
+
+    console.log('posts by address', postsByAdresss)
+
+    return postsByAdresss
   }
 }

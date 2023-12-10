@@ -19,6 +19,12 @@ export class User {
     this.feedServices.setAllPosts(post)
   }
 
+  public async getUser(address: string) {
+    console.log('get user address', address)
+    const user = await this.setUser()
+    return user
+  }
+
   public async setUser() {
     const avatarUri = this.generateIdIcon(this.userData.address)
     const nfd = await this.getUserNfd(this.userData.address)
