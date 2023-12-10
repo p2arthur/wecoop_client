@@ -7,7 +7,7 @@ interface FeedPropsInterface {
   getAllPosts: () => Promise<void>
 }
 
-const Feed = ({ postsList, getAllPosts }: FeedPropsInterface) => {
+const FeedComponent = ({ postsList, getAllPosts }: FeedPropsInterface) => {
   const sortedPostList = postsList.sort((a, b) => {
     return b.timestamp! - a.timestamp!
   })
@@ -28,4 +28,4 @@ const Feed = ({ postsList, getAllPosts }: FeedPropsInterface) => {
   )
 }
 
-export default Feed
+export default FeedComponent

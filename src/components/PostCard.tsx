@@ -108,7 +108,7 @@ const PostCard = ({ post, getAllPosts }: PostPropsInterface) => {
                     >
                       <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                     </button>
-                    {post.likes && <p className="text-black">{post.likes}</p>}
+                    {post.likes && <p className="text-black dark:text-white">{post.likes}</p>}
                   </>
                 )}
               </div>

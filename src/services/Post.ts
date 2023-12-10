@@ -4,7 +4,7 @@ export interface PostProps {
   text: string
   creator_address: string
   transaction_id: string | null
-  status: 'loading' | 'accepted' | 'denied' | null
+  status: 'loading' | 'accepted' | 'denied' | string | null
   timestamp: number | null
   country?: string
   nfd?: string
@@ -12,14 +12,9 @@ export interface PostProps {
 }
 
 export class Post {
-  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null, likes: null }
+  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null, likes: undefined }
+
   constructor() {}
-
-  private decryptPostNote(note: string): string {
-    const decodedString = atob(note)
-
-    return decodedString
-  }
 
   public async setPostData(postDataInput: PostProps): Promise<PostProps> {
     const text = this.decryptPostNote(postDataInput.text!)
@@ -37,6 +32,12 @@ export class Post {
       likes: postDataInput.likes,
     }
     return this.postData
+  }
+
+  private decryptPostNote(note: string): string {
+    const decodedString = atob(note)
+
+    return decodedString
   }
 
   private async getPostNfd(address: string) {
