@@ -60,7 +60,7 @@ const PostCard = ({ post, getAllPosts }: PostPropsInterface) => {
 
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
     console.log('Like transaction id:', id)
-    await getAllPosts()
+
     setIsLoadingLike(false)
   }
 
