@@ -23,7 +23,7 @@ interface PostInputPropsInterface {
   userData: UserInterface
 }
 
-const PostCard = ({ post, getAllPosts }: PostPropsInterface) => {
+const PostCard = ({ post }: PostPropsInterface) => {
   const { sendTransactions, signTransactions } = useWallet()
   const [isLoadingLike, setIsLoadingLike] = useState(false)
   const { algod, userData } = useOutletContext() as PostInputPropsInterface
