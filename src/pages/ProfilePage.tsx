@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FaCheckToSlot, FaCircleCheck } from 'react-icons/fa6'
+import { FaCheckToSlot, FaCircleCheck, FaTrophy } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import Button from '../components/Button'
 import PostCard from '../components/PostCard'
@@ -47,13 +47,28 @@ const ProfilePage = () => {
             <div className="border-2 border-gray-900 rounded-full">
               <img className="w-16" src={user?.avatarUri} alt="profile-photo" />
             </div>
-            <div className="flex">
-              <h3 className="text-3xl font-bold">{user?.nfd ? user.nfd : ellipseAddress(user?.address)}</h3>
-              {user?.nfd ? (
-                <span>
-                  <FaCircleCheck className="text-md text-orange-500" />
-                </span>
-              ) : null}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                <h3 className="text-3xl font-bold">{user?.nfd ? user.nfd : ellipseAddress(user?.address)}</h3>
+                {user?.nfd ? (
+                  <span>
+                    <FaCircleCheck className="text-md text-orange-500" />
+                  </span>
+                ) : null}
+              </div>
+              <div>
+                {postList.length >= 5 ? (
+                  <div className="relative">
+                    <span className="absolute font-bold text-xl">5</span>
+                    <FaTrophy className="text-yellow-500 text-xl" />
+                  </div>
+                ) : postList.length >= 1 ? (
+                  <div className="relative">
+                    <span className="absolute font-bold text-xl">1</span>
+                    <FaTrophy className="text-green-500 text-xl" />
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
           <div className="flex gap-6 justify-end">

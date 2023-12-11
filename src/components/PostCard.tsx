@@ -5,6 +5,7 @@ import { minidenticon } from 'minidenticons'
 import { useState } from 'react'
 import { FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { NotePrefix } from '../enums/notePrefix'
 import { PostProps } from '../services/Post'
 import { Transaction } from '../services/Transaction'
 import { UserInterface } from '../services/User'
@@ -37,7 +38,7 @@ const PostCard = ({ post, getAllPosts }: PostPropsInterface) => {
     setIsLoadingLike(true)
     event.preventDefault()
     const country = await getUserCountry()
-    const note = `wecoop:like:${country}:${post.transaction_id}`
+    const note = `${NotePrefix.WeCoopLike}${country}:${post.transaction_id}`
     const scoopFeeTransaction = await transactionService.createTransaction(
       userData.address,
       'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
@@ -78,6 +79,7 @@ const PostCard = ({ post, getAllPosts }: PostPropsInterface) => {
                     <h2 className="font-bold text-xl h-full hover:underline">
                       {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
                     </h2>
+                    {}
                   </a>
                 </div>
                 <div className="flex flex-col md:flex-row md:gap-2">

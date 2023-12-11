@@ -9,6 +9,7 @@ import { Transaction } from '../services/Transaction'
 import { UserInterface } from '../services/User'
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
+import { NotePrefix } from '../enums/notePrefix'
 
 interface PostInputOutletContext {
   algod: AlgodClient
@@ -79,7 +80,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     event.preventDefault()
     setPosts({ text: inputText, creator_address: userData.address, status: 'loading', timestamp: null, transaction_id: null })
     const country = await getUserCountry()
-    const note = `wecoop:post:${country}:${inputText}`
+    const note = `${NotePrefix.WeCoopPost}${country}:${inputText}`
 
     const transaction = await transactionServices.createTransaction(
       userData.address,
