@@ -1,5 +1,6 @@
 import axios from 'axios'
 import base64 from 'base-64'
+import { getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 import { Post, PostProps } from './Post'
 import { TransactionInterface } from './Transaction'
 
@@ -9,11 +10,11 @@ export class Feed {
   constructor(private post: Post = new Post()) {}
 
   public async getAllPosts() {
+    const server = getIndexerConfigFromViteEnvironment().server
+    console.log('server', server)
     try {
       const { data } = await axios.get(
-        `https:testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=${base64.encode(
-          'wecoop',
-        )}`,
+        `https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29w`,
       )
 
       const { transactions } = data

@@ -1,5 +1,5 @@
 import { useWallet } from '@txnlab/use-wallet'
-import algosdk from 'algosdk'
+import algosdk, { AlgodTokenHeader } from 'algosdk'
 import { useEffect, useState } from 'react'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Footer from '../components/Footer'
@@ -7,6 +7,7 @@ import NavBar from '../components/NavBar'
 import Home from '../pages/Home'
 import ProfilePage from '../pages/ProfilePage'
 import { User, UserInterface } from '../services/User'
+import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 
 export const Router = () => {
   const { activeAccount } = useWallet()
@@ -25,7 +26,13 @@ export const Router = () => {
     }
   }, [activeAccount])
 
-  const algod = new algosdk.Algodv2('a'.repeat(64), 'https://testnet-api.algonode.cloud', '')
+  const algodNetwork = getAlgodConfigFromViteEnvironment().network
+  const algodServer = getAlgodConfigFromViteEnvironment().server
+  const algodToken = getAlgodConfigFromViteEnvironment().token
+  const algodPort = getAlgodConfigFromViteEnvironment().port
+
+  const algod = new algosdk.Algodv2(algodToken as AlgodTokenHeader, algodServer, algodPort)
+  console.log('algod', algod)
 
   const router = createBrowserRouter([
     {

@@ -4,12 +4,12 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { NotePrefix } from '../enums/notePrefix'
 import { PostProps } from '../services/Post'
 import { Transaction } from '../services/Transaction'
 import { UserInterface } from '../services/User'
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
-import { NotePrefix } from '../enums/notePrefix'
 
 interface PostInputOutletContext {
   algod: AlgodClient
@@ -82,14 +82,17 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopPost}${country}:${inputText}`
 
-    const transaction = await transactionServices.createTransaction(
-      userData.address,
-      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
-      1000,
-      note,
-    )
+    console.log('note', note)
 
     try {
+      const transaction = await transactionServices.createTransaction(
+        userData.address,
+        'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+        100000,
+        note,
+      )
+
+      console.log('transaction', transaction)
       const encodedTransaction = algosdk.encodeUnsignedTransaction(transaction)
       const signedTransactions = await signTransactions([encodedTransaction])
       const waitRoundsToConfirm = 4

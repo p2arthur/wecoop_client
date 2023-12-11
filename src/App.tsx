@@ -5,6 +5,7 @@ import { PROVIDER_ID, ProvidersArray, useInitializeProviders, WalletProvider } f
 import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
 import { Router } from './routes'
+import { getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 
 const providersArray: ProvidersArray = [
   { id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect },
@@ -18,7 +19,7 @@ export default function App() {
     providers: providersArray,
     nodeConfig: {
       network: 'testnet',
-      nodeServer: 'https://testnet-api.algonode.cloud',
+      nodeServer: getIndexerConfigFromViteEnvironment().server,
       nodePort: '',
       nodeToken: 'a'.repeat(64),
     },
