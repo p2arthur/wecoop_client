@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { FaCheckToSlot, FaCircleCheck } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import Button from '../components/Button'
+import PostCard from '../components/PostCard'
 import { Feed } from '../services/Feed'
 import { PostProps } from '../services/Post'
 import { User, UserInterface } from '../services/User'
@@ -36,11 +37,7 @@ const ProfilePage = () => {
     fetchData()
   }, [userData, walletAddress])
 
-  const renderedUserPosts = postList.map((post) => (
-    <div className="border-2 p-2 border-gray-900 h-32" key={post.transaction_id}>
-      <p>{post.text}</p>
-    </div>
-  ))
+  const renderedUserPosts = postList.map((post) => <PostCard post={post} />)
 
   return (
     <div className="flex flex-col ">
@@ -64,7 +61,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </section>
-      <section className="h-screen p-4 flex flex-col gap-3">{renderedUserPosts}</section>
+      <section className="p-4 flex flex-col gap-3">{renderedUserPosts}</section>
     </div>
   )
 }

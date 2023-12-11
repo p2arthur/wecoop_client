@@ -14,7 +14,7 @@ import { getUserCountry } from '../utils/userUtils'
 
 interface PostPropsInterface {
   post: PostProps
-  getAllPosts: () => Promise<void>
+  getAllPosts?: () => Promise<void>
 }
 
 interface PostInputPropsInterface {
