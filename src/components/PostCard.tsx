@@ -1,34 +1,85 @@
+import { useWallet } from '@txnlab/use-wallet'
+import algosdk from 'algosdk'
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
+import { useState } from 'react'
 import { FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { useOutletContext } from 'react-router-dom'
+import { NotePrefix } from '../enums/notePrefix'
 import { PostProps } from '../services/Post'
+import { Transaction } from '../services/Transaction'
+import { UserInterface } from '../services/User'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
+import { getUserCountry } from '../utils/userUtils'
 
 interface PostPropsInterface {
   post: PostProps
+  getAllPosts?: () => Promise<void>
+}
+
+interface PostInputPropsInterface {
+  algod: AlgodClient
+  userData: UserInterface
 }
 
 const PostCard = ({ post }: PostPropsInterface) => {
+  const { sendTransactions, signTransactions } = useWallet()
+  const [isLoadingLike, setIsLoadingLike] = useState(false)
+  const { algod, userData } = useOutletContext() as PostInputPropsInterface
+  const transactionService = new Transaction(algod)
+
   const generateIdIcon = (creatorAddress: string) => {
     const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
     return svgURI
+  }
+
+  const handlePostLike = async (event: React.FormEvent) => {
+    setIsLoadingLike(true)
+    event.preventDefault()
+    const country = await getUserCountry()
+    const note = `${NotePrefix.WeCoopLike}${country}:${post.transaction_id}`
+    const scoopFeeTransaction = await transactionService.createTransaction(
+      userData.address,
+      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+      1000,
+      note,
+    )
+    const postCreatorFee = await transactionService.createTransaction(
+      userData.address,
+      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+      1000,
+      `creator-fee:${note}`,
+    )
+
+    const transactionsArray = [scoopFeeTransaction, postCreatorFee]
+    const groupedTransactions = algosdk.assignGroupID(transactionsArray)
+    const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
+    const signedTransactions = await signTransactions(encodedGroupedTransactions)
+    const waitRoundsToConfirm = 4
+
+    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+    console.log('Like transaction id:', id)
+
+    setIsLoadingLike(false)
   }
 
   return (
     <>
       <div>
         {post.status === 'accepted' ? (
-          <a target="_blank" href={`https://testnet.algoexplorer.io/tx/${post.transaction_id}`}>
-            <div className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-800">
+          <a target="_blank" href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
+            <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
                     <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                   </div>
-                  <a target="_blank" href={`https://testnet.algoexplorer.io/address/${post.creator_address}`}>
+                  <a target="_blank" href={`/profile/${post.creator_address}`}>
                     <h2 className="font-bold text-xl h-full hover:underline">
                       {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
                     </h2>
+                    {}
                   </a>
                 </div>
                 <div className="flex flex-col md:flex-row md:gap-2">
@@ -49,16 +100,20 @@ const PostCard = ({ post }: PostPropsInterface) => {
               </div>
               <p className="w-full tracking-wide">{post.text}</p>
 
-              <div className="flex justify-end">
-                <button
-                  className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
-                  onClick={() => {
-                    event?.preventDefault()
-                    console.log('donate')
-                  }}
-                >
-                  <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                </button>
+              <div className="flex justify-end items-center gap-1 text-md">
+                {isLoadingLike ? (
+                  <FaSpinner className="animate-spin text-2xl" />
+                ) : (
+                  <>
+                    <button
+                      className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                      onClick={handlePostLike}
+                    >
+                      <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                    </button>
+                    {post.likes && <p className="text-black dark:text-white">{post.likes}</p>}
+                  </>
+                )}
               </div>
             </div>
           </a>

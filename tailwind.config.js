@@ -8,6 +8,7 @@ module.exports = {
       fontFamily: {
         sans: ['Pixelify Sans'],
       },
+      scale: { 101: '1.01' },
     },
   },
 }

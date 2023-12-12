@@ -1,5 +1,4 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { useEffect } from 'react'
 import { UserInterface } from '../services/User'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { DropDown } from './DropDown'
@@ -13,10 +12,6 @@ const ConnectWallet = ({ user }: ConnectWalletProps) => {
 
   const actualProvider = providers?.find((provider) => provider.metadata.id === activeAccount?.providerId)
 
-  useEffect(() => {
-    console.log('userData from connect wallet', user)
-  }, [user])
-
   return (
     <div>
       {activeAccount ? (
@@ -26,6 +21,7 @@ const ConnectWallet = ({ user }: ConnectWalletProps) => {
             options={[actualProvider!]}
             type="activeAccount"
             buttonText={!user.nfd ? ellipseAddress(activeAccount.address) : user.nfd.toUpperCase()}
+            address={activeAccount.address}
           />
         </div>
       ) : (

@@ -1,13 +1,27 @@
-import Feed from '../components/Feed'
+import { useEffect, useState } from 'react'
+import FeedComponent from '../components/Feed'
 import PostInput from '../components/PostInput'
+import { Feed } from '../services/Feed'
 import { PostProps } from '../services/Post'
 
-interface HomeInterface {
-  postsList: PostProps[]
-  setPosts(posts: PostProps): void
-}
+const Home = () => {
+  const [postsList, setPostsList] = useState<PostProps[]>([])
 
-const Home = ({ postsList, setPosts }: HomeInterface) => {
+  const feed = new Feed()
+
+  const getAllPosts = async () => {
+    const data = await feed.getAllPosts()
+    setPostsList(data)
+  }
+
+  const setPosts = (newPost: PostProps) => {
+    setPostsList([newPost, ...postsList])
+  }
+
+  useEffect(() => {
+    getAllPosts()
+  }, [])
+
   const handleSetPosts = (newPost: PostProps) => {
     setPosts(newPost)
   }
@@ -16,7 +30,7 @@ const Home = ({ postsList, setPosts }: HomeInterface) => {
     <div className="flex flex-col gap-4 p-2 ">
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed</p>
-      <Feed postsList={postsList} />
+      <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
     </div>
   )
 }

@@ -1,29 +1,24 @@
 import axios from 'axios'
 
 export interface PostProps {
-  text?: string
-  creator_address?: string
-  transaction_id?: string
-  status?: 'loading' | 'accepted' | 'denied'
-  timestamp?: number
+  text: string
+  creator_address: string
+  transaction_id: string | null
+  status: 'loading' | 'accepted' | 'denied' | string | null
+  timestamp: number | null
   country?: string
   nfd?: string
+  likes?: number
 }
 
 export class Post {
-  postData: PostProps = {}
+  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null, likes: undefined }
+
   constructor() {}
-
-  private decryptPostNote(note: string): string {
-    const decodedString = atob(note)
-
-    return decodedString
-  }
 
   public async setPostData(postDataInput: PostProps): Promise<PostProps> {
     const text = this.decryptPostNote(postDataInput.text!)
     const allText = text.split(':')
-    console.log(allText)
     const nfd = await this.getPostNfd(postDataInput.creator_address!)
 
     this.postData = {
@@ -34,17 +29,22 @@ export class Post {
       timestamp: postDataInput.timestamp! * 1000,
       country: allText[2],
       nfd: nfd,
+      likes: postDataInput.likes,
     }
     return this.postData
   }
 
+  private decryptPostNote(note: string): string {
+    const decodedString = atob(note)
+
+    return decodedString
+  }
+
   private async getPostNfd(address: string) {
     try {
-      console.log('Getting nfd')
-      const { data } = await axios.get(`https://api.testnet.nf.domains/nfd/lookup?address=${address}`)
+      const { data } = await axios.get(`https://api.nf.domains/nfd/lookup?address=${address}&view=tiny&allowUnverified=true`)
 
       const nfd = data[address].name
-      console.log(nfd)
       return nfd
     } catch (error) {
       console.error(error)

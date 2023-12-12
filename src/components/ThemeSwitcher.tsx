@@ -3,7 +3,8 @@ import sun from '../assets/sun.png'
 import useDarkMode from '../utils/getThemeMode'
 
 const ThemeSwitcher = () => {
-  const { isDarkMode, toggleDarkMode } = useDarkMode()
+  const { toggleDarkMode } = useDarkMode()
+
   return (
     <button onClick={toggleDarkMode} className="p-0.5 border-2 border-black switch-theme flex items-center ">
       <div
