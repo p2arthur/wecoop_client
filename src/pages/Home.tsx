@@ -29,7 +29,7 @@ const Home = () => {
   return (
     <div className="flex flex-col gap-4 p-2 ">
       <PostInput setPosts={handleSetPosts} />
-      <p className="font-bold text-2xl">Feed</p>
+      <p className="font-bold text-2xl">Feed - </p>
       <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
     </div>
   )
