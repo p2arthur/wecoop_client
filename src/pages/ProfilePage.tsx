@@ -72,7 +72,7 @@ const ProfilePage = () => {
             </div>
           </div>
           <div className="flex gap-6 justify-end">
-            <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} />
+            <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} type="connect" options={[]} />
           </div>
         </div>
       </section>
