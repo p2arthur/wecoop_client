@@ -12,7 +12,7 @@ interface DropDownOption {
   children?: React.ReactNode
 }
 
-const DropDown = ({ options, buttonText, icon, type, address, children }: DropDownOption) => {
+const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
 

@@ -26,7 +26,6 @@ export const Router = () => {
     }
   }, [activeAccount])
 
-  const algodNetwork = getAlgodConfigFromViteEnvironment().network
   const algodServer = getAlgodConfigFromViteEnvironment().server
   const algodToken = getAlgodConfigFromViteEnvironment().token
   const algodPort = getAlgodConfigFromViteEnvironment().port
