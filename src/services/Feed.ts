@@ -14,7 +14,7 @@ export class Feed {
     console.log('server', server)
     try {
       const { data } = await axios.get(
-        `https://testnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29w`,
+        `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29w`,
       )
 
       const { transactions } = data

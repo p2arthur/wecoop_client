@@ -68,7 +68,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
     <>
       <div>
         {post.status === 'accepted' ? (
-          <a target="_blank" href={`https://testnet.algoexplorer.io/tx/${post.transaction_id}`}>
+          <a target="_blank" href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
             <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

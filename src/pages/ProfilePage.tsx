@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { FaCheckToSlot, FaCircleCheck, FaTrophy } from 'react-icons/fa6'
+import { FaCircleCheck, FaTrophy } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
-import Button from '../components/Button'
+import { DropDown } from '../components/DropDown'
 import PostCard from '../components/PostCard'
 import { Feed } from '../services/Feed'
 import { PostProps } from '../services/Post'
@@ -72,7 +72,7 @@ const ProfilePage = () => {
             </div>
           </div>
           <div className="flex gap-6 justify-end">
-            <Button buttonText="Donate $COOP" icon={<FaCheckToSlot />} />
+            <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} />
           </div>
         </div>
       </section>

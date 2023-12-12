@@ -42,7 +42,7 @@ export class Post {
 
   private async getPostNfd(address: string) {
     try {
-      const { data } = await axios.get(`https://api.testnet.nf.domains/nfd/lookup?address=${address}`)
+      const { data } = await axios.get(`https://api.nf.domains/nfd/lookup?address=${address}&view=tiny&allowUnverified=true`)
 
       const nfd = data[address].name
       return nfd
