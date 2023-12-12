@@ -5,7 +5,7 @@ import Button from './Button'
 
 interface DropDownOption {
   buttonText: string
-  options: any
+  options: Provider[] | null
   icon?: string
   type: string
   address?: string
