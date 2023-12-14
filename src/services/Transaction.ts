@@ -1,31 +1,27 @@
-import * as algosdk from 'algosdk'
-import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
+import * as algosdk from "algosdk";
+import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import { getIndexerConfigFromViteEnvironment } from "../utils/network/getAlgoClientConfigs";
 
 export interface TransactionInterface {
-  note: string
+  note: string;
 }
 
 export class Transaction {
-  constructor(private client: AlgodClient) {}
+  constructor(private client: AlgodClient) {
+  }
 
   async getUserBalance(userAddress: string) {
     try {
-      const balance = await this.client.accountInformation(userAddress).do()
-      console.log('balance', balance)
+      const balance = await this.client.accountInformation(userAddress).do();
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 
   async createTransaction(from: string, to: string, amount: number, note: string) {
-    console.log('creatingTransactions')
-    const token = getIndexerConfigFromViteEnvironment().token
-    console.log(token)
-    const suggestedParams = await this.client.getTransactionParams().do()
-    console.log('suggestedParams', suggestedParams)
+    const token = getIndexerConfigFromViteEnvironment().token;
+    const suggestedParams = await this.client.getTransactionParams().do();
 
-    console.log('token', token)
     const ptxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
       from,
       to,
@@ -34,11 +30,10 @@ export class Transaction {
       amount,
       new Uint8Array(Buffer.from(note)),
       Number(token),
-      suggestedParams,
-    )
+      suggestedParams
+    );
 
-    console.log('ptxn', ptxn)
 
-    return ptxn
+    return ptxn;
   }
 }
