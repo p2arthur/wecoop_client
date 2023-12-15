@@ -75,7 +75,7 @@ const Home = () => {
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed - </p>
       <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
-      {loading && <FeedLoaderSpinner />}
+      {loading && <FeedLoaderSpinner text="loading posts" />}
       {allCaughtUp && (
         <div className={'w-full justify-center flex'}>
           <p className="font-bold text-2xl">You're all caught up!</p>
