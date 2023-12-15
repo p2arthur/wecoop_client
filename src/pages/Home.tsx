@@ -22,6 +22,7 @@ const Home = () => {
         const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken })
 
         setCurrentRound(currentRound)
+        console.log(currentRound)
 
         if (postsList.length === 0) {
           setPostsList(data)
