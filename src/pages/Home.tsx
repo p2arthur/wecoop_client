@@ -77,8 +77,9 @@ const Home = () => {
       <p className="font-bold text-2xl">Feed - </p>
       <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
       {loading && (
-        <div className={"w-full justify-center flex"}>
-          <FaSpinner className="animate-spin text-2xl" />
+        <div className="h-64 flex flex-col justify-start md:justify-center items-center text-gray-500">
+          <FaSpinner className="animate-spin text-3xl" />
+          <p>Loading posts</p>
         </div>
       )}
       {allCaughtUp && (
