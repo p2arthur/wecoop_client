@@ -18,6 +18,7 @@ const ProfilePage = () => {
 
   const [user, setUser] = useState<UserInterface | null>(null)
   const [postList, setPostList] = useState<PostProps[]>([])
+  const [profilePageState, setProfilePageState] = useState({ state: 'empty' })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,6 +27,7 @@ const ProfilePage = () => {
         const profileUser = await userService.getUser()
         setUser(profileUser)
 
+        setProfilePageState({ state: 'loading' })
         const feedServices = new Feed()
         const allUserPosts = await feedServices.getPostsByAddress(walletAddress!)
 
@@ -33,6 +35,7 @@ const ProfilePage = () => {
 
         const { data } = allUserPosts
         setPostList(data)
+        setProfilePageState({ state: 'success' })
       } catch (error) {
         console.error('Error fetching user data or posts', error)
       }
@@ -80,7 +83,11 @@ const ProfilePage = () => {
           </div>
         </div>
       </section>
-      <section className="p-4 flex flex-col gap-3">{renderedUserPosts}</section>
+      {profilePageState.state == 'loading' ? (
+        <div>loading posts</div>
+      ) : (
+        <section className="p-4 flex flex-col gap-3">{renderedUserPosts}</section>
+      )}
     </div>
   )
 }
