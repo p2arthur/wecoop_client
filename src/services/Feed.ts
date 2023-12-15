@@ -12,6 +12,8 @@ export class Feed {
   public async getAllPosts({ next }: { next?: string | null }) {
     const server = getIndexerConfigFromViteEnvironment().server
     try {
+      console.log('server', server)
+
       const { data } = await axios.get(
         `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29w&limit=10${
           next ? `&next=${next}` : ''

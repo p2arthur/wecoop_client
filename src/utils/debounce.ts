@@ -1,11 +1,12 @@
 export function debounce(func: Function, delay: number): () => void {
-  let timeoutId: NodeJS.Timeout;
+  let timeoutId: NodeJS.Timeout
 
-  return function(): void {
-    clearTimeout(timeoutId);
+  // eslint-disable-next-line no-use-before-define
+  return (...args: any[]): void => {
+    clearTimeout(timeoutId)
 
     timeoutId = setTimeout(() => {
-      func.apply(this, arguments);
-    }, delay);
-  };
+      func.apply(this, args)
+    }, delay)
+  }
 }

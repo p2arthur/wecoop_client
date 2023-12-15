@@ -60,6 +60,8 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
+    console.log('Transaction id:', id)
+
     setIsLoadingLike(false)
   }
 

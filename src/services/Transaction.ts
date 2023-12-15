@@ -12,6 +12,7 @@ export class Transaction {
   async getUserBalance(userAddress: string) {
     try {
       const balance = await this.client.accountInformation(userAddress).do()
+      console.log('balance', balance)
     } catch (error) {
       console.error(error)
     }
