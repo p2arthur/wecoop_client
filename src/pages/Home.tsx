@@ -1,75 +1,72 @@
-import { useEffect, useState } from "react";
-import FeedComponent from "../components/Feed";
-import PostInput from "../components/PostInput";
-import { Feed } from "../services/Feed";
-import { PostProps } from "../services/Post";
-import { FaSpinner } from "react-icons/fa6";
-import { debounce } from "../utils/debounce";
+import { useEffect, useState } from 'react'
+import { FaSpinner } from 'react-icons/fa6'
+import FeedComponent from '../components/Feed'
+import PostInput from '../components/PostInput'
+import { Feed } from '../services/Feed'
+import { PostProps } from '../services/Post'
+import { debounce } from '../utils/debounce'
 
 const Home = () => {
-  const [postsList, setPostsList] = useState<PostProps[]>([]);
-  const [currentRound, setCurrentRound] = useState(null);
-  const [nextToken, setNextToken] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [allCaughtUp, setAllCaughtUp] = useState(false);
+  const [postsList, setPostsList] = useState<PostProps[]>([])
+  const [currentRound, setCurrentRound] = useState(null)
+  const [nextToken, setNextToken] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [allCaughtUp, setAllCaughtUp] = useState(false)
 
-  const feed = new Feed();
+  const feed = new Feed()
 
   const getAllPosts = async () => {
     if (!loading) {
-      setLoading(true);
+      setLoading(true)
       try {
-        const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken });
+        const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken })
 
         if (postsList.length === 0) {
-          setPostsList(data);
+          setPostsList(data)
         } else {
-          const existingTransactionIds = postsList.map(post => post.transaction_id);
+          const existingTransactionIds = postsList.map((post) => post.transaction_id)
 
-          const uniquePosts = data.filter(post => !existingTransactionIds.includes(post.transaction_id));
+          const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id))
 
-          setPostsList(prev => [...prev, ...uniquePosts]);
+          setPostsList((prev) => [...prev, ...uniquePosts])
         }
         if (!next) {
-          setAllCaughtUp(true);
+          setAllCaughtUp(true)
         }
-        setNextToken(next);
+        setNextToken(next)
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        console.error('Error fetching posts:', error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
-  };
-
+  }
 
   const setPosts = (newPost: PostProps) => {
-    setPostsList([newPost, ...postsList]);
-  };
+    setPostsList([newPost, ...postsList])
+  }
 
   const handleScroll = debounce(() => {
-    const isAtBottom =
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
+    const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100
     if (isAtBottom && nextToken) {
-      getAllPosts().then();
+      getAllPosts().then()
     }
-  }, 380);
+  }, 380)
 
   useEffect(() => {
-    getAllPosts().then();
-  }, []);
+    getAllPosts().then()
+  }, [])
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll)
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [nextToken]);
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [nextToken])
 
   const handleSetPosts = (newPost: PostProps) => {
-    setPosts(newPost);
-  };
-
+    setPosts(newPost)
+  }
 
   return (
     <div className="flex flex-col gap-4 p-2 ">
@@ -83,10 +80,12 @@ const Home = () => {
         </div>
       )}
       {allCaughtUp && (
-        <div className={"w-full justify-center flex"}><p className="font-bold text-2xl">You're all caught up!</p></div>
+        <div className={'w-full justify-center flex'}>
+          <p className="font-bold text-2xl">You're all caught up!</p>
+        </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
