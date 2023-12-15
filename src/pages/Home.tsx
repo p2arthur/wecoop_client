@@ -11,6 +11,7 @@ const Home = () => {
   const [currentRound, setCurrentRound] = useState(null);
   const [nextToken, setNextToken] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [allCaughtUp, setAllCaughtUp] = useState(false);
 
   const feed = new Feed();
 
@@ -27,8 +28,10 @@ const Home = () => {
 
           const uniquePosts = data.filter(post => !existingTransactionIds.includes(post.transaction_id));
 
-
           setPostsList(prev => [...prev, ...uniquePosts]);
+        }
+        if (!next) {
+          setAllCaughtUp(true);
         }
         setNextToken(next);
       } catch (error) {
@@ -77,6 +80,9 @@ const Home = () => {
         <div className={"w-full justify-center flex"}>
           <FaSpinner className="animate-spin text-2xl" />
         </div>
+      )}
+      {allCaughtUp && (
+        <div className={"w-full justify-center flex"}><p className="font-bold text-2xl">You're all caught up!</p></div>
       )}
     </div>
   );
