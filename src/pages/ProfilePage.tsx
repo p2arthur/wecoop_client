@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FaCircleCheck, FaTrophy } from 'react-icons/fa6'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { DropDown } from '../components/DropDown'
 import EmptyFeed from '../components/EmptyFeed'
 import LoaderSpinner from '../components/LoaderSpinner'
@@ -11,16 +11,11 @@ import { PostProps } from '../services/Post'
 import { User, UserInterface } from '../services/User'
 import { ellipseAddress } from '../utils/ellipseAddress'
 
-interface ProfilePageOutletContext {
-  userData: UserInterface
-}
-
 interface ProfilePageStateInterface {
   state: null | 'loading' | 'success' | 'error'
 }
 
 const ProfilePage = () => {
-  const { userData } = useOutletContext() as ProfilePageOutletContext
   const { walletAddress } = useParams<{ walletAddress: string }>()
 
   const [user, setUser] = useState<UserInterface | null>(null)
@@ -91,10 +86,10 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
-            {user?.balance! >= 0 ? (
+            {user?.balance !== undefined ? (
               <div className="flex items-center gap-1">
                 <img className="w-6 h-6" src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`} alt="coopcoin-icon" />
-                <p className="text-xl">{user?.balance}</p>
+                <p className="text-xl">{user.balance}</p>
               </div>
             ) : (
               <LoaderSpinner text="loading balance" />
