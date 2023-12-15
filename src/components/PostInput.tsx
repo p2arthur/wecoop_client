@@ -138,7 +138,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
             <span>
               <img className="h-6 w-6" src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`} alt="" />
             </span>
-            <span>{userData.balance}</span>
+            <span>{userData.balance || 0}</span>
           </div>
           {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance! > 0.1 ? (
             <Button buttonText="Send your message" />
