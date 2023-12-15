@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { FaSpinner } from 'react-icons/fa6'
 import FeedComponent from '../components/Feed'
+import FeedLoaderSpinner from '../components/LoaderSpinner'
 import PostInput from '../components/PostInput'
 import { Feed } from '../services/Feed'
 import { PostProps } from '../services/Post'
@@ -75,12 +75,7 @@ const Home = () => {
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed - </p>
       <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
-      {loading && (
-        <div className="h-64 flex flex-col justify-start md:justify-center items-center text-gray-500">
-          <FaSpinner className="animate-spin text-3xl" />
-          <p>Loading posts</p>
-        </div>
-      )}
+      {loading && <FeedLoaderSpinner />}
       {allCaughtUp && (
         <div className={'w-full justify-center flex'}>
           <p className="font-bold text-2xl">You're all caught up!</p>

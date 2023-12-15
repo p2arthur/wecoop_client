@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { minidenticon } from 'minidenticons'
+import { AssetId } from '../enums/assetId'
 import { Feed } from './Feed'
 import { PostProps } from './Post'
 
@@ -7,6 +8,7 @@ export interface UserInterface {
   address: string
   avatarUri?: string
   nfd?: string
+  balance?: number
 }
 
 export class User {
@@ -27,7 +29,8 @@ export class User {
   public async setUser() {
     const avatarUri = this.generateIdIcon(this.userData.address)
     const nfd = await this.getUserNfd(this.userData.address)
-    this.userData = { address: this.userData.address, avatarUri, nfd }
+    const balance = await this.getUserAssetBalance(this.userData.address, AssetId.coopCoin)
+    this.userData = { address: this.userData.address, avatarUri, nfd, balance }
     return this.userData
   }
 
@@ -45,6 +48,25 @@ export class User {
     } catch (error) {
       console.error(error)
       return null
+    }
+  }
+
+  public async getUserAssetBalance(userAddres: string, assetId: number): Promise<number> {
+    try {
+      const { data: userAssetsData } = await axios.get(
+        `https://mainnet-idx.algonode.cloud/v2/accounts/${userAddres}/assets?asset-id=${assetId}&include-all=false`,
+      )
+
+      const { assets } = userAssetsData
+
+      const { data: assetData } = await axios.get(`https://mainnet-idx.algonode.cloud/v2/assets/${assetId}`)
+
+      const assetDecimals = assetData['asset'].params.decimals
+
+      const balance = Number.parseFloat((assets[0].amount / 10 ** assetDecimals).toFixed(2))
+      return balance
+    } catch (error) {
+      return 0
     }
   }
 }

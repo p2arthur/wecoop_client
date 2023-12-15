@@ -4,6 +4,7 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { AssetId } from '../enums/assetId'
 import { NotePrefix } from '../enums/notePrefix'
 import { PostProps } from '../services/Post'
 import { Transaction } from '../services/Transaction'
@@ -131,11 +132,20 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
             <p>Note: All posts and interactions are permanently recorded on the Algorand blockchain.</p>
           </div>
         </div>
-        {activeAccount?.address && inputText !== '' && inputText.length <= 300 ? (
-          <Button buttonText="Send your message" />
-        ) : (
-          <Button inactive={true} buttonText="Send your message" />
-        )}
+        <div className="flex items-center gap-2">
+          {' '}
+          <div className="flex gap-1">
+            <span>
+              <img className="h-6 w-6" src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`} alt="" />
+            </span>
+            <span>{userData.balance}</span>
+          </div>
+          {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance! > 0.1 ? (
+            <Button buttonText="Send your message" />
+          ) : (
+            <Button inactive={true} buttonText="Send your message" />
+          )}
+        </div>
       </div>
     </form>
   )
