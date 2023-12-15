@@ -17,7 +17,7 @@ export class Feed {
 
       const { data } = await axios.get(
         `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=${base64.encode(
-          NotePrefix.WeCoopPost,
+          NotePrefix.WeCoopAll,
         )}&limit=10${next ? `&next=${next}` : ''}`,
       )
 
