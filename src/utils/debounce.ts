@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-use-before-define
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 type DebounceFunction<T extends (...args: any[]) => void> = (...args: Parameters<T>) => void
 
 export function debounce<T extends (...args: any[]) => void>(func: T, delay: number): DebounceFunction<T> {
