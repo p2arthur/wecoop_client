@@ -14,7 +14,7 @@ const Home = () => {
   const [allCaughtUp, setAllCaughtUp] = useState(false)
 
   const feed = new Feed()
-
+  console.log(currentRound)
   const getAllPosts = async () => {
     if (!loading) {
       setLoading(true)
@@ -22,7 +22,6 @@ const Home = () => {
         const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken })
 
         setCurrentRound(currentRound)
-        console.log(currentRound)
 
         if (postsList.length === 0) {
           setPostsList(data)
