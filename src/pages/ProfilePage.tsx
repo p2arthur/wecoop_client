@@ -27,7 +27,9 @@ const ProfilePage = () => {
         setUser(profileUser)
 
         const feedServices = new Feed()
-        const posts = await feedServices.getPostsByAddress(walletAddress!)
+        console.log(feedServices)
+
+        const posts: PostProps[] = []
         setPostList(posts)
       } catch (error) {
         console.error('Error fetching user data or posts', error)

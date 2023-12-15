@@ -82,8 +82,6 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopPost}${country}:${inputText}`
 
-    console.log('note', note)
-
     try {
       const transaction = await transactionServices.createTransaction(
         userData.address,
@@ -92,7 +90,6 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
         note,
       )
 
-      console.log('transaction', transaction)
       const encodedTransaction = algosdk.encodeUnsignedTransaction(transaction)
       const signedTransactions = await signTransactions([encodedTransaction])
       const waitRoundsToConfirm = 4

@@ -1,4 +1,3 @@
-import { FaSpinner } from 'react-icons/fa6'
 import { PostProps } from '../services/Post'
 import PostCard from './PostCard'
 
@@ -14,18 +13,7 @@ const FeedComponent = ({ postsList, getAllPosts }: FeedPropsInterface) => {
 
   const renderedPosts = sortedPostList.map((post) => <PostCard post={post} getAllPosts={getAllPosts} />)
 
-  return (
-    <>
-      {postsList.length > 0 ? (
-        renderedPosts
-      ) : (
-        <div className="h-64 flex flex-col justify-start md:justify-center items-center text-gray-500">
-          <FaSpinner className="animate-spin text-3xl" />
-          <p>Loading posts</p>
-        </div>
-      )}
-    </>
-  )
+  return <>{postsList.length > 0 && renderedPosts}</>
 }
 
 export default FeedComponent

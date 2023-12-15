@@ -9,15 +9,18 @@ export class Feed {
 
   constructor(private post: Post = new Post()) {}
 
-  public async getAllPosts() {
+  public async getAllPosts({ next }: { next?: string | null }) {
     const server = getIndexerConfigFromViteEnvironment().server
-    console.log('server', server)
     try {
+      console.log('server', server)
+
       const { data } = await axios.get(
-        `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29w`,
+        `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29w&limit=10${
+          next ? `&next=${next}` : ''
+        }`,
       )
 
-      const { transactions } = data
+      const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
 
       const postsFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop:post'),
@@ -27,32 +30,40 @@ export class Feed {
         base64.decode(transaction.note).includes('wecoop:like'),
       )
 
+      const uniquePostIds = new Set(this.feedData.map((post) => post.transaction_id))
+
       for (const transaction of postsFiltered || []) {
         if (transaction.note) {
           const { note, sender, id } = transaction
 
-          const likes = (likesFiltered || []).filter((likeTransaction: TransactionInterface) => {
-            const noteDecoded = base64.decode(likeTransaction.note)?.split(':')
-            return noteDecoded[3] === id
-          })
+          // Check if the post with the same ID already exists
+          if (!uniquePostIds.has(id)) {
+            const likes = (likesFiltered || []).filter((likeTransaction: TransactionInterface) => {
+              const noteDecoded = base64.decode(likeTransaction.note)?.split(':')
+              return noteDecoded[3] === id
+            })
 
-          const roundTime = transaction['round-time']
-          const postData: PostProps = {
-            text: note,
-            creator_address: sender,
-            transaction_id: id,
-            timestamp: roundTime,
-            status: 'accepted',
-            likes: likes.length,
+            const roundTime = transaction['round-time']
+            const postData: PostProps = {
+              text: note,
+              creator_address: sender,
+              transaction_id: id,
+              timestamp: roundTime,
+              status: 'accepted',
+              likes: likes.length,
+            }
+
+            const post = await this.post.setPostData(postData)
+
+            this.feedData.push(post)
+
+            // Add the post ID to the set to ensure uniqueness
+            uniquePostIds.add(id)
           }
-
-          const post = await this.post.setPostData(postData)
-
-          this.feedData = [...this.feedData, post]
         }
       }
 
-      return this.feedData
+      return { data: this.feedData, next: nextToken, currentRound }
     } catch (error) {
       console.error('Error fetching posts:', error)
       throw error
@@ -63,10 +74,10 @@ export class Feed {
     this.feedData.push(post)
   }
 
-  public async getPostsByAddress(address: string) {
-    const allPosts = await this.getAllPosts()
-    const postsByAdresss = allPosts.filter((post) => post.creator_address === address)
+  // public async getPostsByAddress(address: string) {
+  //   const allPosts = await this.getAllPosts()
+  //   const postsByAdresss = allPosts.filter((post) => post.creator_address === address)
 
-    return postsByAdresss
-  }
+  //   return postsByAdresss
+  // }
 }

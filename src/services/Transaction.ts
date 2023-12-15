@@ -19,13 +19,9 @@ export class Transaction {
   }
 
   async createTransaction(from: string, to: string, amount: number, note: string) {
-    console.log('creatingTransactions')
     const token = getIndexerConfigFromViteEnvironment().token
-    console.log(token)
     const suggestedParams = await this.client.getTransactionParams().do()
-    console.log('suggestedParams', suggestedParams)
 
-    console.log('token', token)
     const ptxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
       from,
       to,
@@ -36,8 +32,6 @@ export class Transaction {
       Number(token),
       suggestedParams,
     )
-
-    console.log('ptxn', ptxn)
 
     return ptxn
   }

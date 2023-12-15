@@ -31,7 +31,6 @@ export const Router = () => {
   const algodPort = getAlgodConfigFromViteEnvironment().port
 
   const algod = new algosdk.Algodv2(algodToken as AlgodTokenHeader, algodServer, algodPort)
-  console.log('algod', algod)
 
   const router = createBrowserRouter([
     {
