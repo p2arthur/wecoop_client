@@ -78,7 +78,7 @@ export class Feed {
   public async getPostsByAddress(address: string) {
     try {
       const { data } = await axios.get(
-        `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(NotePrefix.WeCoopPost)}`,
+        `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(NotePrefix.WeCoopAll)}`,
       )
 
       const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
