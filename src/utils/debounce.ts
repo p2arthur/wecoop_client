@@ -1,6 +1,7 @@
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 type DebounceFunction<T extends (...args: any[]) => void> = (...args: Parameters<T>) => void
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => void>(func: T, delay: number): DebounceFunction<T> {
   let timeoutId: NodeJS.Timeout
 
