@@ -13,6 +13,8 @@ import { Reply } from "../services/Reply";
 import { Transaction } from "../services/Transaction";
 import { getUserCountry } from "../utils/userUtils";
 import { NotePrefix } from "../enums/notePrefix";
+import { ReplyInput } from "./ReplyInput";
+import { Like } from "../services/Like";
 
 interface PostPropsInterface {
   post: PostProps;
@@ -29,9 +31,14 @@ const PostCard = ({ post }: PostPropsInterface) => {
   const [isLoadingLike, setIsLoadingLike] = useState(false);
   const [isLoadingReply, setIsLoadingReply] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const [openReplyInput, setOpenReplyInput] = useState(false);
+
   const { algod, userData } = useOutletContext() as PostInputPropsInterface;
   const replyService = new Reply(algod);
   const transactionService = new Transaction(algod);
+  const likeService = new Like(algod)
+
+
 
   const generateIdIcon = (creatorAddress: string) => {
     const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`;
@@ -41,25 +48,13 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
   const handlePostLike = async (event: React.FormEvent) => {
     setIsLoadingLike(true);
-    event.preventDefault();
-    const country = await getUserCountry();
-    const note = `${NotePrefix.WeCoopLike}${country}:${post.transaction_id}`;
-    const scoopFeeTransaction = await transactionService.createTransaction(
-      userData.address,
-      "GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ",
-      1000,
-      note
-    );
-    const postCreatorFee = await transactionService.createTransaction(
-      userData.address,
-      "GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ",
-      1000,
-      `creator-fee:${note}`
-    );
 
-    const transactionsArray = [scoopFeeTransaction, postCreatorFee];
-    const groupedTransactions = algosdk.assignGroupID(transactionsArray);
-    const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction));
+    const encodedGroupedTransactions = await likeService.handlePostLike({
+      event,
+      creatorAdress: post.creator_address,
+      address: userData.address,
+      transactionId: post.transaction_id as string})
+
     const signedTransactions = await signTransactions(encodedGroupedTransactions);
     const waitRoundsToConfirm = 4;
 
@@ -70,11 +65,10 @@ const PostCard = ({ post }: PostPropsInterface) => {
     setIsLoadingLike(false);
   };
 
-  const handlePostReply = async (event: React.FormEvent) => {
+  const handlePostReply = async () => {
     setIsLoadingReply(true);
 
     const encodedGroupedTransactions = await replyService.handlePostReply({
-      event,
       creatorAdress: post.creator_address,
       address: userData.address,
       transactionId: post.transaction_id as string,
@@ -83,9 +77,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
     const signedTransactions = await signTransactions(encodedGroupedTransactions);
     const waitRoundsToConfirm = 4;
 
-    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm);
-
-    console.log("Transaction id:", id);
+    await sendTransactions(signedTransactions, waitRoundsToConfirm);
 
     setIsLoadingReply(false);
   };
@@ -126,13 +118,16 @@ const PostCard = ({ post }: PostPropsInterface) => {
                 </p>
               </div>
             </div>
-            <div className={""}>
-            </div>
 
-            <div className="">
+            <div className="grid gap-2">
               <p className="w-full tracking-wide">{post.text}</p>
-              <div className={"flex justify-between items-center gap-1 text-md bg-red-500"}>
-                <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+              <div className={"flex justify-end items-center gap-1 text-md "}>
+                <button
+                  className="rounded-full p-2 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                  onClick={() => setOpenReplyInput(!openReplyInput)}
+                >
+                  <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                </button>
                 <a target="_blank" className={"cursor-pointer"} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
                   <FaGlobe className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                 </a>
@@ -153,6 +148,17 @@ const PostCard = ({ post }: PostPropsInterface) => {
                   )}
                 </div>
               </div>
+              {openReplyInput && (
+                <div className={"grid gap-4"}>
+                  <ReplyInput
+                    handleChange={(e) => setReplyText(e.target.value)}
+                    placeholder={"Reply message..."} value={replyText}
+                    handleSubmit={handlePostReply}
+                  />
+
+                  <p>Replys</p>
+                </div>
+              )}
             </div>
           </div>
         ) : post.status === "loading" ? (
