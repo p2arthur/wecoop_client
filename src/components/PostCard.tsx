@@ -71,13 +71,18 @@ const PostCard = ({ post, variant = "default", getAllPosts, handleNewReply }: Po
     setIsLoadingReply(true);
     const country = await getUserCountry();
 
-    handleNewReply && handleNewReply({
+    const newReply: PostProps = {
       text: replyText,
       creator_address: userData.address,
       status: "loading",
       timestamp: null,
-      transaction_id: null
-    }, post.transaction_id as string);
+      transaction_id: null,
+      replys: []
+    };
+
+    const parentReplyId = post.transaction_id as string;
+
+    handleNewReply && handleNewReply(newReply, parentReplyId);
 
 
     const encodedGroupedTransactions = await replyService.handlePostReply({
@@ -92,16 +97,18 @@ const PostCard = ({ post, variant = "default", getAllPosts, handleNewReply }: Po
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm);
 
 
-    handleNewReply && handleNewReply({
+    const acceptedReply: PostProps = {
       creator_address: userData.address,
       text: replyText,
       status: "accepted",
       transaction_id: id,
       country,
       nfd: userData.nfd,
-      timestamp: null,
+      timestamp: Date.now(),
       replys: []
-    }, post.transaction_id as string);
+    };
+
+    handleNewReply && handleNewReply(acceptedReply, parentReplyId);
 
     getAllPosts && await getAllPosts();
 
@@ -148,16 +155,16 @@ const PostCard = ({ post, variant = "default", getAllPosts, handleNewReply }: Po
             <div className="grid gap-2">
               <p className="w-full tracking-wide">{post.text}</p>
               <div className={"flex justify-end items-center gap-1 text-md "}>
-                <button
-                  className="rounded-full gap-1 items-center p-2 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
-                  onClick={() => setOpenReplyInput(!openReplyInput)}
-                >
-                  <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                  <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replys?.length}</p>
-                </button>
-                <a target="_blank" className={"cursor-pointer"} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
-                  <FaGlobe className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                </a>
+                {variant === "default" && (
+                  <button
+                    className="rounded-lg gap-1 items-center p-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                    onClick={() => setOpenReplyInput(!openReplyInput)}
+                  >
+                    <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replys?.length}</p>
+                  </button>
+                )}
+
 
                 <div className={"flex gap-1 items-center"}>
                   {isLoadingLike ? (
@@ -165,15 +172,18 @@ const PostCard = ({ post, variant = "default", getAllPosts, handleNewReply }: Po
                   ) : (
                     <>
                       <button
-                        className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                        className="rounded-lg gap-1 items-center p-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
                         onClick={handlePostLike}
                       >
                         <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                        {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.likes}</p>}
                       </button>
-                      {post.likes && <p className="text-black dark:text-white">{post.likes}</p>}
                     </>
                   )}
                 </div>
+                <a target="_blank" className={"cursor-pointer"} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
+                  <FaGlobe className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                </a>
               </div>
               {openReplyInput && (
                 <div className={"grid gap-4"}>

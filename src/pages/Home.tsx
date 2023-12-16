@@ -73,11 +73,9 @@ const Home = () => {
   };
 
   const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
-    console.log("transactionCreatorId", newReply, transactionCreatorId);
     const newPostsList = postsList.map((post) => {
 
-      if (post.creator_address === newReply.creator_address && post.transaction_id === transactionCreatorId) {
-        console.log(post, "ACHOU");
+      if (transactionCreatorId === post.transaction_id) {
 
         if (post.replys === undefined) {
           return { ...post, replys: [newReply] };
@@ -86,7 +84,6 @@ const Home = () => {
       }
       return post;
     });
-    console.log(newPostsList, "newPostLits");
     setPostsList(newPostsList);
   };
 

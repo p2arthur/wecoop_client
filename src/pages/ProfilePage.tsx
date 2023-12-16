@@ -1,45 +1,44 @@
-import { useEffect, useState } from 'react'
-import { FaCircleCheck, FaTrophy } from 'react-icons/fa6'
-import { useOutletContext, useParams } from 'react-router-dom'
-import { DropDown } from '../components/DropDown'
-import PostCard from '../components/PostCard'
-import { Feed } from '../services/Feed'
-import { PostProps } from '../services/Post'
-import { User, UserInterface } from '../services/User'
-import { ellipseAddress } from '../utils/ellipseAddress'
+import { useEffect, useState } from "react";
+import { FaCircleCheck, FaTrophy } from "react-icons/fa6";
+import { useOutletContext, useParams } from "react-router-dom";
+import { DropDown } from "../components/DropDown";
+import PostCard from "../components/PostCard";
+import { Feed } from "../services/Feed";
+import { PostProps } from "../services/Post";
+import { User, UserInterface } from "../services/User";
+import { ellipseAddress } from "../utils/ellipseAddress";
 
 interface ProfilePageOutletContext {
-  userData: UserInterface
+  userData: UserInterface;
 }
 
 const ProfilePage = () => {
-  const { userData } = useOutletContext() as ProfilePageOutletContext
-  const { walletAddress } = useParams<{ walletAddress: string }>()
+  const { userData } = useOutletContext() as ProfilePageOutletContext;
+  const { walletAddress } = useParams<{ walletAddress: string }>();
 
-  const [user, setUser] = useState<UserInterface | null>(null)
-  const [postList, setPostList] = useState<PostProps[]>([])
+  const [user, setUser] = useState<UserInterface | null>(null);
+  const [postList, setPostList] = useState<PostProps[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userService = new User({ address: walletAddress! })
-        const profileUser = await userService.getUser()
-        setUser(profileUser)
+        const userService = new User({ address: walletAddress! });
+        const profileUser = await userService.getUser();
+        setUser(profileUser);
 
-        const feedServices = new Feed()
-        console.log(feedServices)
+        const feedServices = new Feed();
 
-        const posts: PostProps[] = []
-        setPostList(posts)
+        const posts: PostProps[] = [];
+        setPostList(posts);
       } catch (error) {
-        console.error('Error fetching user data or posts', error)
+        console.error("Error fetching user data or posts", error);
       }
-    }
+    };
 
-    fetchData()
-  }, [userData, walletAddress])
+    fetchData();
+  }, [userData, walletAddress]);
 
-  const renderedUserPosts = postList.map((post) => <PostCard post={post} />)
+  const renderedUserPosts = postList.map((post) => <PostCard post={post} />);
 
   return (
     <div className="flex flex-col ">
@@ -80,7 +79,7 @@ const ProfilePage = () => {
       </section>
       <section className="p-4 flex flex-col gap-3">{renderedUserPosts}</section>
     </div>
-  )
-}
+  );
+};
 
-export default ProfilePage
+export default ProfilePage;

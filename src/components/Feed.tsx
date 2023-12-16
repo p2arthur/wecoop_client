@@ -13,7 +13,8 @@ const FeedComponent = ({ postsList, getAllPosts, handleNewReply }: FeedPropsInte
     return b.timestamp! - a.timestamp!;
   });
 
-  const renderedPosts = sortedPostList.map((post) => <PostCard handleNewReply={handleNewReply} post={post} getAllPosts={getAllPosts} />);
+  const renderedPosts = sortedPostList.map((post) => <PostCard key={post.transaction_id} handleNewReply={handleNewReply} post={post}
+                                                               getAllPosts={getAllPosts} />);
 
   return <>{postsList.length > 0 && renderedPosts}</>;
 };
