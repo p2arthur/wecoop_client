@@ -1,95 +1,87 @@
-import { useWallet } from "@txnlab/use-wallet";
-import algosdk from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
-import { minidenticon } from "minidenticons";
-import { useState } from "react";
-import { FaGlobe, FaRegMessage, FaRegThumbsUp, FaSpinner } from "react-icons/fa6";
-import { useOutletContext } from "react-router-dom";
-import { PostProps } from "../services/Post";
-import { UserInterface } from "../services/User";
-import formatDateFromTimestamp from "../utils";
-import { ellipseAddress } from "../utils/ellipseAddress";
-import { Reply } from "../services/Reply";
-import { Transaction } from "../services/Transaction";
-import { getUserCountry } from "../utils/userUtils";
-import { NotePrefix } from "../enums/notePrefix";
-import { ReplyInput } from "./ReplyInput";
-import { Like } from "../services/Like";
+import { useWallet } from '@txnlab/use-wallet'
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import { minidenticon } from 'minidenticons'
+import { useState } from 'react'
+import { FaGlobe, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { useOutletContext } from 'react-router-dom'
+import { Like } from '../services/Like'
+import { PostProps } from '../services/Post'
+import { Reply } from '../services/Reply'
+import { Transaction } from '../services/Transaction'
+import { UserInterface } from '../services/User'
+import formatDateFromTimestamp from '../utils'
+import { ellipseAddress } from '../utils/ellipseAddress'
+import { ReplyInput } from './ReplyInput'
 
 interface PostPropsInterface {
-  post: PostProps;
-  getAllPosts?: () => Promise<void>;
+  post: PostProps
+  getAllPosts?: () => Promise<void>
 }
 
 interface PostInputPropsInterface {
-  algod: AlgodClient;
-  userData: UserInterface;
+  algod: AlgodClient
+  userData: UserInterface
 }
 
 const PostCard = ({ post }: PostPropsInterface) => {
-  const { sendTransactions, signTransactions } = useWallet();
-  const [isLoadingLike, setIsLoadingLike] = useState(false);
-  const [isLoadingReply, setIsLoadingReply] = useState(false);
-  const [replyText, setReplyText] = useState("");
-  const [openReplyInput, setOpenReplyInput] = useState(false);
+  const { sendTransactions, signTransactions } = useWallet()
+  const [isLoadingLike, setIsLoadingLike] = useState(false)
+  const [isLoadingReply, setIsLoadingReply] = useState(false)
+  const [replyText, setReplyText] = useState('')
+  const [openReplyInput, setOpenReplyInput] = useState(false)
 
-  const { algod, userData } = useOutletContext() as PostInputPropsInterface;
-  const replyService = new Reply(algod);
-  const transactionService = new Transaction(algod);
+  const { algod, userData } = useOutletContext() as PostInputPropsInterface
+  const replyService = new Reply(algod)
+  const transactionService = new Transaction(algod)
   const likeService = new Like(algod)
 
-
-
   const generateIdIcon = (creatorAddress: string) => {
-    const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`;
-    return svgURI;
-  };
-
+    const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
+    return svgURI
+  }
 
   const handlePostLike = async (event: React.FormEvent) => {
-    setIsLoadingLike(true);
+    setIsLoadingLike(true)
 
     const encodedGroupedTransactions = await likeService.handlePostLike({
       event,
       creatorAdress: post.creator_address,
       address: userData.address,
-      transactionId: post.transaction_id as string})
+      transactionId: post.transaction_id as string,
+    })
 
-    const signedTransactions = await signTransactions(encodedGroupedTransactions);
-    const waitRoundsToConfirm = 4;
+    const signedTransactions = await signTransactions(encodedGroupedTransactions)
+    const waitRoundsToConfirm = 4
 
-    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm);
+    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-    console.log("Transaction id:", id);
+    console.log('Transaction id:', id)
 
-    setIsLoadingLike(false);
-  };
+    setIsLoadingLike(false)
+  }
 
   const handlePostReply = async () => {
-    setIsLoadingReply(true);
+    setIsLoadingReply(true)
 
     const encodedGroupedTransactions = await replyService.handlePostReply({
       creatorAdress: post.creator_address,
       address: userData.address,
       transactionId: post.transaction_id as string,
-      text: replyText
-    });
-    const signedTransactions = await signTransactions(encodedGroupedTransactions);
-    const waitRoundsToConfirm = 4;
+      text: replyText,
+    })
+    const signedTransactions = await signTransactions(encodedGroupedTransactions)
+    const waitRoundsToConfirm = 4
 
-    await sendTransactions(signedTransactions, waitRoundsToConfirm);
+    await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-    setIsLoadingReply(false);
-  };
-
+    setIsLoadingReply(false)
+  }
 
   return (
     <>
       <div>
-        {post.status === "accepted" ? (
-
-          <div
-            className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
+        {post.status === 'accepted' ? (
+          <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
@@ -113,7 +105,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
                 ) : null}
                 <p>
                   {!formatDateFromTimestamp(post.timestamp!).time
-                    ? "Just now"
+                    ? 'Just now'
                     : `${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure} ago`}
                 </p>
               </div>
@@ -121,18 +113,18 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
             <div className="grid gap-2">
               <p className="w-full tracking-wide">{post.text}</p>
-              <div className={"flex justify-end items-center gap-1 text-md "}>
+              <div className={'flex justify-end items-center gap-1 text-md '}>
                 <button
                   className="rounded-full p-2 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
                   onClick={() => setOpenReplyInput(!openReplyInput)}
                 >
                   <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                 </button>
-                <a target="_blank" className={"cursor-pointer"} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
+                <a target="_blank" className={'cursor-pointer'} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
                   <FaGlobe className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                 </a>
 
-                <div className={"flex gap-1 items-center"}>
+                <div className={'flex gap-1 items-center'}>
                   {isLoadingLike ? (
                     <FaSpinner className="animate-spin text-2xl" />
                   ) : (
@@ -149,10 +141,11 @@ const PostCard = ({ post }: PostPropsInterface) => {
                 </div>
               </div>
               {openReplyInput && (
-                <div className={"grid gap-4"}>
+                <div className={'grid gap-4'}>
                   <ReplyInput
                     handleChange={(e) => setReplyText(e.target.value)}
-                    placeholder={"Reply message..."} value={replyText}
+                    placeholder={'Reply message...'}
+                    value={replyText}
                     handleSubmit={handlePostReply}
                   />
 
@@ -161,7 +154,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
               )}
             </div>
           </div>
-        ) : post.status === "loading" ? (
+        ) : post.status === 'loading' ? (
           <div
             key={post.text}
             className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
@@ -190,7 +183,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
         )}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default PostCard;
+export default PostCard

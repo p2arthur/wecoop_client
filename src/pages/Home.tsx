@@ -71,16 +71,21 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-2 ">
-      <PostInput setPosts={handleSetPosts} />
-      <p className="font-bold text-2xl">Feed - </p>
-      <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
-      {loading && <FeedLoaderSpinner text="loading posts" />}
-      {allCaughtUp && (
-        <div className={'w-full justify-center flex'}>
-          <p className="font-bold text-2xl">You're all caught up!</p>
-        </div>
-      )}
+    <div className="flex bg-green-300">
+      <div className="flex flex-col gap-4 p-2 md:w-2/3">
+        <PostInput setPosts={handleSetPosts} />
+        <p className="font-bold text-2xl">Feed - </p>
+        <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
+        {loading && <FeedLoaderSpinner text="loading posts" />}
+        {allCaughtUp && (
+          <div className={'w-full justify-center flex'}>
+            <p className="font-bold text-2xl">You're all caught up!</p>
+          </div>
+        )}
+      </div>
+      <div className="md:flex flex-col gap-4 p-2 md:w-1/3 border-l-2 bg-red-300 border-gray-900 hidden dark:border-gray-800">
+        <div className=" h-full">aaaaa</div>
+      </div>
     </div>
   )
 }

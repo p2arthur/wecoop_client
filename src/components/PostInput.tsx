@@ -121,7 +121,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
             maxLength={300}
             onChange={handleChange}
             placeholder={placeholder}
-            className="w-full border-2  align-top text-start break-all whitespace-normal h-32 p-2 resize-none  z-20 focus:scale-101 focus:border-b-4 border-gray-900 focus:outline-gray-500"
+            className="w-full border-2 text-xl align-top text-start break-all whitespace-normal h-32 p-2 resize-none  z-20 focus:scale-101 focus:border-b-4 border-gray-900 focus:outline-gray-500"
           />
           <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
         </div>
