@@ -13,6 +13,7 @@ import { Reply } from "../services/Reply";
 import { Transaction } from "../services/Transaction";
 import { getUserCountry } from "../utils/userUtils";
 import { NotePrefix } from "../enums/notePrefix";
+import { Like } from "../services/Like";
 
 interface PostPropsInterface {
   post: PostProps;
@@ -32,6 +33,9 @@ const PostCard = ({ post }: PostPropsInterface) => {
   const { algod, userData } = useOutletContext() as PostInputPropsInterface;
   const replyService = new Reply(algod);
   const transactionService = new Transaction(algod);
+  const likeService = new Like(algod)
+
+
 
   const generateIdIcon = (creatorAddress: string) => {
     const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`;
@@ -41,25 +45,13 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
   const handlePostLike = async (event: React.FormEvent) => {
     setIsLoadingLike(true);
-    event.preventDefault();
-    const country = await getUserCountry();
-    const note = `${NotePrefix.WeCoopLike}${country}:${post.transaction_id}`;
-    const scoopFeeTransaction = await transactionService.createTransaction(
-      userData.address,
-      "GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ",
-      1000,
-      note
-    );
-    const postCreatorFee = await transactionService.createTransaction(
-      userData.address,
-      "GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ",
-      1000,
-      `creator-fee:${note}`
-    );
 
-    const transactionsArray = [scoopFeeTransaction, postCreatorFee];
-    const groupedTransactions = algosdk.assignGroupID(transactionsArray);
-    const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction));
+    const encodedGroupedTransactions = await likeService.handlePostLike({
+      event,
+      creatorAdress: post.creator_address,
+      address: userData.address,
+      transactionId: post.transaction_id as string})
+    
     const signedTransactions = await signTransactions(encodedGroupedTransactions);
     const waitRoundsToConfirm = 4;
 
