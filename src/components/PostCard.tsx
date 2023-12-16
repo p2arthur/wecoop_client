@@ -1,5 +1,4 @@
 import { useWallet } from "@txnlab/use-wallet";
-import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import { minidenticon } from "minidenticons";
 import { useState } from "react";
@@ -11,14 +10,15 @@ import formatDateFromTimestamp from "../utils";
 import { ellipseAddress } from "../utils/ellipseAddress";
 import { Reply } from "../services/Reply";
 import { Transaction } from "../services/Transaction";
-import { getUserCountry } from "../utils/userUtils";
-import { NotePrefix } from "../enums/notePrefix";
 import { ReplyInput } from "./ReplyInput";
 import { Like } from "../services/Like";
+import { getUserCountry } from "../utils/userUtils";
 
 interface PostPropsInterface {
   post: PostProps;
+  variant?: "default" | "reply";
   getAllPosts?: () => Promise<void>;
+  handleNewReply?: (newReply: PostProps, transactionCreatorId: string) => void;
 }
 
 interface PostInputPropsInterface {
@@ -26,18 +26,18 @@ interface PostInputPropsInterface {
   userData: UserInterface;
 }
 
-const PostCard = ({ post }: PostPropsInterface) => {
+const PostCard = ({ post, variant = "default", getAllPosts, handleNewReply }: PostPropsInterface) => {
   const { sendTransactions, signTransactions } = useWallet();
   const [isLoadingLike, setIsLoadingLike] = useState(false);
   const [isLoadingReply, setIsLoadingReply] = useState(false);
   const [replyText, setReplyText] = useState("");
+
   const [openReplyInput, setOpenReplyInput] = useState(false);
 
   const { algod, userData } = useOutletContext() as PostInputPropsInterface;
   const replyService = new Reply(algod);
   const transactionService = new Transaction(algod);
-  const likeService = new Like(algod)
-
+  const likeService = new Like(algod);
 
 
   const generateIdIcon = (creatorAddress: string) => {
@@ -51,25 +51,37 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
     const encodedGroupedTransactions = await likeService.handlePostLike({
       event,
-      creatorAdress: post.creator_address,
+      creatorAddress: post.creator_address,
       address: userData.address,
-      transactionId: post.transaction_id as string})
+      transactionId: post.transaction_id as string
+    });
 
     const signedTransactions = await signTransactions(encodedGroupedTransactions);
     const waitRoundsToConfirm = 4;
 
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm);
 
-    console.log("Transaction id:", id);
+
+    getAllPosts && await getAllPosts();
 
     setIsLoadingLike(false);
   };
 
   const handlePostReply = async () => {
     setIsLoadingReply(true);
+    const country = await getUserCountry();
+
+    handleNewReply && handleNewReply({
+      text: replyText,
+      creator_address: userData.address,
+      status: "loading",
+      timestamp: null,
+      transaction_id: null
+    }, post.transaction_id as string);
+
 
     const encodedGroupedTransactions = await replyService.handlePostReply({
-      creatorAdress: post.creator_address,
+      creatorAddress: post.creator_address,
       address: userData.address,
       transactionId: post.transaction_id as string,
       text: replyText
@@ -77,7 +89,21 @@ const PostCard = ({ post }: PostPropsInterface) => {
     const signedTransactions = await signTransactions(encodedGroupedTransactions);
     const waitRoundsToConfirm = 4;
 
-    await sendTransactions(signedTransactions, waitRoundsToConfirm);
+    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm);
+
+
+    handleNewReply && handleNewReply({
+      creator_address: userData.address,
+      text: replyText,
+      status: "accepted",
+      transaction_id: id,
+      country,
+      nfd: userData.nfd,
+      timestamp: null,
+      replys: []
+    }, post.transaction_id as string);
+
+    getAllPosts && await getAllPosts();
 
     setIsLoadingReply(false);
   };
@@ -123,10 +149,11 @@ const PostCard = ({ post }: PostPropsInterface) => {
               <p className="w-full tracking-wide">{post.text}</p>
               <div className={"flex justify-end items-center gap-1 text-md "}>
                 <button
-                  className="rounded-full p-2 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                  className="rounded-full gap-1 items-center p-2 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
                   onClick={() => setOpenReplyInput(!openReplyInput)}
                 >
                   <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                  <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replys?.length}</p>
                 </button>
                 <a target="_blank" className={"cursor-pointer"} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
                   <FaGlobe className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
@@ -150,13 +177,18 @@ const PostCard = ({ post }: PostPropsInterface) => {
               </div>
               {openReplyInput && (
                 <div className={"grid gap-4"}>
+                  <p className={"text-lg"}>Replys</p>
+
+                  {post.replys && post.replys.length > 0 && post.replys.map(reply =>
+                    <PostCard post={reply} variant={"reply"} />
+                  )}
+
                   <ReplyInput
                     handleChange={(e) => setReplyText(e.target.value)}
                     placeholder={"Reply message..."} value={replyText}
                     handleSubmit={handlePostReply}
                   />
 
-                  <p>Replys</p>
                 </div>
               )}
             </div>

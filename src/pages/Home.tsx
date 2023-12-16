@@ -1,80 +1,101 @@
-import { useEffect, useState } from 'react'
-import { FaSpinner } from 'react-icons/fa6'
-import FeedComponent from '../components/Feed'
-import PostInput from '../components/PostInput'
-import { Feed } from '../services/Feed'
-import { PostProps } from '../services/Post'
-import { debounce } from '../utils/debounce'
+import { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa6";
+import FeedComponent from "../components/Feed";
+import PostInput from "../components/PostInput";
+import { Feed } from "../services/Feed";
+import { PostProps } from "../services/Post";
+import { debounce } from "../utils/debounce";
 
 const Home = () => {
-  const [postsList, setPostsList] = useState<PostProps[]>([])
-  const [currentRound, setCurrentRound] = useState(null)
-  const [nextToken, setNextToken] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [allCaughtUp, setAllCaughtUp] = useState(false)
+  const [postsList, setPostsList] = useState<PostProps[]>([]);
+  const [currentRound, setCurrentRound] = useState(null);
+  const [nextToken, setNextToken] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [allCaughtUp, setAllCaughtUp] = useState(false);
 
-  const feed = new Feed()
-  console.log(currentRound)
+  const feed = new Feed();
   const getAllPosts = async () => {
     if (!loading) {
-      setLoading(true)
+      setLoading(true);
       try {
-        const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken })
+        const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken });
 
-        setCurrentRound(currentRound)
+        setCurrentRound(currentRound);
 
         if (postsList.length === 0) {
-          setPostsList(data)
+          const existingTransactionIds = postsList.map((post) => post.transaction_id);
+
+          const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id));
+          setPostsList(uniquePosts);
         } else {
-          const existingTransactionIds = postsList.map((post) => post.transaction_id)
+          const existingTransactionIds = postsList.map((post) => post.transaction_id);
 
-          const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id))
+          const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id));
 
-          setPostsList((prev) => [...prev, ...uniquePosts])
+          setPostsList((prev) => [...prev, ...uniquePosts]);
         }
         if (!next) {
-          setAllCaughtUp(true)
+          setAllCaughtUp(true);
         }
-        setNextToken(next)
+        setNextToken(next);
       } catch (error) {
-        console.error('Error fetching posts:', error)
+        console.error("Error fetching posts:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-  }
+  };
 
   const setPosts = (newPost: PostProps) => {
-    setPostsList([newPost, ...postsList])
-  }
+    setPostsList([newPost, ...postsList]);
+  };
 
   const handleScroll = debounce(() => {
-    const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100
+    const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
     if (isAtBottom && nextToken) {
-      getAllPosts().then()
+      getAllPosts().then();
     }
-  }, 380)
+  }, 380);
 
   useEffect(() => {
-    getAllPosts().then()
-  }, [])
+    getAllPosts().then();
+  }, []);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [nextToken])
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [nextToken]);
 
   const handleSetPosts = (newPost: PostProps) => {
-    setPosts(newPost)
-  }
+    setPosts(newPost);
+  };
+
+  const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
+    console.log("transactionCreatorId", newReply, transactionCreatorId);
+    const newPostsList = postsList.map((post) => {
+
+      if (post.creator_address === newReply.creator_address && post.transaction_id === transactionCreatorId) {
+        console.log(post, "ACHOU");
+
+        if (post.replys === undefined) {
+          return { ...post, replys: [newReply] };
+        }
+        return { ...post, replys: [...post.replys, newReply] };
+      }
+      return post;
+    });
+    console.log(newPostsList, "newPostLits");
+    setPostsList(newPostsList);
+  };
+
 
   return (
     <div className="flex flex-col gap-4 p-2 ">
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed - </p>
-      <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
+      <FeedComponent postsList={postsList} getAllPosts={getAllPosts} handleNewReply={handleNewReply} />
       {loading && (
         <div className="h-64 flex flex-col justify-start md:justify-center items-center text-gray-500">
           <FaSpinner className="animate-spin text-3xl" />
@@ -82,12 +103,12 @@ const Home = () => {
         </div>
       )}
       {allCaughtUp && (
-        <div className={'w-full justify-center flex'}>
+        <div className={"w-full justify-center flex"}>
           <p className="font-bold text-2xl">You're all caught up!</p>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

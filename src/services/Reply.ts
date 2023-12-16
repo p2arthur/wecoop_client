@@ -6,7 +6,7 @@ import { Transaction } from "./Transaction";
 
 interface ReplyProps {
   address: string;
-  creatorAdress: string;
+  creatorAddress: string;
   text: string;
   transactionId: string;
 }
@@ -16,12 +16,12 @@ export class Reply {
   }
 
 
-  public async handlePostReply({ creatorAdress, transactionId, address, text }: ReplyProps) {
+  public async handlePostReply({ creatorAddress, transactionId, address, text }: ReplyProps) {
 
     const transactionService = new Transaction(this.client);
 
     const country = await getUserCountry();
-    const note = `${NotePrefix.WeCoopPost}${country}:${transactionId}:${text}`;
+    const note = `${NotePrefix.WeCoopReply}${country}:${transactionId}:${text}`;
     const scoopFeeTransaction = await transactionService.createTransaction(
       address,
       "GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ",
@@ -30,7 +30,7 @@ export class Reply {
     );
     const postCreatorFee = await transactionService.createTransaction(
       address,
-      creatorAdress,
+      creatorAddress,
       1000,
       `creator-fee:${note}`
     );
