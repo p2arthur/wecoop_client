@@ -1,4 +1,5 @@
 export enum NotePrefix {
-  WeCoopPost = 'wecoop:post:',
-  WeCoopLike = 'wecoop:like:',
+  WeCoopPost = "wecoop:post:",
+  WeCoopLike = "wecoop:like:",
+  WeCoopReply = "wecoop:reply:",
 }

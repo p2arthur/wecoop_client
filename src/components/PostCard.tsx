@@ -1,76 +1,83 @@
-import { useWallet } from '@txnlab/use-wallet'
-import algosdk from 'algosdk'
-import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { minidenticon } from 'minidenticons'
-import { useState } from 'react'
-import { FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
-import { useOutletContext } from 'react-router-dom'
-import { NotePrefix } from '../enums/notePrefix'
-import { PostProps } from '../services/Post'
-import { Transaction } from '../services/Transaction'
-import { UserInterface } from '../services/User'
-import formatDateFromTimestamp from '../utils'
-import { ellipseAddress } from '../utils/ellipseAddress'
-import { getUserCountry } from '../utils/userUtils'
+import { useWallet } from "@txnlab/use-wallet";
+import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import { minidenticon } from "minidenticons";
+import { useState } from "react";
+import { FaRegThumbsUp, FaSpinner } from "react-icons/fa6";
+import { useOutletContext } from "react-router-dom";
+import { PostProps } from "../services/Post";
+import { UserInterface } from "../services/User";
+import formatDateFromTimestamp from "../utils";
+import { ellipseAddress } from "../utils/ellipseAddress";
+import { Reply } from "../services/Reply";
 
 interface PostPropsInterface {
-  post: PostProps
-  getAllPosts?: () => Promise<void>
+  post: PostProps;
+  getAllPosts?: () => Promise<void>;
 }
 
 interface PostInputPropsInterface {
-  algod: AlgodClient
-  userData: UserInterface
+  algod: AlgodClient;
+  userData: UserInterface;
 }
 
 const PostCard = ({ post }: PostPropsInterface) => {
-  const { sendTransactions, signTransactions } = useWallet()
-  const [isLoadingLike, setIsLoadingLike] = useState(false)
-  const { algod, userData } = useOutletContext() as PostInputPropsInterface
-  const transactionService = new Transaction(algod)
+  const { sendTransactions, signTransactions } = useWallet();
+  const [isLoadingLike, setIsLoadingLike] = useState(false);
+  const [isLoadingReply, setIsLoadingReply] = useState(false);
+  const { algod, userData } = useOutletContext() as PostInputPropsInterface;
+  const replyService = new Reply(algod);
 
   const generateIdIcon = (creatorAddress: string) => {
-    const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
-    return svgURI
-  }
+    const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`;
+    return svgURI;
+  };
 
   const handlePostLike = async (event: React.FormEvent) => {
-    setIsLoadingLike(true)
-    event.preventDefault()
-    const country = await getUserCountry()
-    const note = `${NotePrefix.WeCoopLike}${country}:${post.transaction_id}`
-    const scoopFeeTransaction = await transactionService.createTransaction(
-      userData.address,
-      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
-      1000,
-      note,
-    )
-    const postCreatorFee = await transactionService.createTransaction(
-      userData.address,
-      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
-      1000,
-      `creator-fee:${note}`,
-    )
+    setIsLoadingLike(true);
 
-    const transactionsArray = [scoopFeeTransaction, postCreatorFee]
-    const groupedTransactions = algosdk.assignGroupID(transactionsArray)
-    const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
-    const signedTransactions = await signTransactions(encodedGroupedTransactions)
-    const waitRoundsToConfirm = 4
+    const encodedGroupedTransactions = await replyService.handlePostReply({
+      event,
+      creatorAdress: post.creator_address,
+      address: userData.address,
+      transactionId: post.transaction_id as string
+    });
+    const signedTransactions = await signTransactions(encodedGroupedTransactions);
+    const waitRoundsToConfirm = 4;
 
-    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm);
 
-    console.log('Transaction id:', id)
+    console.log("Transaction id:", id);
 
-    setIsLoadingLike(false)
-  }
+    setIsLoadingLike(false);
+  };
+
+  const handlePostReply = async (event: React.FormEvent) => {
+    setIsLoadingReply(true);
+
+    const encodedGroupedTransactions = await replyService.handlePostReply({
+      event,
+      creatorAdress: post.creator_address,
+      address: userData.address,
+      transactionId: post.transaction_id as string
+    });
+    const signedTransactions = await signTransactions(encodedGroupedTransactions);
+    const waitRoundsToConfirm = 4;
+
+    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm);
+
+    console.log("Transaction id:", id);
+
+    setIsLoadingReply(false);
+  };
+
 
   return (
     <>
       <div>
-        {post.status === 'accepted' ? (
+        {post.status === "accepted" ? (
           <a target="_blank" href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
-            <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
+            <div
+              className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
@@ -94,7 +101,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
                   ) : null}
                   <p>
                     {!formatDateFromTimestamp(post.timestamp!).time
-                      ? 'Just now'
+                      ? "Just now"
                       : `${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure} ago`}
                   </p>
                 </div>
@@ -118,7 +125,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
               </div>
             </div>
           </a>
-        ) : post.status === 'loading' ? (
+        ) : post.status === "loading" ? (
           <div
             key={post.text}
             className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
@@ -147,7 +154,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
         )}
       </div>
     </>
-  )
-}
+  );
+};
 
-export default PostCard
+export default PostCard;
