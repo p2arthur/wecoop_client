@@ -47,6 +47,8 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
   const [inputText, setInputText] = useState<string>("");
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)]);
 
+
+  console.log(inputText, "inputText");
   const [placeholder, setPlaceholder] = useState(placeholderSelected.slice(0, 0));
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
@@ -80,7 +82,9 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     event.preventDefault();
     setPosts({ text: inputText, creator_address: userData.address, status: "loading", timestamp: null, transaction_id: null });
     const country = await getUserCountry();
-    const note = `${NotePrefix.WeCoopPost}${country}:${inputText}`;
+    const encodedInputText = encodeURIComponent(inputText);
+    console.log(encodedInputText, "encodedInputText");
+    const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`;
 
     try {
       const transaction = await transactionServices.createTransaction(

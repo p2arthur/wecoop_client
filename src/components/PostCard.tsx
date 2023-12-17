@@ -153,7 +153,8 @@ const PostCard = ({ post, variant = "default", getAllPosts, handleNewReply }: Po
             </div>
 
             <div className="grid gap-2">
-              <p className="w-full tracking-wide">{post.text}</p>
+              <p className="w-full tracking-wide"
+                 dangerouslySetInnerHTML={{ __html: post.text }}></p>
               <div className={"flex justify-end items-center gap-1 text-md "}>
                 {variant === "default" && (
                   <button
