@@ -34,7 +34,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
   const [openReplyInput, setOpenReplyInput] = useState(false)
 
   const { algod, userData } = useOutletContext() as PostInputPropsInterface
-  const replyService = new Reply(algod)
+  const replieservice = new Reply(algod)
   const likeService = new Like(algod)
 
   const generateIdIcon = (creatorAddress: string) => {
@@ -72,14 +72,14 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
       status: 'loading',
       timestamp: null,
       transaction_id: null,
-      replys: [],
+      replies: [],
     }
 
     const parentReplyId = post.transaction_id as string
 
     handleNewReply && handleNewReply(newReply, parentReplyId)
 
-    const encodedGroupedTransactions = await replyService.handlePostReply({
+    const encodedGroupedTransactions = await replieservice.handlePostReply({
       creatorAddress: post.creator_address,
       address: userData.address,
       transactionId: post.transaction_id as string,
@@ -99,7 +99,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
       country,
       nfd: userData.nfd,
       timestamp: Date.now(),
-      replys: [],
+      replies: [],
     }
 
     handleNewReply && handleNewReply(acceptedReply, parentReplyId)
@@ -153,7 +153,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
                     onClick={() => setOpenReplyInput(!openReplyInput)}
                   >
                     <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replys?.length}</p>
+                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replies?.length}</p>
                   </button>
                 )}
 
@@ -178,9 +178,9 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
               </div>
               {openReplyInput && (
                 <div className={'grid gap-4'}>
-                  <p className={'text-lg'}>Replys</p>
+                  <p className={'text-lg'}>replies</p>
 
-                  {post.replys && post.replys.length > 0 && post.replys.map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                  {post.replies && post.replies.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
 
                   {!isLoadingReply && (
                     <ReplyInput

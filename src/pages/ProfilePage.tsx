@@ -67,10 +67,10 @@ const ProfilePage = () => {
   const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
     const newPostsList = postsList.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
-        if (post.replys === undefined) {
-          return { ...post, replys: [newReply] }
+        if (post.replies === undefined) {
+          return { ...post, replies: [newReply] }
         }
-        return { ...post, replys: [...post.replys, newReply] }
+        return { ...post, replies: [...post.replies, newReply] }
       }
       return post
     })
