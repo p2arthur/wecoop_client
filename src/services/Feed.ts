@@ -13,8 +13,6 @@ export class Feed {
 
   public async getAllPosts({ next }: { next?: string | null }) {
     try {
-      console.log('server', this.server)
-
       const { data } = await axios.get(
         `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=${base64.encode(
           NotePrefix.WeCoopAll,
@@ -117,8 +115,6 @@ export class Feed {
       )
 
       const uniquePostIds = new Set(this.feedData.map((post) => post.transaction_id))
-
-      console.log('uniquePostIds', uniquePostIds)
 
       for (const transaction of postsFiltered || []) {
         if (transaction.note) {

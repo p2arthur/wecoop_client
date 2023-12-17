@@ -38,7 +38,6 @@ const ProfilePage = () => {
         const allUserPosts = await feedServices.getPostsByAddress(walletAddress!)
 
         const { data } = allUserPosts
-        console.log('allUserPosts', allUserPosts)
         setPostList(data)
         setProfilePageState({ state: 'success' })
       } catch (error) {

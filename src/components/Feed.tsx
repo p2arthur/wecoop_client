@@ -13,8 +13,6 @@ const FeedComponent = ({ postsList, getAllPosts, handleNewReply }: FeedPropsInte
     return b.timestamp! - a.timestamp!
   })
 
-  console.log(postsList, 'post')
-
   const renderedPosts = sortedPostList.map((post) => (
     <PostCard key={post.transaction_id} handleNewReply={handleNewReply} post={post} getAllPosts={getAllPosts} />
   ))
