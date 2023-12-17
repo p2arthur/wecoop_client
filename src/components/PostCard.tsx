@@ -7,7 +7,6 @@ import { useOutletContext } from 'react-router-dom'
 import { Like } from '../services/Like'
 import { PostProps } from '../services/Post'
 import { Reply } from '../services/Reply'
-import { Transaction } from '../services/Transaction'
 import { UserInterface } from '../services/User'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -36,7 +35,6 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
 
   const { algod, userData } = useOutletContext() as PostInputPropsInterface
   const replyService = new Reply(algod)
-  const transactionService = new Transaction(algod)
   const likeService = new Like(algod)
 
   const generateIdIcon = (creatorAddress: string) => {
@@ -57,7 +55,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
 
-    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+    await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
     getAllPosts && (await getAllPosts())
 
@@ -182,12 +180,14 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
 
                   {post.replys && post.replys.length > 0 && post.replys.map((reply) => <PostCard post={reply} variant={'reply'} />)}
 
-                  <ReplyInput
-                    handleChange={(e) => setReplyText(e.target.value)}
-                    placeholder={'Reply message...'}
-                    value={replyText}
-                    handleSubmit={handlePostReply}
-                  />
+                  {!isLoadingReply && (
+                    <ReplyInput
+                      handleChange={(e) => setReplyText(e.target.value)}
+                      placeholder={'Reply message...'}
+                      value={replyText}
+                      handleSubmit={handlePostReply}
+                    />
+                  )}
                 </div>
               )}
             </div>

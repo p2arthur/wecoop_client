@@ -120,7 +120,6 @@ export class Feed {
         if (transaction.note) {
           const { note, sender, id } = transaction
 
-          // Check if the post with the same ID already exists
           if (!uniquePostIds.has(id)) {
             const likes = (likesFiltered || []).filter((likeTransaction: TransactionInterface) => {
               const noteDecoded = base64.decode(likeTransaction.note)?.split(':')

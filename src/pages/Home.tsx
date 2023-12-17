@@ -8,7 +8,6 @@ import { debounce } from '../utils/debounce'
 
 const Home = () => {
   const [postsList, setPostsList] = useState<PostProps[]>([])
-  const [currentRound, setCurrentRound] = useState(null)
   const [nextToken, setNextToken] = useState(null)
   const [loading, setLoading] = useState(false)
   const [allCaughtUp, setAllCaughtUp] = useState(false)
@@ -19,8 +18,6 @@ const Home = () => {
       setLoading(true)
       try {
         const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken })
-
-        setCurrentRound(currentRound)
 
         if (postsList.length === 0) {
           const existingTransactionIds = postsList.map((post) => post.transaction_id)
@@ -89,7 +86,7 @@ const Home = () => {
     <div className="flex flex-col gap-4 p-2 ">
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed - </p>
-      <FeedComponent postsList={postsList} getAllPosts={getAllPosts} />
+      <FeedComponent postsList={postsList} getAllPosts={getAllPosts} handleNewReply={handleNewReply} />
       {loading && <LoaderSpinner text={'loading feed'} />}
       {allCaughtUp && (
         <div className={'w-full justify-center flex'}>
