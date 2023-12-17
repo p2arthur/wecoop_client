@@ -71,7 +71,7 @@ export class Feed {
 
             const roundTime = transaction["round-time"];
             const postData: PostProps = {
-              text: note,
+              text: decodeURIComponent(note),
               creator_address: sender,
               transaction_id: id,
               timestamp: roundTime,
