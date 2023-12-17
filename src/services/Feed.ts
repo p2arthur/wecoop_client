@@ -12,11 +12,12 @@ export class Feed {
   constructor(private post: Post = new Post()) {}
 
   public async getAllPosts({ next }: { next?: string | null }) {
+    const server = getIndexerConfigFromViteEnvironment().server
     try {
       const { data } = await axios.get(
-        `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=${base64.encode(
-          NotePrefix.WeCoopAll,
-        )}&limit=10${next ? `&next=${next}` : ''}`,
+        `https://mainnet-idx.algonode.cloud/v2/accounts/GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ/transactions?note-prefix=d2Vjb29w&limit=20${
+          next ? `&next=${next}` : ''
+        }`,
       )
 
       const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
@@ -69,7 +70,7 @@ export class Feed {
 
             const roundTime = transaction['round-time']
             const postData: PostProps = {
-              text: decodeURIComponent(note),
+              text: note,
               creator_address: sender,
               transaction_id: id,
               timestamp: roundTime,
@@ -112,6 +113,10 @@ export class Feed {
 
       const likesFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop:like'),
+      )
+
+      const replysFiltered = transactions?.filter((transaction: TransactionInterface) =>
+        base64.decode(transaction.note).includes('wecoop:reply'),
       )
 
       const uniquePostIds = new Set(this.feedData.map((post) => post.transaction_id))

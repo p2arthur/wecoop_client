@@ -67,7 +67,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
     const country = await getUserCountry()
 
     const newReply: PostProps = {
-      text: replyText,
+      text: encodeURIComponent(replyText),
       creator_address: userData.address,
       status: 'loading',
       timestamp: null,
@@ -83,7 +83,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
       creatorAddress: post.creator_address,
       address: userData.address,
       transactionId: post.transaction_id as string,
-      text: replyText,
+      text: encodeURIComponent(replyText),
     })
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
@@ -92,9 +92,10 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
 
     const acceptedReply: PostProps = {
       creator_address: userData.address,
-      text: replyText,
+      text: encodeURIComponent(replyText),
       status: 'accepted',
       transaction_id: id,
+      likes: 0,
       country,
       nfd: userData.nfd,
       timestamp: Date.now(),
@@ -105,6 +106,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
 
     getAllPosts && (await getAllPosts())
 
+    setReplyText('')
     setIsLoadingReply(false)
   }
 
@@ -143,11 +145,11 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
             </div>
 
             <div className="grid gap-2">
-              <p className="w-full tracking-wide">{decodeURIComponent(post.text)}</p>
+              <p className="tracking-wide break-words w-32">{decodeURIComponent(post.text)}</p>
               <div className={'flex justify-end items-center gap-1 text-md '}>
                 {variant === 'default' && (
                   <button
-                    className="rounded-lg gap-1 items-center p-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                    className="rounded-lg gap-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
                     onClick={() => setOpenReplyInput(!openReplyInput)}
                   >
                     <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
@@ -204,7 +206,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
                 </div>
                 <h2 className="font-bold text-xl h-full">{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
               </div>
-              <p className="w-full">{post.text}</p>
+              <p className="w-full">{decodeURIComponent(post.text)}</p>
             </div>
             <span>
               <FaSpinner className="w-6 animate-spin" />
