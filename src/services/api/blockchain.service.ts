@@ -14,10 +14,10 @@ const getAllPosts = async (): Promise<PostProps[]> => {
     const transactions = data?.transactions // Ensure transactions is defined
 
     const postsFiltered = transactions?.filter((transaction: TransactionInterface) =>
-      base64.decode(transaction.note).includes('wecoop:post'),
+      base64.decode(transaction.note).includes('wecoop-v1post'),
     )
     const likesFiltered = transactions?.filter((transaction: TransactionInterface) =>
-      base64.decode(transaction.note).includes('wecoop:like'),
+      base64.decode(transaction.note).includes('wecoop-v1like'),
     )
 
     const postData: PostProps[] = []

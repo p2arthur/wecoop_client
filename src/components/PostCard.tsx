@@ -1,21 +1,23 @@
 import { useWallet } from '@txnlab/use-wallet'
-import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { useState } from 'react'
-import { FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { FaGlobe, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
-import { NotePrefix } from '../enums/notePrefix'
+import { Like } from '../services/Like'
 import { PostProps } from '../services/Post'
-import { Transaction } from '../services/Transaction'
+import { Reply } from '../services/Reply'
 import { UserInterface } from '../services/User'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
+import { ReplyInput } from './ReplyInput'
 
 interface PostPropsInterface {
   post: PostProps
+  variant?: 'default' | 'reply'
   getAllPosts?: () => Promise<void>
+  handleNewReply?: (newReply: PostProps, transactionCreatorId: string) => void
 }
 
 interface PostInputPropsInterface {
@@ -23,11 +25,17 @@ interface PostInputPropsInterface {
   userData: UserInterface
 }
 
-const PostCard = ({ post }: PostPropsInterface) => {
+const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: PostPropsInterface) => {
   const { sendTransactions, signTransactions } = useWallet()
   const [isLoadingLike, setIsLoadingLike] = useState(false)
+  const [isLoadingReply, setIsLoadingReply] = useState(false)
+  const [replyText, setReplyText] = useState('')
+
+  const [openReplyInput, setOpenReplyInput] = useState(false)
+
   const { algod, userData } = useOutletContext() as PostInputPropsInterface
-  const transactionService = new Transaction(algod)
+  const replyService = new Reply(algod)
+  const likeService = new Like(algod)
 
   const generateIdIcon = (creatorAddress: string) => {
     const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -36,88 +44,156 @@ const PostCard = ({ post }: PostPropsInterface) => {
 
   const handlePostLike = async (event: React.FormEvent) => {
     setIsLoadingLike(true)
-    event.preventDefault()
-    const country = await getUserCountry()
-    const note = `${NotePrefix.WeCoopLike}${country}:${post.transaction_id}`
-    const scoopFeeTransaction = await transactionService.createTransaction(
-      userData.address,
-      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
-      1000,
-      note,
-    )
-    const postCreatorFee = await transactionService.createTransaction(
-      userData.address,
-      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
-      1000,
-      `creator-fee:${note}`,
-    )
 
-    const transactionsArray = [scoopFeeTransaction, postCreatorFee]
-    const groupedTransactions = algosdk.assignGroupID(transactionsArray)
-    const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
+    const encodedGroupedTransactions = await likeService.handlePostLike({
+      event,
+      creatorAddress: post.creator_address,
+      address: userData.address,
+      transactionId: post.transaction_id as string,
+    })
+
+    const signedTransactions = await signTransactions(encodedGroupedTransactions)
+    const waitRoundsToConfirm = 4
+
+    await sendTransactions(signedTransactions, waitRoundsToConfirm)
+
+    getAllPosts && (await getAllPosts())
+
+    setIsLoadingLike(false)
+  }
+
+  const handlePostReply = async () => {
+    setIsLoadingReply(true)
+    const country = await getUserCountry()
+
+    const newReply: PostProps = {
+      text: encodeURIComponent(replyText),
+      creator_address: userData.address,
+      status: 'loading',
+      timestamp: null,
+      transaction_id: null,
+      replys: [],
+    }
+
+    const parentReplyId = post.transaction_id as string
+
+    handleNewReply && handleNewReply(newReply, parentReplyId)
+
+    const encodedGroupedTransactions = await replyService.handlePostReply({
+      creatorAddress: post.creator_address,
+      address: userData.address,
+      transactionId: post.transaction_id as string,
+      text: encodeURIComponent(replyText),
+    })
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
 
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-    console.log('Transaction id:', id)
+    const acceptedReply: PostProps = {
+      creator_address: userData.address,
+      text: encodeURIComponent(replyText),
+      status: 'accepted',
+      transaction_id: id,
+      likes: 0,
+      country,
+      nfd: userData.nfd,
+      timestamp: Date.now(),
+      replys: [],
+    }
 
-    setIsLoadingLike(false)
+    handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+
+    getAllPosts && (await getAllPosts())
+
+    setReplyText('')
+    setIsLoadingReply(false)
   }
 
   return (
     <>
       <div>
         {post.status === 'accepted' ? (
-          <a target="_blank" href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
-            <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
-                    <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
-                  </div>
-                  <a target="_blank" href={`/profile/${post.creator_address}`}>
-                    <h2 className="font-bold text-xl h-full hover:underline">
-                      {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
-                    </h2>
-                    {}
-                  </a>
+          <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
+                  <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                 </div>
-                <div className="flex flex-col md:flex-row md:gap-2">
-                  {post.country ? (
-                    <div className="flex gap-0 flex-col items-center justify-center">
-                      <div className="w-6 rounded-full overflow-hidden">
-                        <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
-                      </div>
-                      <p className="w-full text-center">{post.country}</p>
-                    </div>
-                  ) : null}
-                  <p>
-                    {!formatDateFromTimestamp(post.timestamp!).time
-                      ? 'Just now'
-                      : `${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure} ago`}
-                  </p>
-                </div>
+                <a target="_blank" href={`/profile/${post.creator_address}`}>
+                  <h2 className="font-bold text-xl h-full hover:underline">
+                    {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
+                  </h2>
+                  {}
+                </a>
               </div>
-              <p className="w-full tracking-wide">{post.text}</p>
-
-              <div className="flex justify-end items-center gap-1 text-md">
-                {isLoadingLike ? (
-                  <FaSpinner className="animate-spin text-2xl" />
-                ) : (
-                  <>
-                    <button
-                      className="rounded-full hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
-                      onClick={handlePostLike}
-                    >
-                      <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                    </button>
-                    {post.likes && <p className="text-black dark:text-white">{post.likes}</p>}
-                  </>
-                )}
+              <div className="flex flex-col md:flex-row md:gap-2">
+                {post.country ? (
+                  <div className="flex gap-0 flex-col items-center justify-center">
+                    <div className="w-6 rounded-full overflow-hidden">
+                      <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
+                    </div>
+                    <p className="w-full text-center">{post.country}</p>
+                  </div>
+                ) : null}
+                <p>
+                  {!formatDateFromTimestamp(post.timestamp!).time
+                    ? 'Just now'
+                    : `${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure} ago`}
+                </p>
               </div>
             </div>
-          </a>
+
+            <div className="grid gap-2">
+              <p className="tracking-wide break-words w-full">{post.text.length > 0 && decodeURIComponent(post.text)}</p>
+              <div className={'flex justify-end items-center gap-1 text-md '}>
+                {variant === 'default' && (
+                  <button
+                    className="rounded-lg gap-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                    onClick={() => setOpenReplyInput(!openReplyInput)}
+                  >
+                    <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replys?.length}</p>
+                  </button>
+                )}
+
+                <div className={'flex gap-1 items-center'}>
+                  {isLoadingLike ? (
+                    <FaSpinner className="animate-spin text-2xl" />
+                  ) : (
+                    <>
+                      <button
+                        className="rounded-lg gap-1 items-center p-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                        onClick={handlePostLike}
+                      >
+                        <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                        {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.likes}</p>}
+                      </button>
+                    </>
+                  )}
+                </div>
+                <a target="_blank" className={'cursor-pointer'} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
+                  <FaGlobe className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                </a>
+              </div>
+              {openReplyInput && (
+                <div className={'grid gap-4'}>
+                  <p className={'text-lg'}>Replys</p>
+
+                  {post.replys && post.replys.length > 0 && post.replys.map((reply) => <PostCard post={reply} variant={'reply'} />)}
+
+                  {!isLoadingReply && (
+                    <ReplyInput
+                      handleChange={(e) => setReplyText(e.target.value)}
+                      placeholder={'Reply message...'}
+                      value={replyText}
+                      handleSubmit={handlePostReply}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         ) : post.status === 'loading' ? (
           <div
             key={post.text}
@@ -130,7 +206,7 @@ const PostCard = ({ post }: PostPropsInterface) => {
                 </div>
                 <h2 className="font-bold text-xl h-full">{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
               </div>
-              <p className="w-full">{post.text}</p>
+              <p className="w-full">{decodeURIComponent(post.text)}</p>
             </div>
             <span>
               <FaSpinner className="w-6 animate-spin" />

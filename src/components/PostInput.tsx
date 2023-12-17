@@ -4,6 +4,7 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { AssetId } from '../enums/assetId'
 import { NotePrefix } from '../enums/notePrefix'
 import { PostProps } from '../services/Post'
 import { Transaction } from '../services/Transaction'
@@ -38,7 +39,7 @@ const placeholderPhrases = [
   "Coop Coin is your ink, WeCoop's paper. Start creating, resonate in Algorand.",
   "WeCoop's arena awaits. Pay with Coop Coin, your message in Algorand forever.",
   "Create impact on WeCoop, Coop Coin your ticket to Algorand's eternity.",
-  'WeCoop: Your platform, your messages. Coop Coin echoes in Algorand.',
+  'WeCoop Your platform, your messages. Coop Coin echoes in Algorand.',
 ]
 
 const PostInput = ({ setPosts }: PostPropsInterface) => {
@@ -80,12 +81,13 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     event.preventDefault()
     setPosts({ text: inputText, creator_address: userData.address, status: 'loading', timestamp: null, transaction_id: null })
     const country = await getUserCountry()
-    const note = `${NotePrefix.WeCoopPost}${country}:${inputText}`
+    const encodedInputText = encodeURIComponent(inputText)
+    const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
     try {
       const transaction = await transactionServices.createTransaction(
         userData.address,
-        'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+        import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
         100000,
         note,
       )
@@ -102,6 +104,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
         country,
         nfd: userData.nfd,
         timestamp: null,
+        replys: [],
       })
     } catch (error) {
       console.error(error)
@@ -131,11 +134,20 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
             <p>Note: All posts and interactions are permanently recorded on the Algorand blockchain.</p>
           </div>
         </div>
-        {activeAccount?.address && inputText !== '' && inputText.length <= 300 ? (
-          <Button buttonText="Send your message" />
-        ) : (
-          <Button inactive={true} buttonText="Send your message" />
-        )}
+        <div className="flex items-center gap-2">
+          {' '}
+          <div className="flex gap-1">
+            <span>
+              <img className="h-6 w-6" src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`} alt="" />
+            </span>
+            <span>{userData.balance || 0}</span>
+          </div>
+          {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance! > 0.1 ? (
+            <Button buttonText="Send your message" />
+          ) : (
+            <Button inactive={true} buttonText="Send your message" />
+          )}
+        </div>
       </div>
     </form>
   )

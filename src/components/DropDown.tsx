@@ -29,8 +29,6 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
       return options.map((option: Provider) => {
         return type === 'connect' ? (
           <div className="bg-gray-100" key={option.metadata.name}>
-            {' '}
-            {/* Move the key attribute here */}
             <button
               className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
               onClick={option.connect}
@@ -43,8 +41,6 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
           </div>
         ) : type === 'activeAccount' ? (
           <div key={option.metadata.name}>
-            {' '}
-            {/* Move the key attribute here */}
             <button
               className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
               onClick={option.disconnect}
