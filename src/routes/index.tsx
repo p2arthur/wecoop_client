@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Footer from '../components/Footer'
 import NavBar from '../components/NavBar'
+import Whitepaper from '../pages/About'
 import Home from '../pages/Home'
 import ProfilePage from '../pages/ProfilePage'
 import { User, UserInterface } from '../services/User'
@@ -44,6 +45,7 @@ export const Router = () => {
       children: [
         { path: '/', element: <Home /> },
         { path: '/profile/:walletAddress', element: <ProfilePage /> },
+        { path: '/about', element: <Whitepaper /> },
       ],
     },
   ])
