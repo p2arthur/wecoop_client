@@ -29,7 +29,7 @@ export class Feed {
         base64.decode(transaction.note).includes('wecoop-v1:like'),
       )
 
-      const replysFiltered = transactions?.filter((transaction: TransactionInterface) =>
+      const repliesFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop-v1:reply'),
       )
 
@@ -45,7 +45,7 @@ export class Feed {
               return noteDecoded[3] === id
             })
 
-            const replys = (replysFiltered || [])
+            const replies = (repliesFiltered || [])
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .map((replyTransaction: any) => {
                 const noteDecoded = base64.decode(replyTransaction.note)?.split(':')
@@ -60,7 +60,7 @@ export class Feed {
                     timestamp: roundTime * 1000,
                     status: 'accepted',
                     likes: 0,
-                    replys: [],
+                    replies: [],
                   }
                 } else {
                   return null // Skip this reply if the transaction ID doesn't match
@@ -77,7 +77,7 @@ export class Feed {
               timestamp: roundTime,
               status: 'accepted',
               likes: likes.length,
-              replys: replys,
+              replies: replies,
             }
 
             const post = await this.post.setPostData(postData)
@@ -116,7 +116,7 @@ export class Feed {
         base64.decode(transaction.note).includes('wecoop-v1:like'),
       )
 
-      const replysFiltered = transactions?.filter((transaction: TransactionInterface) =>
+      const repliesFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop-v1:reply'),
       )
 
@@ -127,7 +127,7 @@ export class Feed {
           const { note, sender, id } = transaction
 
           if (!uniquePostIds.has(id)) {
-            const replys = (replysFiltered || [])
+            const replies = (repliesFiltered || [])
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .map((replyTransaction: any) => {
                 const noteDecoded = base64.decode(replyTransaction.note)?.split(':')
@@ -142,7 +142,7 @@ export class Feed {
                     timestamp: roundTime * 1000,
                     status: 'accepted',
                     likes: likesFiltered ? likesFiltered.length : 0,
-                    replys: [],
+                    replies: [],
                   }
                 } else {
                   return null // Skip this reply if the transaction ID doesn't match
@@ -159,7 +159,7 @@ export class Feed {
               timestamp: roundTime,
               status: 'accepted',
               likes: likesFiltered.length,
-              replys: replys,
+              replies: replies,
             }
 
             const post = await this.post.setPostData(postData)
