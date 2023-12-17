@@ -1,5 +1,8 @@
+import Footer from '../components/Footer'
+import { ellipseAddress } from '../utils/ellipseAddress'
+
 const Whitepaper = () => (
-  <div className="my-8 px-4">
+  <div className="my-8 w-full px-4">
     <h1 className="text-4xl font-bold mb-4">WeCoop v1.0 Whitepaper</h1>
 
     <div className="text-lg leading-7 text-gray-700">
@@ -14,18 +17,34 @@ const Whitepaper = () => (
         <h2 className="text-2xl font-bold mb-2">1. Introduction:</h2>
         <p>
           WeCoop v1.0 serves as an experimental proof of concept, showcasing the capabilities of the Algorand blockchain in the realm of
-          social media. With a fixed supply of 21 million CoopCoins, WeCoop aims to deliver a decentralized and user-centric platform that
-          fosters genuine interactions. The platform's design ensures fast, secure, and cost-effective transactions, paving the way for a
-          new era of social media on the Algorand blockchain.
+          social media. With a fixed supply of 21 million{' '}
+          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
+            CoopCoin
+          </a>
+          s, WeCoop aims to deliver a decentralized and user-centric platform that fosters genuine interactions. The platform's design
+          ensures fast, secure, and cost-effective transactions, paving the way for a new era of social media on the Algorand blockchain.
         </p>
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">2. CoopCoin ($COOP):</h2>
+        <h2 className="text-2xl font-bold mb-2">
+          2.{' '}
+          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
+            CoopCoin
+          </a>{' '}
+          ($COOP):
+        </h2>
         <p>
-          Fixed Supply: CoopCoin maintains a fixed supply of 21 million, promoting scarcity and value retention. Distribution: Fully
-          distributed, CoopCoin ensures fair and equitable distribution among users. Anti-Rugpull: CoopCoin is resistant to rug pulls,
-          providing users with a secure and trustworthy digital asset on the Algorand blockchain.
+          Fixed Supply:{' '}
+          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
+            CoopCoin
+          </a>{' '}
+          maintains a fixed supply of 21 million, promoting scarcity and value retention. Distribution: Fully distributed, ensures fair and
+          equitable distribution among users. Anti-Rugpull:{' '}
+          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
+            CoopCoin
+          </a>{' '}
+          is resistant to rug pulls, providing users with a secure and trustworthy digital asset on the Algorand blockchain.
         </p>
       </section>
       <section className="my-6">
@@ -48,18 +67,29 @@ const Whitepaper = () => (
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">5. Platform Wallet:</h2>
+        <h2 className="text-2xl font-bold mb-2 break-words">5. Platform Wallet:</h2>
         <p>
-          The platform wallet (DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM) acts as the repository for transaction fees
-          generated on the platform. Transparency and accountability are maintained to build trust within the community.
+          The platform wallet{' '}
+          <a
+            className="underline text-blue-700"
+            href="https://algoexplorer.io/address/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM"
+          >
+            {ellipseAddress('DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM')}
+          </a>{' '}
+          acts as the repository for transaction fees generated on the platform. Transparency and accountability are maintained to build
+          trust within the community.
         </p>
       </section>
 
       <section className="my-6">
         <h2 className="text-2xl font-bold mb-2">6. Platform Power:</h2>
         <p>
-          WeCoop v1.0 is powered by CoopCoin ($COOP), a community coin we believe is exemplary. Our choice reflects our commitment to
-          fostering a robust and engaging social media experience within the Algorand ecosystem.
+          WeCoop v1.0 is powered by{' '}
+          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
+            CoopCoin
+          </a>{' '}
+          ($COOP), a community coin we believe is exemplary. Our choice reflects our commitment to fostering a robust and engaging social
+          media experience within the Algorand ecosystem.
         </p>
       </section>
 
@@ -70,6 +100,7 @@ const Whitepaper = () => (
         Join us in building the future of decentralized social interactions with WeCoop v1.0.
       </p>
     </div>
+    <Footer />
   </div>
 )
 
