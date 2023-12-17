@@ -55,7 +55,7 @@ export class Feed {
 
               if (replyTransactionId === id) {
                 return {
-                  text: noteDecoded[4],
+                  text: decodeURIComponent(noteDecoded[4]),
                   creator_address: replyTransaction.sender,
                   transaction_id: replyTransaction.id,
                   timestamp: roundTime * 1000,
