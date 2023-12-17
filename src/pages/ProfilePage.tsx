@@ -61,10 +61,6 @@ const ProfilePage = () => {
     }
   }
 
-  const setPosts = (newPost: PostProps) => {
-    setPostsList([newPost, ...postsList])
-  }
-
   useEffect(() => {
     getAllPosts().then()
   }, [])

@@ -12,7 +12,6 @@ export class Feed {
   constructor(private post: Post = new Post()) {}
 
   public async getAllPosts({ next }: { next?: string | null }) {
-    const server = getIndexerConfigFromViteEnvironment().server
     try {
       const { data } = await axios.get(
         `https://mainnet-idx.algonode.cloud/v2/accounts/${
@@ -47,6 +46,7 @@ export class Feed {
             })
 
             const replys = (replysFiltered || [])
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .map((replyTransaction: any) => {
                 const noteDecoded = base64.decode(replyTransaction.note)?.split(':')
                 const replyTransactionId = noteDecoded[3]
@@ -66,6 +66,7 @@ export class Feed {
                   return null // Skip this reply if the transaction ID doesn't match
                 }
               })
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .filter((reply: any) => reply !== null)
 
             const roundTime = transaction['round-time']
@@ -126,12 +127,8 @@ export class Feed {
           const { note, sender, id } = transaction
 
           if (!uniquePostIds.has(id)) {
-            const likes = (likesFiltered || []).filter((likeTransaction: TransactionInterface) => {
-              const noteDecoded = base64.decode(likeTransaction.note)?.split(':')
-              return noteDecoded[3] === id
-            })
-
             const replys = (replysFiltered || [])
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .map((replyTransaction: any) => {
                 const noteDecoded = base64.decode(replyTransaction.note)?.split(':')
                 const replyTransactionId = noteDecoded[3]
@@ -151,6 +148,7 @@ export class Feed {
                   return null // Skip this reply if the transaction ID doesn't match
                 }
               })
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .filter((reply: any) => reply !== null)
 
             const roundTime = transaction['round-time']
