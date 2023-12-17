@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'dogica';
+  src: url('/public/fonts/dogica/dogica.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'dogica';
+  src: url('/public/fonts/dogica/dogicapixelbold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
 .dark {
   background-color: #000;
   color: #fff;
