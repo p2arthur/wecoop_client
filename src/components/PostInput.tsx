@@ -39,7 +39,7 @@ const placeholderPhrases = [
   "Coop Coin is your ink, WeCoop's paper. Start creating, resonate in Algorand.",
   "WeCoop's arena awaits. Pay with Coop Coin, your message in Algorand forever.",
   "Create impact on WeCoop, Coop Coin your ticket to Algorand's eternity.",
-  'WeCoop: Your platform, your messages. Coop Coin echoes in Algorand.',
+  'WeCoop Your platform, your messages. Coop Coin echoes in Algorand.',
 ]
 
 const PostInput = ({ setPosts }: PostPropsInterface) => {
@@ -87,7 +87,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     try {
       const transaction = await transactionServices.createTransaction(
         userData.address,
-        'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+        import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
         100000,
         note,
       )

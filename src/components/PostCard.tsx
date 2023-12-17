@@ -109,6 +109,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
     setReplyText('')
     setIsLoadingReply(false)
   }
+  console.log(post.text)
 
   return (
     <>
@@ -145,7 +146,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-words w-32">{decodeURIComponent(post.text)}</p>
+              <p className="tracking-wide break-words w-full">{post.text.length > 0 && decodeURIComponent(post.text)}</p>
               <div className={'flex justify-end items-center gap-1 text-md '}>
                 {variant === 'default' && (
                   <button

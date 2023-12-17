@@ -1,7 +1,7 @@
-import { getUserCountry } from '../utils/userUtils'
-import { NotePrefix } from '../enums/notePrefix'
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import { NotePrefix } from '../enums/notePrefix'
+import { getUserCountry } from '../utils/userUtils'
 import { Transaction } from './Transaction'
 
 interface ReplyProps {
@@ -21,7 +21,7 @@ export class Reply {
     const note = `${NotePrefix.WeCoopReply}${country}:${transactionId}:${text}`
     const scoopFeeTransaction = await transactionService.createTransaction(
       address,
-      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+      import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
       1000,
       note,
     )

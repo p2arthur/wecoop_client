@@ -17,7 +17,7 @@ const Home = () => {
     if (!loading) {
       setLoading(true)
       try {
-        const { data, next, currentRound } = await feed.getAllPosts({ next: nextToken })
+        const { data, next } = await feed.getAllPosts({ next: nextToken })
 
         if (postsList.length === 0) {
           const existingTransactionIds = postsList.map((post) => post.transaction_id)

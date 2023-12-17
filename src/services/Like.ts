@@ -1,8 +1,8 @@
-import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { getUserCountry } from '../utils/userUtils'
-import { NotePrefix } from '../enums/notePrefix'
-import { Transaction } from './Transaction'
 import algosdk from 'algosdk'
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import { NotePrefix } from '../enums/notePrefix'
+import { getUserCountry } from '../utils/userUtils'
+import { Transaction } from './Transaction'
 
 interface LikeProps {
   event: React.FormEvent
@@ -22,7 +22,7 @@ export class Like {
     const note = `${NotePrefix.WeCoopLike}${country}:${transactionId}`
     const scoopFeeTransaction = await transactionService.createTransaction(
       address,
-      'GYET4OG2L3PIMYSEJV5GNACHFA6ZHFJXUOM7NFR2CDFWEPS2XJRTS45YMQ',
+      import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
       1000,
       note,
     )
