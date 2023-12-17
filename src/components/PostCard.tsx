@@ -109,7 +109,6 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
     setReplyText('')
     setIsLoadingReply(false)
   }
-  console.log(post.text)
 
   return (
     <>

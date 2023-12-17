@@ -5,7 +5,6 @@ import { DropDown } from '../components/DropDown'
 import EmptyFeed from '../components/EmptyFeed'
 import FeedComponent from '../components/Feed'
 import LoaderSpinner from '../components/LoaderSpinner'
-import PostCard from '../components/PostCard'
 import { AssetId } from '../enums/assetId'
 import { Feed } from '../services/Feed'
 import { PostProps } from '../services/Post'
@@ -21,6 +20,8 @@ const ProfilePage = () => {
   const [user, setUser] = useState<UserInterface | null>(null)
   const [postsList, setPostsList] = useState<PostProps[]>([])
   const [profilePageState, setProfilePageState] = useState<ProfilePageStateInterface>({ state: null })
+
+  console.log(postsList, 'postslist')
 
   const feed = new Feed()
 
@@ -40,6 +41,8 @@ const ProfilePage = () => {
       setProfilePageState({ state: 'loading' })
 
       const { data } = await feed.getPostsByAddress(walletAddress!)
+
+      console.log(data, 'data')
 
       if (postsList.length === 0) {
         const existingTransactionIds = postsList.map((post) => post.transaction_id)
@@ -70,12 +73,6 @@ const ProfilePage = () => {
     getAllPosts().then()
   }, [])
 
-  const handleSetPosts = (newPost: PostProps) => {
-    setPosts(newPost)
-  }
-
-  console.log(postsList)
-
   const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
     const newPostsList = postsList.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
@@ -89,7 +86,7 @@ const ProfilePage = () => {
     setPostsList(newPostsList)
   }
 
-  const renderedUserPosts = postsList.map((post) => <PostCard post={post} handleNewReply={handleNewReply} key={post.transaction_id} />)
+  console.log(postsList)
 
   return (
     <div className="flex flex-col ">

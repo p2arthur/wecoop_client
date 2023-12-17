@@ -105,7 +105,7 @@ export class Feed {
         `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(NotePrefix.WeCoopAll)}`,
       )
 
-      const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
+      const { transactions } = data
 
       const postsFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop-v1:post'),
@@ -114,6 +114,8 @@ export class Feed {
       const likesFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop-v1:like'),
       )
+
+      console.log(likesFiltered, 'likesFiltered')
 
       const replysFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop-v1:reply'),
@@ -144,7 +146,7 @@ export class Feed {
                     transaction_id: replyTransaction.id,
                     timestamp: roundTime * 1000,
                     status: 'accepted',
-                    likes: 0,
+                    likes: likesFiltered ? likesFiltered.length : 0,
                     replys: [],
                   }
                 } else {
@@ -160,7 +162,7 @@ export class Feed {
               transaction_id: id,
               timestamp: roundTime,
               status: 'accepted',
-              likes: likes.length,
+              likes: likesFiltered.length,
               replys: replys,
             }
 
@@ -173,7 +175,7 @@ export class Feed {
         }
       }
 
-      return { data: this.feedData, next: nextToken, currentRound }
+      return { data: this.feedData }
     } catch (error) {
       console.error('Error fetching posts:', error)
       throw error
