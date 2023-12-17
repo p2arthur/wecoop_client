@@ -145,7 +145,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-words w-full text-xs">{post.text.length > 0 && decodeURIComponent(post.text)}</p>
+              <p className="tracking-wide break-words w-full">{post.text.length > 0 && decodeURIComponent(post.text)}</p>
               <div className={'flex justify-end items-center gap-1 text-md '}>
                 {variant === 'default' && (
                   <button
@@ -163,7 +163,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
                   ) : (
                     <>
                       <button
-                        className="rounded-lg gap-1 items-center p-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                        className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                         onClick={handlePostLike}
                       >
                         <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
