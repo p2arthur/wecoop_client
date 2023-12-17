@@ -21,8 +21,6 @@ const ProfilePage = () => {
   const [postsList, setPostsList] = useState<PostProps[]>([])
   const [profilePageState, setProfilePageState] = useState<ProfilePageStateInterface>({ state: null })
 
-  console.log(postsList, 'postslist')
-
   const feed = new Feed()
 
   const getAllPosts = async () => {
@@ -41,8 +39,6 @@ const ProfilePage = () => {
       setProfilePageState({ state: 'loading' })
 
       const { data } = await feed.getPostsByAddress(walletAddress!)
-
-      console.log(data, 'data')
 
       if (postsList.length === 0) {
         const existingTransactionIds = postsList.map((post) => post.transaction_id)
@@ -85,8 +81,6 @@ const ProfilePage = () => {
     })
     setPostsList(newPostsList)
   }
-
-  console.log(postsList)
 
   return (
     <div className="flex flex-col ">

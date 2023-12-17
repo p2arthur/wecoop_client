@@ -115,8 +115,6 @@ export class Feed {
         base64.decode(transaction.note).includes('wecoop-v1:like'),
       )
 
-      console.log(likesFiltered, 'likesFiltered')
-
       const replysFiltered = transactions?.filter((transaction: TransactionInterface) =>
         base64.decode(transaction.note).includes('wecoop-v1:reply'),
       )
