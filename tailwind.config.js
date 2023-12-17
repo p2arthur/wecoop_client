@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['dogica'],
+        sans: ['Pixelify Sans'],
       },
       scale: { 101: '1.01' },
     },
