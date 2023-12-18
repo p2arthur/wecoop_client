@@ -104,7 +104,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
         country,
         nfd: userData.nfd,
         timestamp: null,
-        replys: [],
+        replies: [],
       })
     } catch (error) {
       console.error(error)

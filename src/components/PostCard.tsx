@@ -38,7 +38,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const [openReplyInput, setOpenReplyInput] = useState(false)
 
   const { algod, userData } = useOutletContext() as PostInputPropsInterface
-  const replyService = new Reply(algod)
+  const replieservice = new Reply(algod)
   const likeService = new Like(algod)
 
   const generateIdIcon = (creatorAddress: string) => {
@@ -81,14 +81,14 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       status: 'loading',
       timestamp: null,
       transaction_id: null,
-      replys: [],
+      replies: [],
     }
 
     const parentReplyId = post.transaction_id as string
 
     handleNewReply && handleNewReply(newReply, parentReplyId)
 
-    const encodedGroupedTransactions = await replyService.handlePostReply({
+    const encodedGroupedTransactions = await replieservice.handlePostReply({
       creatorAddress: post.creator_address,
       address: userData.address,
       transactionId: post.transaction_id as string,
@@ -108,7 +108,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       country,
       nfd: userData.nfd,
       timestamp: Date.now(),
-      replys: [],
+      replies: [],
     }
 
     handleNewReply && handleNewReply(acceptedReply, parentReplyId)
@@ -161,7 +161,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                     onClick={() => setOpenReplyInput(!openReplyInput)}
                   >
                     <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replys?.length}</p>
+                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replies?.length}</p>
                   </button>
                 )}
 
@@ -171,7 +171,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                   ) : (
                     <>
                       <button
-                        className="rounded-lg gap-1 items-center p-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                        className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                         onClick={handlePostLike}
                       >
                         <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
@@ -186,9 +186,9 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               </div>
               {openReplyInput && (
                 <div className={'grid gap-4'}>
-                  <p className={'text-lg'}>Replys</p>
+                  <p className={'text-lg'}>replies</p>
 
-                  {post.replys && post.replys.length > 0 && post.replys.map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                  {post.replies && post.replies.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
 
                   {!isLoadingReply && (
                     <ReplyInput

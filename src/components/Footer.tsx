@@ -11,6 +11,9 @@ const Footer = () => {
           Felipe
         </a>
       </div>
+      <a href="/about">
+        <p className="text-blue-700 underline">About the app</p>
+      </a>
       <p className="text-xs text-gray-500">$COOP is not responsible for any post created on the platform</p>
       <div className="flex gap-2 items-center justify-center">
         <p>powered by</p>

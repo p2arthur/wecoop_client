@@ -9,7 +9,7 @@ export interface PostProps {
   country?: string
   nfd?: string
   likes?: number
-  replys?: PostProps[]
+  replies?: PostProps[]
 }
 
 export class Post {
@@ -31,7 +31,7 @@ export class Post {
       country: allText[2],
       nfd: nfd,
       likes: postDataInput.likes,
-      replys: postDataInput.replys,
+      replies: postDataInput.replies,
     }
     return this.postData
   }
