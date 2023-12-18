@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
@@ -16,7 +17,6 @@ import { ReplyInput } from './ReplyInput'
 interface PostPropsInterface {
   post: PostProps
   variant?: 'default' | 'reply'
-  getAllPosts?: () => Promise<void>
   handleNewReply?: (newReply: PostProps, transactionCreatorId: string) => void
 }
 
@@ -25,11 +25,15 @@ interface PostInputPropsInterface {
   userData: UserInterface
 }
 
-const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: PostPropsInterface) => {
+const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
+  const queryClient = useQueryClient()
+
   const { sendTransactions, signTransactions } = useWallet()
   const [isLoadingLike, setIsLoadingLike] = useState(false)
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
+
+  queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
 
   const [openReplyInput, setOpenReplyInput] = useState(false)
 
@@ -43,23 +47,28 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
   }
 
   const handlePostLike = async (event: React.FormEvent) => {
-    setIsLoadingLike(true)
+    try {
+      setIsLoadingLike(true)
 
-    const encodedGroupedTransactions = await likeService.handlePostLike({
-      event,
-      creatorAddress: post.creator_address,
-      address: userData.address,
-      transactionId: post.transaction_id as string,
-    })
+      const encodedGroupedTransactions = await likeService.handlePostLike({
+        event,
+        creatorAddress: post.creator_address,
+        address: userData.address,
+        transactionId: post.transaction_id as string,
+      })
 
-    const signedTransactions = await signTransactions(encodedGroupedTransactions)
-    const waitRoundsToConfirm = 4
+      const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      const waitRoundsToConfirm = 4
 
-    await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      queryClient.refetchQueries({ queryKey: ['getAllPosts'] })
 
-    getAllPosts && (await getAllPosts())
-
-    setIsLoadingLike(false)
+      setIsLoadingLike(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      queryClient.refetchQueries({ queryKey: ['getAllPosts'] })
+    }
   }
 
   const handlePostReply = async () => {
@@ -104,10 +113,9 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
 
     handleNewReply && handleNewReply(acceptedReply, parentReplyId)
 
-    getAllPosts && (await getAllPosts())
-
     setReplyText('')
     setIsLoadingReply(false)
+    queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
   }
 
   return (

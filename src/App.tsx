@@ -1,7 +1,8 @@
 import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import { DaffiWalletConnect } from '@daffiwallet/connect'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { PROVIDER_ID, ProvidersArray, useInitializeProviders, WalletProvider } from '@txnlab/use-wallet'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { PROVIDER_ID, ProvidersArray, WalletProvider, useInitializeProviders } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
 import { Router } from './routes'
@@ -13,6 +14,8 @@ const providersArray: ProvidersArray = [
   { id: PROVIDER_ID.DAFFI, clientStatic: DaffiWalletConnect },
   { id: PROVIDER_ID.EXODUS },
 ]
+
+const queryClient = new QueryClient()
 
 export default function App() {
   const walletProviders = useInitializeProviders({
@@ -29,7 +32,9 @@ export default function App() {
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider value={walletProviders}>
-        <Router />
+        <QueryClientProvider client={queryClient}>
+          <Router />
+        </QueryClientProvider>
       </WalletProvider>
     </SnackbarProvider>
   )
