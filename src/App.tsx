@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PROVIDER_ID, ProvidersArray, WalletProvider, useInitializeProviders } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
+import { PostsProvider } from './context/Posts/Posts'
 import { Router } from './routes'
 import { getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 
@@ -33,7 +34,9 @@ export default function App() {
     <SnackbarProvider maxSnack={3}>
       <WalletProvider value={walletProviders}>
         <QueryClientProvider client={queryClient}>
-          <Router />
+          <PostsProvider>
+            <Router />
+          </PostsProvider>
         </QueryClientProvider>
       </WalletProvider>
     </SnackbarProvider>

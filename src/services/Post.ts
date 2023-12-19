@@ -20,7 +20,6 @@ export class Post {
   public async setPostData(postDataInput: PostProps): Promise<PostProps> {
     const text = this.decryptPostNote(postDataInput.text!)
     const allText = text.split(':')
-    const nfd = await this.getPostNfd(postDataInput.creator_address!)
 
     this.postData = {
       text: allText[3],
@@ -29,7 +28,6 @@ export class Post {
       status: postDataInput.status,
       timestamp: postDataInput.timestamp! * 1000,
       country: allText[2],
-      nfd: nfd,
       likes: postDataInput.likes,
       replies: postDataInput.replies,
     }
