@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetAllPosts } from '../../services/api/Posts'
 
 interface PostProps {
@@ -19,7 +19,6 @@ type IPostsContext = {
   handleGetPostByAddress(address: string): void
   handleAddNewPost(post: PostProps): void
   handleNewReply(newReply: PostProps, transactionCreatorId: string): void
-  allCaughtUp: boolean
   isLoading: boolean
 }
 
@@ -33,51 +32,19 @@ const PostsContext = createContext<IPostsContext>({
   handleGetPostByAddress: () => Object,
   handleAddNewPost: () => Object,
   handleNewReply: () => Object,
-  allCaughtUp: false,
   isLoading: false,
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
   const [postList, setPostList] = useState<PostProps[] | null>([])
-  const [nextToken, setNextToken] = useState<string | null>(null)
-  const [allCaughtUp, setAllCaughtUp] = useState(false)
 
-  const { data, refetch, isLoading } = useGetAllPosts({ next: nextToken })
+  const { data, isLoading } = useGetAllPosts()
 
   useEffect(() => {
     if (data) {
       setPostList(data.posts)
     }
   }, [data])
-
-  const handleInfiniteScroll = useCallback(async () => {
-    const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100
-    if (isAtBottom && nextToken) {
-      await refetch()
-    }
-  }, [nextToken, refetch])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await handleInfiniteScroll()
-      if (data && data.posts !== null) {
-        if (!data.next) {
-          setAllCaughtUp(true)
-        }
-        setNextToken(data.next)
-        setPostList((prevPosts) => (prevPosts ? [...prevPosts, ...data.posts] : data.posts))
-      }
-    }
-
-    fetchData()
-  }, [handleInfiniteScroll])
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleInfiniteScroll)
-    return () => {
-      window.removeEventListener('scroll', handleInfiniteScroll)
-    }
-  }, [nextToken, handleInfiniteScroll])
 
   const handleDeletePost = (postId: string) => {
     setPostList((prevPosts) => prevPosts?.filter((post) => post.transaction_id !== postId) || [])
@@ -88,7 +55,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }
 
   const handleAddNewPost = (post: PostProps) => {
-    setPostList((prevPosts) => (prevPosts ? [post, ...prevPosts] : [post]))
+    setPostList((prevPosts) => prevPosts && [...prevPosts, post])
   }
 
   const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
@@ -111,10 +78,9 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       handleDeletePost,
       handleGetPostByAddress,
       handleAddNewPost,
-      allCaughtUp,
       isLoading,
     }),
-    [postList, handleAddNewPost, handleNewReply, handleDeletePost, handleGetPostByAddress, allCaughtUp, isLoading],
+    [handleAddNewPost, handleNewReply, handleDeletePost, handleGetPostByAddress, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>

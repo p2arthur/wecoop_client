@@ -4,6 +4,7 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { usePosts } from '../context/Posts/Posts'
 import { AssetId } from '../enums/assetId'
 import { NotePrefix } from '../enums/notePrefix'
 import { PostProps } from '../services/Post'
@@ -42,8 +43,9 @@ const placeholderPhrases = [
   'WeCoop Your platform, your messages. Coop Coin echoes in Algorand.',
 ]
 
-const PostInput = ({ setPosts }: PostPropsInterface) => {
+const PostInput = () => {
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
+  const { handleAddNewPost } = usePosts()
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
@@ -79,7 +81,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    setPosts({ text: inputText, creator_address: userData.address, status: 'loading', timestamp: null, transaction_id: null })
+    handleAddNewPost({ text: inputText, creator_address: userData.address, status: 'loading', timestamp: null, transaction_id: 'gfdaghas' })
     const country = await getUserCountry()
     const encodedInputText = encodeURIComponent(inputText)
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
@@ -96,7 +98,7 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
       const signedTransactions = await signTransactions([encodedTransaction])
       const waitRoundsToConfirm = 4
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-      setPosts({
+      handleAddNewPost({
         creator_address: userData.address,
         text: inputText,
         status: 'accepted',
@@ -109,7 +111,8 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
     } catch (error) {
       console.error(error)
       setTimeout(
-        () => setPosts({ text: inputText, creator_address: userData.address, status: 'denied', timestamp: null, transaction_id: null }),
+        () =>
+          handleAddNewPost({ text: inputText, creator_address: userData.address, status: 'denied', timestamp: null, transaction_id: null }),
         1000,
       )
     }

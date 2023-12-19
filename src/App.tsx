@@ -16,7 +16,13 @@ const providersArray: ProvidersArray = [
   { id: PROVIDER_ID.EXODUS },
 ]
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 export default function App() {
   const walletProviders = useInitializeProviders({

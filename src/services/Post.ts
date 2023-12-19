@@ -9,7 +9,12 @@ export interface PostProps {
   country?: string
   nfd?: string
   likes?: number
-  replies?: PostProps[]
+  replies?: PostProps[] | undefined
+}
+
+export interface NfdListProps {
+  nfd: string
+  address: string
 }
 
 export class Post {
@@ -20,7 +25,6 @@ export class Post {
   public async setPostData(postDataInput: PostProps): Promise<PostProps> {
     const text = this.decryptPostNote(postDataInput.text!)
     const allText = text.split(':')
-
     this.postData = {
       text: allText[3],
       creator_address: postDataInput.creator_address,
@@ -40,7 +44,7 @@ export class Post {
     return decodedString
   }
 
-  private async getPostNfd(address: string) {
+  public async getPostNfd(address: string) {
     try {
       const { data } = await axios.get(`https://api.nf.domains/nfd/lookup?address=${address}&view=tiny&allowUnverified=true`)
 

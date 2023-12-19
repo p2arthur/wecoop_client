@@ -33,8 +33,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
 
-  queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
-
   const [openReplyInput, setOpenReplyInput] = useState(false)
 
   const { algod, userData } = useOutletContext() as PostInputPropsInterface
