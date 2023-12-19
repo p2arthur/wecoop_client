@@ -15,11 +15,6 @@ const Home = () => {
 
   useEffect(() => {
     if (data) {
-      const existingTransactionIds = postsList.map((post) => post.transaction_id)
-
-      const uniquePosts = data.posts.filter((post) => !existingTransactionIds.includes(post.transaction_id))
-
-      setPostsList((prev) => [...prev, ...uniquePosts])
       if (!data.next) {
         setAllCaughtUp(true)
       }
@@ -62,7 +57,7 @@ const Home = () => {
     <div className="flex flex-col gap-4 p-2 ">
       <PostInput setPosts={handleSetPosts} />
       <p className="font-bold text-2xl">Feed - </p>
-      <FeedComponent postsList={postsList} handleNewReply={handleNewReply} />
+      {data && <FeedComponent postsList={data?.posts} handleNewReply={handleNewReply} />}
       {isLoading || (isRefetching && <LoaderSpinner text={'loading feed'} />)}
       {allCaughtUp && (
         <div className={'w-full justify-center flex'}>

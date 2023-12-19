@@ -21,7 +21,7 @@ const getAllPosts = async ({ next }: { next?: string | null }) => {
 
   const postsFiltered = filterTransactions(NotePrefix.WeCoopPost)
   const likesFiltered = filterTransactions(NotePrefix.WeCoopLike)
-  const replysFiltered = filterTransactions(NotePrefix.WeCoopReply)
+  const repliesFiltered = filterTransactions(NotePrefix.WeCoopReply)
 
   const uniquePostIds = new Set(feedData.map((post) => post.transaction_id))
 
@@ -33,8 +33,8 @@ const getAllPosts = async ({ next }: { next?: string | null }) => {
         const likes =
           likesFiltered?.filter((likeTransaction: TransactionInterface) => base64.decode(likeTransaction.note)?.split(':')[3] === id) || []
 
-        const replys =
-          replysFiltered
+        const replies =
+          repliesFiltered
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ?.map((replyTransaction: any) => {
               const noteDecoded = base64.decode(replyTransaction.note)?.split(':')
@@ -49,7 +49,7 @@ const getAllPosts = async ({ next }: { next?: string | null }) => {
                     timestamp: roundTime * 1000,
                     status: 'accepted',
                     likes: 0,
-                    replys: [],
+                    replies: [],
                   }
                 : null
             })
@@ -64,7 +64,7 @@ const getAllPosts = async ({ next }: { next?: string | null }) => {
           timestamp: roundTime,
           status: 'accepted',
           likes: likes.length,
-          replys: replys,
+          replies: replies,
         }
 
         const post = await postService.setPostData(postData)
