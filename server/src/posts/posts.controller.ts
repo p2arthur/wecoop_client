@@ -8,9 +8,16 @@ export class PostsController {
   @Get()
   async getAllPosts() {
     const response = await this.postsService.getAllPosts();
+
+    console.log('Eu sou um console.log');
+
     return response;
   }
 
   @Get('/:walletAddress')
-  async getAllPostsByAddress(@Param('walletAddress') walletAddress: string) {}
+  async getAllPostsByAddress(@Param('walletAddress') walletAddress: string) {
+    const response =
+      await this.postsService.getAllPostsByAddress(walletAddress);
+    return response;
+  }
 }
