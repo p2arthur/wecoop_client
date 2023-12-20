@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { PostsService } from './posts.service';
 
 @Controller('/posts')
@@ -10,4 +10,7 @@ export class PostsController {
     const response = await this.postsService.getAllPosts();
     return response;
   }
+
+  @Get('/:walletAddress')
+  async getAllPostsByAddress(@Param('walletAddress') walletAddress: string) {}
 }
