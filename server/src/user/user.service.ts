@@ -49,8 +49,6 @@ export class UserService {
     const userBalance = await this.getUserBalance(walletAddres);
     const nfd = await this.getUserNfd(walletAddres);
 
-    console.log('user nfd', nfd);
-
     const userData: UserInterface = {
       address: walletAddres,
       avatar: nfd.avatar || null,

@@ -57,8 +57,6 @@ export class PostsService {
         (like: any) => atob(like.note).split(':')[3] == transaction.id,
       );
 
-      console.log(postLikes.length);
-
       const post = this.postServices.setPost(transaction, postLikes.length);
 
       this.postsList.push(post);
