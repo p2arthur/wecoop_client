@@ -5,6 +5,9 @@ import { WalletAddress } from 'src/enums/WalletAddress';
 import { NotePrefix } from 'src/enums/NotePrefix';
 import { AssetId } from 'src/enums/AssetId';
 import { Fee } from 'src/enums/Fee';
+import { PostInterface } from 'src/interfaces/PostInterface';
+import { PostService } from 'src/post/post.service';
+import { LikesService } from 'src/likes/likes.service';
 
 @Injectable()
 export class PostsService {
@@ -13,8 +16,13 @@ export class PostsService {
   private notePrefix: string = NotePrefix.WeCoopPost;
 
   //Setting the postsList when this Class is created and setting it to an empty array of Posts
-  private postsList: any[] = [];
+  private postsList: PostInterface[] = [];
   //----------------------------------------------------------------------------
+
+  constructor(
+    private postServices: PostService,
+    private likesServices: LikesService,
+  ) {}
 
   //Method to reset set indexer url based on a given address
   private setGetPostsUrl(address: string) {
@@ -34,15 +42,26 @@ export class PostsService {
   //----------------------------------------------------------------------------
   public async getAllPosts() {
     this.resetPostsList();
+
+    //TODO - Move likes logic to its own service - This is testing
+    const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOmxpa2U6&tx-type=axfer`;
+
+    const allLikes = (await axios.get(likesUrl)).data as any;
+
     const url = this.setGetPostsUrl(WalletAddress.WeCoopMainAddres);
     const { data } = await axios.get(url);
     const { transactions } = data;
 
     for (let transaction of transactions) {
-      const note = base64.decode(transaction.note);
-      const postText = note.split(':');
+      const postLikes = allLikes.transactions.filter(
+        (like: any) => atob(like.note).split(':')[3] == transaction.id,
+      );
 
-      this.postsList.push({ text: postText[3] });
+      console.log(postLikes.length);
+
+      const post = this.postServices.setPost(transaction, postLikes.length);
+
+      this.postsList.push(post);
     }
 
     return this.postsList;
@@ -52,15 +71,14 @@ export class PostsService {
   //Method to get all posts using a given address
   //----------------------------------------------------------------------------
   public async getAllPostsByAddress(walletAddres: string) {
-    this.resetPostsList();
     const url = this.setGetPostsUrl(walletAddres);
     const { data } = await axios.get(url);
     const { transactions } = data;
-    for (let transaction of transactions) {
-      const note = base64.decode(transaction.note);
-      const postText = note.split(':');
 
-      this.postsList.push({ text: postText[3] });
+    for (let transaction of transactions) {
+      const post = this.postServices.setPost(transaction, 1);
+
+      this.postsList.push(post);
     }
 
     return this.postsList;

@@ -8,9 +8,6 @@ export class PostsController {
   @Get()
   async getAllPosts() {
     const response = await this.postsService.getAllPosts();
-
-    console.log('Eu sou um console.log');
-
     return response;
   }
 
