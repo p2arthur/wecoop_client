@@ -8,6 +8,7 @@ import { Fee } from 'src/enums/Fee';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { PostService } from 'src/post/post.service';
 import { LikesService } from 'src/likes/likes.service';
+import { RepliesService } from 'src/replies/replies.service';
 
 @Injectable()
 export class PostsService {
@@ -22,6 +23,7 @@ export class PostsService {
   constructor(
     private postServices: PostService,
     private likesServices: LikesService,
+    private repliesServices: RepliesService,
   ) {}
 
   //Method to reset set indexer url based on a given address
@@ -42,11 +44,16 @@ export class PostsService {
   //----------------------------------------------------------------------------
   public async getAllPosts() {
     this.resetPostsList();
-
     //TODO - Move likes logic to its own service - This is testing
-    const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOmxpa2U6&tx-type=axfer`;
+    const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopLike,
+    )}&tx-type=axfer`;
+    const repliesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopReply,
+    )}&tx-type=axfer`;
 
-    const allLikes = (await axios.get(likesUrl)).data as any;
+    const { data: allLikes } = await axios.get(likesUrl);
+    const { data: allReplies } = await axios.get(repliesUrl);
 
     const url = this.setGetPostsUrl(WalletAddress.WeCoopMainAddres);
     const { data } = await axios.get(url);
@@ -60,7 +67,15 @@ export class PostsService {
         allLikes,
       );
 
-      Object.assign(post, { likes: postLikes.length });
+      const postReplies = this.repliesServices.filterRepliesByPostTransactionId(
+        transaction.id,
+        allReplies,
+      );
+
+      Object.assign(post, {
+        likes: postLikes,
+        replies: postReplies,
+      });
 
       this.postsList.push(post);
     }

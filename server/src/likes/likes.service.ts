@@ -11,8 +11,10 @@ export class LikesService {
     postTransactionId: string,
     likesList: any,
   ) {
-    return likesList.transactions.filter(
-      (like) => atob(like.note).split(':')[3] == postTransactionId,
-    );
+    return likesList.transactions
+      .filter((like) => atob(like.note).split(':')[3] == postTransactionId)
+      .map((filteredLike) => {
+        return { creator_address: filteredLike.sender };
+      });
   }
 }
