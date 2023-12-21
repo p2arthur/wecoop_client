@@ -53,7 +53,14 @@ export class PostsService {
     const { transactions } = data;
 
     for (let transaction of transactions) {
-      const post = await this.postServices.setPost(transaction);
+      const post: PostInterface = await this.postServices.setPost(transaction);
+
+      const postLikes = this.likesServices.filterLikesByPostTransactionId(
+        transaction.id,
+        allLikes,
+      );
+
+      Object.assign(post, { likes: postLikes.length });
 
       this.postsList.push(post);
     }
