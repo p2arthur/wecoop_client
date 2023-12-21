@@ -70,6 +70,7 @@ export class PostsService {
       const postReplies = this.repliesServices.filterRepliesByPostTransactionId(
         transaction.id,
         allReplies,
+        allLikes,
       );
 
       Object.assign(post, {
