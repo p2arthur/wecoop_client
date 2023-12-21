@@ -7,21 +7,24 @@ import { NotePrefix } from 'src/enums/NotePrefix';
 export class LikesService {
   public likesList: any[];
 
-  // public async getLikesByPostTransactionId(postTransactionId: string) {
-  //   console.log('postTransactionId', postTransactionId);
+  public async getLikesByPostTransactionId(
+    postTransactionId: string,
+    country: string,
+  ) {
+    const prefix = NotePrefix.WeCoopLike + country + ':' + postTransactionId;
 
-  //   const { data } = await axios.get(
-  //     `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
-  //       postTransactionId,
-  //     )}`,
-  //   );
+    const { data } = await axios.get(
+      `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+        prefix,
+      )}`,
+    );
 
-  //   const allLikes = data.transactions;
+    const allLikes = data.transactions;
 
-  //this.likesList = allLikes
+    this.likesList = allLikes;
 
-  //return this.likesList
-  // }
+    return this.likesList;
+  }
 
   public filterLikesByPostTransactionId(
     postTransactionId: string,

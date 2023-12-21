@@ -53,11 +53,7 @@ export class PostsService {
     const { transactions } = data;
 
     for (let transaction of transactions) {
-      const postLikes = allLikes.transactions.filter(
-        (like: any) => atob(like.note).split(':')[3] == transaction.id,
-      );
-
-      const post = this.postServices.setPost(transaction, postLikes.length);
+      const post = await this.postServices.setPost(transaction);
 
       this.postsList.push(post);
     }
@@ -74,7 +70,7 @@ export class PostsService {
     const { transactions } = data;
 
     for (let transaction of transactions) {
-      const post = this.postServices.setPost(transaction, 1);
+      const post = await this.postServices.setPost(transaction);
 
       this.postsList.push(post);
     }

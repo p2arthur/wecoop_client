@@ -17,7 +17,7 @@ export class PostService {
     replies: [],
   };
 
-  public setPost(transaction: any, likes: number) {
+  public async setPost(transaction: any) {
     const encodedNote = transaction.note;
     const decodedNote = atob(encodedNote);
     const postData = decodedNote.split(':');
@@ -26,6 +26,12 @@ export class PostService {
     const creatorAddress = transaction.sender;
     const transactionId = transaction.id;
     const timestamp = transaction['confirmed-round'];
+    const likes = await this.likesServices.getLikesByPostTransactionId(
+      transactionId,
+      postCountry,
+    );
+
+    console.log('likes length', likes.length);
 
     this.post = {
       text: postText,
@@ -33,7 +39,7 @@ export class PostService {
       transaction_id: transactionId,
       timestamp,
       country: postCountry,
-      likes: likes,
+      likes: likes.length,
       replies: [],
     };
 
