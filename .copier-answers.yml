@@ -1,0 +1,21 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 0.9.1
+_src_path: gh:algorandfoundation/algokit-react-frontend-template
+algod_port: ''
+algod_server: https://testnet-api.algonode.cloud
+algod_token: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+author_email: arthurrabelopro@gmail.com
+author_name: Arthur Rabelo
+cloud_provider: vercel
+ide_jetbrains: false
+ide_vscode: true
+indexer_port: 8980
+indexer_server: https://testnet-api.algonode.cloud
+indexer_token: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+project_name: scoop_media
+use_daisy_ui: false
+use_eslint_prettier: true
+use_github_actions: true
+use_jest: false
+use_playwright: false
+use_tailwind: true
