@@ -5,66 +5,48 @@ import EmptyFeed from '../components/EmptyFeed'
 import FeedComponent from '../components/Feed'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { AssetId } from '../enums/assetId'
-import { Feed } from '../services/Feed'
-import { PostProps } from '../services/Post'
-import { User, UserInterface } from '../services/User'
 import { ellipseAddress } from '../utils/ellipseAddress'
-
-interface ProfilePageStateInterface {
-  state: null | 'loading' | 'success' | 'error'
-}
+import { useGetPostsByAddress } from '../services/api/Posts'
+import { Post, User } from '../services/api/types'
+import { useGetUserInfo } from '../services/api/Users'
+import { minidenticon } from 'minidenticons'
 
 const ProfilePage = () => {
   const { walletAddress } = useParams<{ walletAddress: string }>()
-  const [user, setUser] = useState<UserInterface | null>(null)
-  const [postsList, setPostsList] = useState<PostProps[]>([])
-  const [profilePageState, setProfilePageState] = useState<ProfilePageStateInterface>({ state: null })
+  const [user, setUser] = useState<User | null>(null)
+  const [postsList, setPostsList] = useState<Post[]>([])
 
-  const feed = new Feed()
+  const { data: userData, isLoading: isLoadingUser } = useGetUserInfo(walletAddress as string)
 
-  const getAllPosts = async () => {
-    try {
-      setProfilePageState({ state: 'loading' })
-
-      const userService = new User({ address: walletAddress! })
-      const user = await userService.getUser()
-
-      const profilePageUserBalance = await userService.getUserAssetBalance(walletAddress!, AssetId.coopCoin)
-
-      const profileUser = Object.assign(user, { balance: profilePageUserBalance })
-
-      setUser(profileUser)
-
-      setProfilePageState({ state: 'loading' })
-
-      const { data } = await feed.getPostsByAddress(walletAddress!)
-
-      if (postsList.length === 0) {
-        const existingTransactionIds = postsList.map((post) => post.transaction_id)
-
-        const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id))
-        setPostsList(uniquePosts)
-
-        setProfilePageState({ state: 'success' })
-      } else {
-        const existingTransactionIds = postsList.map((post) => post.transaction_id)
-
-        const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id))
-
-        setPostsList((prev) => [...prev, ...uniquePosts])
-
-        setProfilePageState({ state: 'success' })
-      }
-    } catch (error) {
-      console.error('Error fetching posts:', error)
-    }
-  }
+  const { data, isLoading } = useGetPostsByAddress(walletAddress as string)
 
   useEffect(() => {
-    getAllPosts().then()
-  }, [])
+    if (userData) {
+      setUser(userData)
+    }
+  }, [userData])
 
-  const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
+  useEffect(() => {
+    if (data) {
+      setPostsList(
+        data.map((post) => {
+          return {
+            ...post,
+            status: 'accepted',
+            replies: post.replies.map((reply) => {
+              return { ...reply, status: 'accepted' }
+            }),
+          }
+        }),
+      )
+    }
+  }, [data])
+
+  const generateIdIcon = (creatorAddress: string) => {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
+  }
+
+  const handleNewReply = (newReply: Post, transactionCreatorId: string) => {
     const newPostsList = postsList.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
         if (post.replies === undefined) {
@@ -84,12 +66,18 @@ const ProfilePage = () => {
           <div className="flex gap-3 justify-between">
             <div className="flex gap-3 items-center">
               <div className="border-2 border-gray-900 rounded-full">
-                {user?.avatarUri && <img className="w-16" src={user?.avatarUri} alt="profile-photo" />}
+                {user?.avatar ? (
+                  <img className="w-16" src={user?.avatar} alt="profile-photo" />
+                ) : (
+                  <img className="w-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
+                )}
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
-                  <h3 className="text-xl md:text-3xl font-bold">{user?.nfd ? user.nfd : ellipseAddress(user?.address)}</h3>
-                  {user?.nfd ? (
+                  <h3 className="text-xl md:text-3xl font-bold">
+                    {user?.nfd.name !== null ? user?.nfd?.name : ellipseAddress(user?.address)}
+                  </h3>
+                  {user?.nfd.name !== null ? (
                     <span>
                       <FaCircleCheck className="text-md md:text-xl text-orange-500" />
                     </span>
@@ -128,11 +116,11 @@ const ProfilePage = () => {
           </div> */}
         </div>
       </section>
-      {profilePageState.state == 'loading' ? (
+      {isLoading || isLoadingUser ? (
         <LoaderSpinner text="loading posts" />
-      ) : profilePageState.state == 'success' ? (
+      ) : postsList.length > 0 ? (
         <section className="p-4 flex flex-col gap-3">
-          <FeedComponent getAllPosts={getAllPosts} postsList={postsList} handleNewReply={handleNewReply} />
+          <FeedComponent postList={postsList} isLoading={isLoading} handleNewReply={handleNewReply} />
         </section>
       ) : (
         <EmptyFeed />

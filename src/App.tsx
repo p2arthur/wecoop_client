@@ -1,9 +1,11 @@
 import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import { DaffiWalletConnect } from '@daffiwallet/connect'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { PROVIDER_ID, ProvidersArray, useInitializeProviders, WalletProvider } from '@txnlab/use-wallet'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { PROVIDER_ID, ProvidersArray, WalletProvider, useInitializeProviders } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
+import { PostsProvider } from './context/Posts/Posts'
 import { Router } from './routes'
 import { getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 
@@ -13,6 +15,14 @@ const providersArray: ProvidersArray = [
   { id: PROVIDER_ID.DAFFI, clientStatic: DaffiWalletConnect },
   { id: PROVIDER_ID.EXODUS },
 ]
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 export default function App() {
   const walletProviders = useInitializeProviders({
@@ -29,7 +39,11 @@ export default function App() {
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider value={walletProviders}>
-        <Router />
+        <QueryClientProvider client={queryClient}>
+          <PostsProvider>
+            <Router />
+          </PostsProvider>
+        </QueryClientProvider>
       </WalletProvider>
     </SnackbarProvider>
   )

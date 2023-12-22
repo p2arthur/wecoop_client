@@ -1,23 +1,25 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { useState } from 'react'
 import { FaGlobe, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 import { Like } from '../services/Like'
-import { PostProps } from '../services/Post'
 import { Reply } from '../services/Reply'
 import { UserInterface } from '../services/User'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
+import { Post, Reply as IReply } from '../services/api/types'
+import { usePosts } from '../context/Posts/Posts'
 
 interface PostPropsInterface {
-  post: PostProps
+  post: Post | IReply
   variant?: 'default' | 'reply'
-  getAllPosts?: () => Promise<void>
-  handleNewReply?: (newReply: PostProps, transactionCreatorId: string) => void
+  handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
 }
 
 interface PostInputPropsInterface {
@@ -25,7 +27,10 @@ interface PostInputPropsInterface {
   userData: UserInterface
 }
 
-const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: PostPropsInterface) => {
+const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
+  const queryClient = useQueryClient()
+  const { handleNewLike } = usePosts()
+
   const { sendTransactions, signTransactions } = useWallet()
   const [isLoadingLike, setIsLoadingLike] = useState(false)
   const [isLoadingReply, setIsLoadingReply] = useState(false)
@@ -38,40 +43,45 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
   const likeService = new Like(algod)
 
   const generateIdIcon = (creatorAddress: string) => {
-    const svgURI = `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
-    return svgURI
+    return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
   const handlePostLike = async (event: React.FormEvent) => {
-    setIsLoadingLike(true)
+    try {
+      setIsLoadingLike(true)
 
-    const encodedGroupedTransactions = await likeService.handlePostLike({
-      event,
-      creatorAddress: post.creator_address,
-      address: userData.address,
-      transactionId: post.transaction_id as string,
-    })
+      const encodedGroupedTransactions = await likeService.handlePostLike({
+        event,
+        creatorAddress: post.creator_address,
+        address: userData.address,
+        transactionId: post.transaction_id as string,
+      })
 
-    const signedTransactions = await signTransactions(encodedGroupedTransactions)
-    const waitRoundsToConfirm = 4
+      const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      const waitRoundsToConfirm = 4
 
-    await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-    getAllPosts && (await getAllPosts())
-
-    setIsLoadingLike(false)
+      setIsLoadingLike(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      handleNewLike && handleNewLike({ creator_address: userData.address }, post.transaction_id as string)
+    }
   }
 
   const handlePostReply = async () => {
     setIsLoadingReply(true)
     const country = await getUserCountry()
 
-    const newReply: PostProps = {
+    const newReply: Post = {
       text: encodeURIComponent(replyText),
       creator_address: userData.address,
       status: 'loading',
-      timestamp: null,
-      transaction_id: null,
+      country: country,
+      likes: [],
+      timestamp: new Date().getDate(),
+      transaction_id: uuidv4(),
       replies: [],
     }
 
@@ -90,12 +100,12 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
 
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-    const acceptedReply: PostProps = {
+    const acceptedReply: Post = {
       creator_address: userData.address,
       text: encodeURIComponent(replyText),
       status: 'accepted',
       transaction_id: id,
-      likes: 0,
+      likes: [],
       country,
       nfd: userData.nfd,
       timestamp: Date.now(),
@@ -104,10 +114,20 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
 
     handleNewReply && handleNewReply(acceptedReply, parentReplyId)
 
-    getAllPosts && (await getAllPosts())
-
     setReplyText('')
     setIsLoadingReply(false)
+    queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
+  }
+
+  const handleTimestamp = () => {
+    const date = post.timestamp! * 1000
+    const formattedDate = formatDateFromTimestamp(date)
+
+    if (!formattedDate.time) {
+      return 'Just now'
+    } else {
+      return `${formattedDate.time} ${formattedDate.measure} ago`
+    }
   }
 
   return (
@@ -120,7 +140,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
                 <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100">
                   <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                 </div>
-                <a target="_blank" href={`/profile/${post.creator_address}`}>
+                <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-xl h-full hover:underline">
                     {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
                   </h2>
@@ -136,11 +156,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
                     <p className="w-full text-center">{post.country}</p>
                   </div>
                 ) : null}
-                <p>
-                  {!formatDateFromTimestamp(post.timestamp!).time
-                    ? 'Just now'
-                    : `${formatDateFromTimestamp(post.timestamp!).time} ${formatDateFromTimestamp(post.timestamp!).measure} ago`}
-                </p>
+                <p>{handleTimestamp()}</p>
               </div>
             </div>
 
@@ -167,7 +183,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
                         onClick={handlePostLike}
                       >
                         <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                        {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.likes}</p>}
+                        {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.likes.length}</p>}
                       </button>
                     </>
                   )}
@@ -196,7 +212,7 @@ const PostCard = ({ post, variant = 'default', getAllPosts, handleNewReply }: Po
           </div>
         ) : post.status === 'loading' ? (
           <div
-            key={post.text}
+            key={post.transaction_id}
             className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
           >
             <div className="flex flex-col">

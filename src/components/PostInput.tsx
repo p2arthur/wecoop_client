@@ -4,9 +4,10 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { usePosts } from '../context/Posts/Posts'
 import { AssetId } from '../enums/assetId'
 import { NotePrefix } from '../enums/notePrefix'
-import { PostProps } from '../services/Post'
+import { v4 as uuidv4 } from 'uuid'
 import { Transaction } from '../services/Transaction'
 import { UserInterface } from '../services/User'
 import { getUserCountry } from '../utils/userUtils'
@@ -15,10 +16,6 @@ import Button from './Button'
 interface PostInputOutletContext {
   algod: AlgodClient
   userData: UserInterface
-}
-
-interface PostPropsInterface {
-  setPosts(post: PostProps): void
 }
 
 const placeholderPhrases = [
@@ -42,8 +39,9 @@ const placeholderPhrases = [
   'WeCoop Your platform, your messages. Coop Coin echoes in Algorand.',
 ]
 
-const PostInput = ({ setPosts }: PostPropsInterface) => {
+const PostInput = () => {
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
+  const { handleAddNewPost } = usePosts()
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
@@ -79,8 +77,17 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    setPosts({ text: inputText, creator_address: userData.address, status: 'loading', timestamp: null, transaction_id: null })
     const country = await getUserCountry()
+    handleAddNewPost({
+      text: inputText,
+      creator_address: userData.address,
+      status: 'loading',
+      timestamp: new Date().getDate(),
+      country: country,
+      replies: [],
+      likes: [],
+      transaction_id: 'gfdaghas',
+    })
     const encodedInputText = encodeURIComponent(inputText)
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
@@ -96,20 +103,31 @@ const PostInput = ({ setPosts }: PostPropsInterface) => {
       const signedTransactions = await signTransactions([encodedTransaction])
       const waitRoundsToConfirm = 4
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-      setPosts({
+      handleAddNewPost({
         creator_address: userData.address,
         text: inputText,
         status: 'accepted',
         transaction_id: id,
         country,
         nfd: userData.nfd,
-        timestamp: null,
+        timestamp: new Date().getDate(),
         replies: [],
+        likes: [],
       })
     } catch (error) {
       console.error(error)
       setTimeout(
-        () => setPosts({ text: inputText, creator_address: userData.address, status: 'denied', timestamp: null, transaction_id: null }),
+        () =>
+          handleAddNewPost({
+            text: inputText,
+            creator_address: userData.address,
+            status: 'rejected',
+            timestamp: new Date().getDate(),
+            transaction_id: uuidv4(),
+            replies: [],
+            country,
+            likes: [],
+          }),
         1000,
       )
     }
