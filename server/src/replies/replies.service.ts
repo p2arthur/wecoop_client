@@ -13,6 +13,8 @@ export class RepliesService {
     repliesList: any,
     likesList: any,
   ): PostInterface[] {
+    console.log('repliesList', repliesList);
+
     const mappedReplies = repliesList.transactions
       .filter((reply) => atob(reply.note).split(':')[3] === postTransactionId)
       .map((filteredReply) => {
@@ -20,7 +22,7 @@ export class RepliesService {
         const creatorAddress = filteredReply.sender;
         const transactionId = filteredReply.id;
         const timestamp = filteredReply['round-time'];
-        const country = filteredReply.country;
+        const country = atob(filteredReply.note).split(':')[2];
         const replyLikes = this.likesService.filterLikesByPostTransactionId(
           transactionId,
           likesList,
