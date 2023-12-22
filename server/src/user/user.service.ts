@@ -63,20 +63,27 @@ export class UserService {
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  private async getUserNfd(walletAddres: string) {
+  private async getUserNfd(walletAddress: string) {
     let userNfd: UserNfdInterface = { name: null, avatar: null };
 
     try {
       const { data } = await axios.get(
-        `https://api.nf.domains/nfd/v2/address?address=${walletAddres}&limit=20&view=thumbnail`,
+        `https://api.nf.domains/nfd/lookup?address=${walletAddress}&view=thumbnail&allowUnverified=true`,
       );
-      const userNfdData = data[walletAddres];
-      const nfdName = userNfdData[0].name;
-      let nfdAvatar = userNfdData[0].properties.userDefined.avatar;
+
+      const userNfdData = data[walletAddress];
+      console.log('nfd data', userNfdData);
+      const nfdName = userNfdData.name;
+      console.log('nfd name', userNfdData);
+
+      const nfdAvatar = userNfdData?.properties?.userDefined?.avatar;
+
+      console.log('nfd avatar', nfdAvatar);
       userNfd = { name: nfdName, avatar: nfdAvatar || null };
 
       return userNfd;
     } catch (error) {
+      console.log('error');
       return userNfd;
     }
   }
