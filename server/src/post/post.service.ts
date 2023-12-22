@@ -23,7 +23,7 @@ export class PostService {
     const postText = postData[3];
     const creatorAddress = transaction.sender;
     const transactionId = transaction.id;
-    const timestamp = transaction['confirmed-round'];
+    const timestamp = transaction['round-time'];
 
     this.post = {
       text: postText,
