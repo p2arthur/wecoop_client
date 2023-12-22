@@ -6,15 +6,16 @@ import { useState } from 'react'
 import { FaGlobe, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
+import { usePosts } from '../context/Posts/Posts'
 import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 import { UserInterface } from '../services/User'
+import { useGetUserInfo } from '../services/api/Users'
+import { Reply as IReply, Post } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
-import { Post, Reply as IReply } from '../services/api/types'
-import { usePosts } from '../context/Posts/Posts'
 
 interface PostPropsInterface {
   post: Post | IReply
@@ -30,15 +31,13 @@ interface PostInputPropsInterface {
 const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
-
   const { sendTransactions, signTransactions } = useWallet()
   const [isLoadingLike, setIsLoadingLike] = useState(false)
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
-
   const [openReplyInput, setOpenReplyInput] = useState(false)
-
-  const { algod, userData } = useOutletContext() as PostInputPropsInterface
+  const { data: userData } = useGetUserInfo(post.creator_address)
+  const { algod } = useOutletContext() as PostInputPropsInterface
   const replieservice = new Reply(algod)
   const likeService = new Like(algod)
 
@@ -53,7 +52,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       const encodedGroupedTransactions = await likeService.handlePostLike({
         event,
         creatorAddress: post.creator_address,
-        address: userData.address,
+        address: userData?.address!,
         transactionId: post.transaction_id as string,
       })
 
@@ -66,7 +65,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     } catch (error) {
       console.log(error)
     } finally {
-      handleNewLike && handleNewLike({ creator_address: userData.address }, post.transaction_id as string)
+      handleNewLike && handleNewLike({ creator_address: userData?.address! }, post.transaction_id as string)
     }
   }
 
@@ -76,7 +75,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
     const newReply: Post = {
       text: encodeURIComponent(replyText),
-      creator_address: userData.address,
+      creator_address: userData?.address!,
       status: 'loading',
       country: country,
       likes: [],
@@ -91,7 +90,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
     const encodedGroupedTransactions = await replieservice.handlePostReply({
       creatorAddress: post.creator_address,
-      address: userData.address,
+      address: userData?.address!,
       transactionId: post.transaction_id as string,
       text: encodeURIComponent(replyText),
     })
@@ -101,13 +100,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
     const acceptedReply: Post = {
-      creator_address: userData.address,
+      creator_address: userData?.address!,
       text: encodeURIComponent(replyText),
       status: 'accepted',
       transaction_id: id,
       likes: [],
       country,
-      nfd: userData.nfd,
+      nfd: userData?.nfd.name,
       timestamp: Date.now(),
       replies: [],
     }
@@ -142,7 +141,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-xl h-full hover:underline">
-                    {post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}
+                    {userData?.nfd.name ? userData.nfd.name.toUpperCase() : ellipseAddress(post.creator_address)}
                   </h2>
                   {}
                 </a>
@@ -161,7 +160,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-words w-full">{post.text.length > 0 && decodeURIComponent(post.text)}</p>
+              <p className="tracking-wide break-words w-[22rem] md:w-full">{post.text.length > 0 && decodeURIComponent(post.text)}</p>
               <div className={'flex justify-end items-center gap-1 text-md '}>
                 {variant === 'default' && (
                   <button
