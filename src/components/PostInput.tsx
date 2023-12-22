@@ -7,7 +7,7 @@ import { useOutletContext } from 'react-router-dom'
 import { usePosts } from '../context/Posts/Posts'
 import { AssetId } from '../enums/assetId'
 import { NotePrefix } from '../enums/notePrefix'
-import { PostProps } from '../services/Post'
+import { v4 as uuidv4 } from 'uuid'
 import { Transaction } from '../services/Transaction'
 import { UserInterface } from '../services/User'
 import { getUserCountry } from '../utils/userUtils'
@@ -16,10 +16,6 @@ import Button from './Button'
 interface PostInputOutletContext {
   algod: AlgodClient
   userData: UserInterface
-}
-
-interface PostPropsInterface {
-  setPosts(post: PostProps): void
 }
 
 const placeholderPhrases = [
@@ -81,8 +77,17 @@ const PostInput = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    handleAddNewPost({ text: inputText, creator_address: userData.address, status: 'loading', timestamp: null, transaction_id: 'gfdaghas' })
     const country = await getUserCountry()
+    handleAddNewPost({
+      text: inputText,
+      creator_address: userData.address,
+      status: 'loading',
+      timestamp: new Date().getDate(),
+      country: country,
+      replies: [],
+      likes: [],
+      transaction_id: 'gfdaghas',
+    })
     const encodedInputText = encodeURIComponent(inputText)
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
@@ -105,14 +110,24 @@ const PostInput = () => {
         transaction_id: id,
         country,
         nfd: userData.nfd,
-        timestamp: null,
+        timestamp: new Date().getDate(),
         replies: [],
+        likes: [],
       })
     } catch (error) {
       console.error(error)
       setTimeout(
         () =>
-          handleAddNewPost({ text: inputText, creator_address: userData.address, status: 'denied', timestamp: null, transaction_id: null }),
+          handleAddNewPost({
+            text: inputText,
+            creator_address: userData.address,
+            status: 'rejected',
+            timestamp: new Date().getDate(),
+            transaction_id: uuidv4(),
+            replies: [],
+            country,
+            likes: [],
+          }),
         1000,
       )
     }

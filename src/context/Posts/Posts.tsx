@@ -1,24 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetAllPosts } from '../../services/api/Posts'
-
-interface PostProps {
-  text: string
-  creator_address: string
-  transaction_id: string | null
-  status: 'loading' | 'accepted' | 'denied' | string | null
-  timestamp: number | null
-  country?: string
-  nfd?: string
-  likes?: number
-  replies?: PostProps[]
-}
+import { Like, Post } from '../../services/api/types'
 
 type IPostsContext = {
-  postList: PostProps[] | null
-  handleDeletePost(postId: string): void
+  postList: Post[] | null
   handleGetPostByAddress(address: string): void
-  handleAddNewPost(post: PostProps): void
-  handleNewReply(newReply: PostProps, transactionCreatorId: string): void
+  handleAddNewPost(post: Post): void
+  handleNewReply(newReply: Post, transactionCreatorId: string): void
+  handleNewLike(newLike: Like, transactionCreatorId: string): void
   isLoading: boolean
 }
 
@@ -28,37 +17,43 @@ interface IPostsProviderProps {
 
 const PostsContext = createContext<IPostsContext>({
   postList: null,
-  handleDeletePost: () => Object,
   handleGetPostByAddress: () => Object,
   handleAddNewPost: () => Object,
   handleNewReply: () => Object,
+  handleNewLike: () => Object,
   isLoading: false,
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
-  const [postList, setPostList] = useState<PostProps[] | null>([])
+  const [postList, setPostList] = useState<Post[] | null>([])
 
   const { data, isLoading } = useGetAllPosts()
 
   useEffect(() => {
     if (data) {
-      setPostList(data.posts)
+      setPostList(
+        data.map((post) => {
+          return {
+            ...post,
+            status: 'accepted',
+            replies: post.replies.map((reply) => {
+              return { ...reply, status: 'accepted' }
+            }),
+          }
+        }),
+      )
     }
   }, [data])
-
-  const handleDeletePost = (postId: string) => {
-    setPostList((prevPosts) => prevPosts?.filter((post) => post.transaction_id !== postId) || [])
-  }
 
   const handleGetPostByAddress = (address: string) => {
     return postList?.find((post) => post.creator_address === address)
   }
 
-  const handleAddNewPost = (post: PostProps) => {
-    setPostList((prevPosts) => prevPosts && [...prevPosts, post])
+  const handleAddNewPost = (post: Post) => {
+    setPostList((prevPosts) => [post, ...(prevPosts || [])])
   }
 
-  const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
+  const handleNewReply = (newReply: Post, transactionCreatorId: string) => {
     const newPostsList = postList?.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
         if (post.replies === undefined) {
@@ -71,16 +66,29 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     setPostList(newPostsList!)
   }
 
+  const handleNewLike = (newLike: Like, transactionCreatorId: string) => {
+    const newPostsList = postList?.map((post) => {
+      if (transactionCreatorId === post.transaction_id) {
+        if (post.likes === undefined) {
+          return { ...post, likes: [newLike] }
+        }
+        return { ...post, likes: [...post.likes, newLike] }
+      }
+      return post
+    })
+    setPostList(newPostsList!)
+  }
+
   const postProviderValues = useMemo(
     () => ({
       postList,
+      handleNewLike,
       handleNewReply,
-      handleDeletePost,
       handleGetPostByAddress,
       handleAddNewPost,
       isLoading,
     }),
-    [handleAddNewPost, handleNewReply, handleDeletePost, handleGetPostByAddress, isLoading],
+    [handleAddNewPost, handleNewReply, handleGetPostByAddress, handleNewLike, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>
