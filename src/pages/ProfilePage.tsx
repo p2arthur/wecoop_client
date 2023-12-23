@@ -1,15 +1,16 @@
+import { minidenticon } from 'minidenticons'
 import { useEffect, useState } from 'react'
 import { FaCircleCheck, FaTrophy } from 'react-icons/fa6'
 import { useParams } from 'react-router-dom'
 import EmptyFeed from '../components/EmptyFeed'
 import FeedComponent from '../components/Feed'
+import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { AssetId } from '../enums/assetId'
-import { ellipseAddress } from '../utils/ellipseAddress'
 import { useGetPostsByAddress } from '../services/api/Posts'
-import { Post, User } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
-import { minidenticon } from 'minidenticons'
+import { Post, User } from '../services/api/types'
+import { ellipseAddress } from '../utils/ellipseAddress'
 
 const ProfilePage = () => {
   const { walletAddress } = useParams<{ walletAddress: string }>()
@@ -63,8 +64,8 @@ const ProfilePage = () => {
     <div className="flex flex-col ">
       <section className="p-4">
         <div className="w-full h-44 border-2 flex flex-col gap-6 border-gray-900 border-b-4 p-5">
-          <div className="flex gap-3 justify-between">
-            <div className="flex gap-3 items-center">
+          <div className="flex gap-3 justify-between bg-green-300 items-center">
+            <div className="flex gap-3">
               <div className="border-2 border-gray-900 rounded-full">
                 {user?.avatar ? (
                   <img className="w-16" src={user?.avatar} alt="profile-photo" />
@@ -110,6 +111,7 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
+            <FollowButton walletAddress={userData?.address!} />
           </div>
           {/* <div className="flex justify-end">
             <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} type="connect" options={[]} />
