@@ -41,7 +41,7 @@ const placeholderPhrases = [
 
 const PostInput = () => {
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
-  const { handleAddNewPost } = usePosts()
+  const { handleAddNewPost, handleDeletePost } = usePosts()
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
@@ -86,7 +86,7 @@ const PostInput = () => {
       country: country,
       replies: [],
       likes: [],
-      transaction_id: 'gfdaghas',
+      transaction_id: 'loading_id',
     })
     const encodedInputText = encodeURIComponent(inputText)
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
@@ -103,6 +103,7 @@ const PostInput = () => {
       const signedTransactions = await signTransactions([encodedTransaction])
       const waitRoundsToConfirm = 4
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      handleDeletePost('loading_id')
       handleAddNewPost({
         creator_address: userData.address,
         text: inputText,
@@ -116,8 +117,8 @@ const PostInput = () => {
       })
     } catch (error) {
       console.error(error)
-      setTimeout(
-        () =>
+      setTimeout(() => {
+        handleDeletePost('loading_id'),
           handleAddNewPost({
             text: inputText,
             creator_address: userData.address,
@@ -127,9 +128,8 @@ const PostInput = () => {
             replies: [],
             country,
             likes: [],
-          }),
-        1000,
-      )
+          })
+      }, 1000)
     }
   }
   return (

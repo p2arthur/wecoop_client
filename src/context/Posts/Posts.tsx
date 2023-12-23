@@ -8,6 +8,7 @@ type IPostsContext = {
   handleAddNewPost(post: Post): void
   handleNewReply(newReply: Post, transactionCreatorId: string): void
   handleNewLike(newLike: Like, transactionCreatorId: string): void
+  handleDeletePost(transactionCreatorId: string): void
   isLoading: boolean
 }
 
@@ -21,6 +22,7 @@ const PostsContext = createContext<IPostsContext>({
   handleAddNewPost: () => Object,
   handleNewReply: () => Object,
   handleNewLike: () => Object,
+  handleDeletePost: () => Object,
   isLoading: false,
 })
 
@@ -44,6 +46,11 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       )
     }
   }, [data])
+
+  const handleDeletePost = (transactionCreatorId: string) => {
+    const newPostsList = postList?.filter((post) => post.transaction_id !== transactionCreatorId)
+    setPostList(newPostsList!)
+  }
 
   const handleGetPostByAddress = (address: string) => {
     return postList?.find((post) => post.creator_address === address)
@@ -86,9 +93,10 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       handleNewReply,
       handleGetPostByAddress,
       handleAddNewPost,
+      handleDeletePost,
       isLoading,
     }),
-    [handleAddNewPost, handleNewReply, handleGetPostByAddress, handleNewLike, isLoading],
+    [handleAddNewPost, handleDeletePost, handleNewReply, handleGetPostByAddress, handleNewLike, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>
