@@ -11,7 +11,7 @@ import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 import { UserInterface } from '../services/User'
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post } from '../services/api/types'
+import { Post, Reply as IReply } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -32,14 +32,15 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
   const { sendTransactions, signTransactions } = useWallet()
-  const [isLoadingLike, setIsLoadingLike] = useState(false)
-  const [isLoadingReply, setIsLoadingReply] = useState(false)
-  const [replyText, setReplyText] = useState('')
-  const [openReplyInput, setOpenReplyInput] = useState(false)
   const { data: userData } = useGetUserInfo(post.creator_address)
   const { algod } = useOutletContext() as PostInputPropsInterface
   const replieservice = new Reply(algod)
   const likeService = new Like(algod)
+
+  const [isLoadingLike, setIsLoadingLike] = useState(false)
+  const [isLoadingReply, setIsLoadingReply] = useState(false)
+  const [replyText, setReplyText] = useState('')
+  const [openReplyInput, setOpenReplyInput] = useState(false)
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
