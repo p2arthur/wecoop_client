@@ -59,8 +59,12 @@ export interface Like2 {
 export interface User {
   address: string
   avatar: string
-  nfd: Nfd
+  nfd: {
+    name: string
+    avatar: string
+  }
   balance: number
+  followTargets: string[]
 }
 
 export interface Nfd {

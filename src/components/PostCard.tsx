@@ -11,7 +11,7 @@ import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 import { UserInterface } from '../services/User'
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, Reply as IReply } from '../services/api/types'
+import { Reply as IReply, Post } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -139,7 +139,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
           <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 rounded-full border-2 border-gray-900 dark:bg-gray-100 overflow-hidden">
+                <div className="w-10 md:w-12 rounded-md border-2 border-gray-900 dark:bg-gray-100 overflow-hidden border-b-4">
                   <img
                     className="w-full bg-cover"
                     src={!userData?.nfd.avatar ? generateIdIcon(post.creator_address!) : userData.nfd.avatar}
@@ -147,7 +147,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                   />
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
-                  <h2 className="font-bold text-xl h-full hover:underline">
+                  <h2 className="font-bold text-lg md:text-xl h-full hover:underline">
                     {userData?.nfd.name ? userData.nfd.name.toUpperCase() : ellipseAddress(post.creator_address)}
                   </h2>
                   {}

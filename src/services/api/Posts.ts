@@ -10,7 +10,8 @@ export const getAllPosts = async () => {
 export const useGetAllPosts = () => useQuery<IGetAllPosts>({ queryKey: ['getAllPosts'], queryFn: () => getAllPosts() })
 
 export const getPostsByAddress = async (address: string) => {
-  const { data } = await axios.get(`https://scoopsocial-production.up.railway.app/posts/${address}`)
+  const { data } = await axios.get(`http://localhost:3000/feed/${address}`)
+  console.log('getPostsByAddress', data)
   return data
 }
 

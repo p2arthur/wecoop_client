@@ -7,7 +7,7 @@ import FeedComponent from '../components/Feed'
 import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { AssetId } from '../enums/assetId'
-import { useGetPostsByAddress } from '../services/api/Posts'
+import { getPostsByAddress, useGetPostsByAddress } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
 import { Post, User } from '../services/api/types'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -29,19 +29,21 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (data) {
-      setPostsList(
-        data.map((post) => {
-          return {
-            ...post,
-            status: 'accepted',
-            replies: post.replies.map((reply) => {
-              return { ...reply, status: 'accepted' }
-            }),
-          }
-        }),
-      )
+      setPostsList(data)
+      console.log('postss data', postsList)
     }
   }, [data])
+
+  useEffect(() => {
+    const appendInitialUserPosts = async () => {
+      console.log('walletAddress', walletAddress)
+      console.log('walletAddress changed')
+      const data = useGetPostsByAddress(walletAddress!)
+      setPostsList(data)
+    }
+
+    appendInitialUserPosts()
+  }, [])
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -64,9 +66,9 @@ const ProfilePage = () => {
     <div className="flex flex-col ">
       <section className="p-4">
         <div className="w-full h-44 border-2 flex flex-col gap-6 border-gray-900 border-b-4 p-5">
-          <div className="flex gap-3 justify-between bg-green-300 items-center">
+          <div className="flex gap-3 justify-between items-center">
             <div className="flex gap-3">
-              <div className="border-2 border-gray-900 rounded-full">
+              <div className="border-2 border-gray-900 rounded-md overflow-hidden">
                 {user?.avatar ? (
                   <img className="w-16" src={user?.avatar} alt="profile-photo" />
                 ) : (
