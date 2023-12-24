@@ -18,8 +18,6 @@ const FollowButton = ({ walletAddress }: FollowButtonProps) => {
     event?.preventDefault()
     setButtonState('loading')
 
-    console.log('userData address', userData.address)
-
     try {
       const followServices = new Follow(algod)
 

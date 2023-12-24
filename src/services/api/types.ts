@@ -4,22 +4,24 @@ export interface Post {
   text: string
   creator_address: string
   transaction_id: string
-  timestamp: number
+  timestamp: number | null
   country: string
   nfd?: string
   likes: Like[]
   replies: Reply[]
-  status: 'accepted' | 'loading' | 'rejected'
+  status: 'accepted' | 'loading' | 'rejected' | null
 }
 
 export interface PostRequest {
   text: string
   creator_address: string
   transaction_id: string
-  timestamp: number
+  timestamp: number | null
   country: string
+  nfd?: string
   likes: Like[]
-  replies: ReplyResponse[]
+  replies: Reply[]
+  status: 'accepted' | 'loading' | 'rejected' | null
 }
 
 export interface Like {
@@ -30,22 +32,24 @@ export interface Reply {
   text: string
   creator_address: string
   transaction_id: string
-  timestamp: number
-  status: 'accepted' | 'loading' | 'rejected'
+  timestamp: number | null
+  country: string
   nfd?: string
-  country?: string
-  likes: Like2[]
-  replies: any[]
+  likes: Like[]
+  replies: Reply[]
+  status: 'accepted' | 'loading' | 'rejected' | null
 }
 
 export interface ReplyResponse {
   text: string
   creator_address: string
   transaction_id: string
-  timestamp: number
-  country?: string
-  likes: Like2[]
-  replies: any[]
+  timestamp: number | null
+  country: string
+  nfd?: string
+  likes: Like[]
+  replies: Reply[]
+  status: 'accepted' | 'loading' | 'rejected' | null
 }
 
 export interface Like2 {

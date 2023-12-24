@@ -1,7 +1,7 @@
-import PostCard from './PostCard'
-import { Post } from '../services/api/types'
 import { useEffect, useState } from 'react'
+import { Post } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
+import PostCard from './PostCard'
 
 interface FeedPropsInterface {
   postList: Post[] | null
@@ -11,9 +11,6 @@ interface FeedPropsInterface {
 
 const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterface) => {
   const [currentPage, setCurrentPage] = useState(1)
-  const postsPerPage = 10
-
-  const paginatedPosts = postList?.slice(0, currentPage * postsPerPage)
 
   const handleScroll = () => {
     if (!isLoading && window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
@@ -29,6 +26,12 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
     }
   }, [isLoading])
 
+  const postsPerPage = 10
+
+  const paginatedPosts = postList?.slice(0, currentPage * postsPerPage)
+
+  console.log('paginated posts', paginatedPosts)
+
   useEffect(() => {
     if (currentPage * postsPerPage >= postList?.length!) {
       setCurrentPage(1)
@@ -38,15 +41,15 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
   if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       {paginatedPosts?.length! > 0 &&
-        paginatedPosts?.map((post) => <PostCard key={post.transaction_id} handleNewReply={handleNewReply} post={post} />)}
+        paginatedPosts?.map((post, index) => <PostCard key={index} handleNewReply={handleNewReply} post={post} />)}
       {currentPage * postsPerPage >= postList?.length! && !isLoading && (
         <div className={'w-full justify-center flex'}>
           <p className="font-bold text-2xl">You're all caught up!</p>
         </div>
       )}
-    </>
+    </div>
   )
 }
 

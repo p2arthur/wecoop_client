@@ -2,7 +2,7 @@ import axios from 'axios'
 import { minidenticon } from 'minidenticons'
 import { AssetId } from '../enums/assetId'
 import { Feed } from './Feed'
-import { PostProps } from './Post'
+import { PostInterface } from './Post'
 
 export interface UserInterface {
   address: string
@@ -17,7 +17,7 @@ export class User {
     private feedServices: Feed = new Feed(),
   ) {}
 
-  async signTransaction(post: PostProps) {
+  async signTransaction(post: PostInterface) {
     this.feedServices.setAllPosts(post)
   }
 

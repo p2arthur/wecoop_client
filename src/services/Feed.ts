@@ -1,23 +1,22 @@
 import axios from 'axios'
 import base64 from 'base-64'
 import { NotePrefix } from '../enums/notePrefix'
+import { Post as PostInterface } from '../services/api/types'
 import { getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
-import { Post, PostProps } from './Post'
+import { Post as PostService } from './Post'
 import { TransactionInterface } from './Transaction'
 
 export class Feed {
-  feedData: PostProps[] = []
+  feedData: PostInterface[] = []
   server = getIndexerConfigFromViteEnvironment().server
 
-  constructor(private post: Post = new Post()) {}
+  constructor(private postServices: PostService = new PostService()) {}
 
   public async getAllPosts({ next }: { next?: string | null }) {
     try {
-      const { data } = await axios.get(
-        `https://mainnet-idx.algonode.cloud/v2/accounts/${
-          import.meta.env.VITE_WECOOP_MAIN_ADDRESS
-        }/transactions?note-prefix=d2Vjb29w&limit=40${next ? `&next=${next}` : ''}`,
-      )
+      const { data } = await axios.get(`https://scoopsocial-production.up.railway.app/feed`)
+
+      console.log(data)
 
       const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
 
@@ -70,7 +69,7 @@ export class Feed {
               .filter((reply: any) => reply !== null)
 
             const roundTime = transaction['round-time']
-            const postData: PostProps = {
+            const postData: PostInterface = {
               text: note,
               creator_address: sender,
               transaction_id: id,
@@ -78,9 +77,10 @@ export class Feed {
               status: 'accepted',
               likes: likes.length,
               replies: replies,
+              country: '',
             }
 
-            const post = await this.post.setPostData(postData)
+            const post = await this.postServices.setPostData(postData)
 
             this.feedData.push(post)
 
@@ -96,7 +96,7 @@ export class Feed {
     }
   }
 
-  public setAllPosts(post: PostProps) {
+  public setAllPosts(post: PostInterface) {
     this.feedData.push(post)
   }
 
@@ -105,6 +105,8 @@ export class Feed {
       const { data } = await axios.get(
         `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(NotePrefix.WeCoopAll)}`,
       )
+
+      console.log(data)
 
       const { transactions } = data
 
@@ -152,7 +154,7 @@ export class Feed {
               .filter((reply: any) => reply !== null)
 
             const roundTime = transaction['round-time']
-            const postData: PostProps = {
+            const postData: PostInterface = {
               text: note,
               creator_address: sender,
               transaction_id: id,
@@ -160,9 +162,10 @@ export class Feed {
               status: 'accepted',
               likes: likesFiltered.length,
               replies: replies,
+              country: '',
             }
 
-            const post = await this.post.setPostData(postData)
+            const post = await this.postServices.setPostData(postData)
 
             this.feedData.push(post)
 
@@ -178,10 +181,10 @@ export class Feed {
     }
   }
 
-  public async getFeedByWalletAddress(walletAddress: string) {
-    this.feedData = await axios.get('http://localhost:3000/feed/by/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM')
+  public async getFeedByWalletAddress(walletAddress: string): Promise<PostInterface[]> {
+    const { data } = await axios.get('http://localhost:3000/feed/by/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM')
 
-    console.log('feedByWalletAddress', this.feedData)
+    this.feedData = data
 
     return this.feedData
   }

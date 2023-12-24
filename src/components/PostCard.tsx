@@ -45,6 +45,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
+  console.log('post card post', post)
+
   const handlePostLike = async (event: React.FormEvent) => {
     try {
       setIsLoadingLike(true)

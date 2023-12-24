@@ -25,7 +25,7 @@ const PostsContext = createContext<IPostsContext>({
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
-  const [postList, setPostList] = useState<Post[] | null>([])
+  const [postList, setPostList] = useState<Post[]>([])
 
   const { data, isLoading } = useGetAllPosts()
 
@@ -61,9 +61,9 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
         }
         return { ...post, replies: [...post.replies, newReply] }
       }
-      return post
+      return post as Post
     })
-    setPostList(newPostsList!)
+    setPostList(newPostsList)
   }
 
   const handleNewLike = (newLike: Like, transactionCreatorId: string) => {

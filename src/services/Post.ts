@@ -1,16 +1,5 @@
 import axios from 'axios'
-
-export interface PostProps {
-  text: string
-  creator_address: string
-  transaction_id: string | null
-  status: 'loading' | 'accepted' | 'denied' | string | null
-  timestamp: number | null
-  country?: string
-  nfd?: string
-  likes?: number
-  replies?: PostProps[] | undefined
-}
+import { Post as PostInterface } from './api/types'
 
 export interface NfdListProps {
   nfd: string
@@ -18,11 +7,19 @@ export interface NfdListProps {
 }
 
 export class Post {
-  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null, likes: undefined }
+  postData: PostInterface = {
+    text: '',
+    creator_address: '',
+    transaction_id: '',
+    timestamp: null,
+    country: '',
+    nfd: '',
+    likes: [],
+    replies: [],
+    status: null,
+  }
 
-  constructor() {}
-
-  public async setPostData(postDataInput: PostProps): Promise<PostProps> {
+  public async setPostData(postDataInput: PostInterface): Promise<PostInterface> {
     const text = this.decryptPostNote(postDataInput.text!)
     const allText = text.split(':')
     this.postData = {
