@@ -1,6 +1,5 @@
 import { minidenticon } from 'minidenticons'
 import { useEffect, useState } from 'react'
-import { FaCircleCheck, FaTrophy } from 'react-icons/fa6'
 import { useParams } from 'react-router-dom'
 import EmptyFeed from '../components/EmptyFeed'
 import FeedComponent from '../components/Feed'
@@ -62,11 +61,11 @@ const ProfilePage = () => {
         <div className="w-full h-44 border-2 flex flex-col gap-6 border-gray-900 border-b-4 p-5">
           <div className="flex gap-3 justify-between items-center">
             <div className="flex gap-3">
-              <div className="border-2 border-gray-900 rounded-md overflow-hidden">
+              <div className="border-2 h-16 border-gray-900 rounded-md overflow-hidden">
                 {user?.avatar ? (
-                  <img className="w-16" src={user?.avatar} alt="profile-photo" />
+                  <img className="w-16 h-16" src={user?.avatar} alt="profile-photo" />
                 ) : (
-                  <img className="w-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
+                  <img className="w-16 h-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
                 )}
               </div>
               <div className="flex flex-col">
@@ -74,36 +73,26 @@ const ProfilePage = () => {
                   <h3 className="text-xl md:text-3xl font-bold">
                     {user?.nfd.name !== null ? user?.nfd?.name : ellipseAddress(user?.address)}
                   </h3>
-                  {user?.nfd.name !== null ? (
-                    <span>
-                      <FaCircleCheck className="text-md md:text-xl text-orange-500" />
-                    </span>
-                  ) : null}
                 </div>
                 <div className="flex gap-5 items-center">
                   {user?.balance !== undefined ? (
                     <div className="flex items-center gap-1">
-                      <img
-                        className="w-6 h-6"
-                        src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`}
-                        alt="coopcoin-icon"
-                      />
-                      <p className="text-xl">{user.balance}</p>
+                      <div className="flex flex-col">
+                        <div className="flex">
+                          <img
+                            className="w-6 h-6"
+                            src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`}
+                            alt="coopcoin-icon"
+                          />
+                          <p className="text-xl">{user.balance}</p>
+                        </div>
+
+                        <p>{((user.balance / 2100000) * 100).toFixed(2)}%</p>
+                      </div>
                     </div>
                   ) : (
                     <LoaderSpinner text="loading balance" />
                   )}
-                  {postsList.length >= 5 ? (
-                    <div className="relative flex gap-2 items-center">
-                      <span className="font-bold text-xl">5</span>
-                      <FaTrophy className="text-yellow-500 text-md md:text-xl" />
-                    </div>
-                  ) : postsList.length >= 1 ? (
-                    <div className="relative flex gap-2 items-center">
-                      <span className="font-bold text-xl">1</span>
-                      <FaTrophy className="text-green-500 text-xl" />
-                    </div>
-                  ) : null}
                 </div>
               </div>
             </div>

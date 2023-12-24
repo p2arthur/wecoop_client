@@ -20,7 +20,7 @@ const ConnectWallet = ({ user }: ConnectWalletProps) => {
             icon={user.avatar}
             options={[actualProvider!]}
             type="activeAccount"
-            buttonText={!user.nfd ? ellipseAddress(activeAccount.address) : user.nfd.name.toUpperCase()}
+            buttonText={user.nfd.name != null ? user?.nfd.name : ellipseAddress(activeAccount.address)}
             address={activeAccount.address}
           />
         </div>
