@@ -78,16 +78,17 @@ const ProfilePage = () => {
                   {user?.balance !== undefined ? (
                     <div className="flex items-center gap-1">
                       <div className="flex flex-col">
-                        <div className="flex">
+                        <div className="flex items-center gap-2">
                           <img
                             className="w-6 h-6"
                             src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`}
                             alt="coopcoin-icon"
                           />
-                          <p className="text-xl">{user.balance}</p>
+                          <div className="flex items-end gap-1">
+                            <p className="text-xl">{user.balance}</p>
+                            <p className="border-gray-950 text-sm">{((user.balance / 2100000) * 100).toFixed(2)}% of the supply</p>
+                          </div>{' '}
                         </div>
-
-                        <p>{((user.balance / 2100000) * 100).toFixed(2)}%</p>
                       </div>
                     </div>
                   ) : (
