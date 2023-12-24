@@ -11,7 +11,6 @@ export const useGetAllPosts = () => useQuery<IGetAllPosts>({ queryKey: ['getAllP
 
 export const getPostsByAddress = async (address: string) => {
   const { data } = await axios.get(`http://localhost:3000/feed/${address}`)
-  console.log('getPostsByAddress', data)
   return data
 }
 

@@ -21,7 +21,6 @@ export class User {
 
   public async setUser(walletAddress: string) {
     const { data } = await this.getUserByWalletAddress(walletAddress)
-    console.log('user', data)
     this.userData = data
     return this.userData
   }

@@ -16,8 +16,6 @@ export class Feed {
     try {
       const { data } = await axios.get(`https://scoopsocial-production.up.railway.app/feed`)
 
-      console.log(data)
-
       const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
 
       const postsFiltered = transactions?.filter((transaction: TransactionInterface) =>
@@ -105,8 +103,6 @@ export class Feed {
       const { data } = await axios.get(
         `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(NotePrefix.WeCoopAll)}`,
       )
-
-      console.log(data)
 
       const { transactions } = data
 

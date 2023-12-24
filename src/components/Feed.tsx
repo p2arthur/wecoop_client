@@ -30,8 +30,6 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
 
   const paginatedPosts = postList?.slice(0, currentPage * postsPerPage)
 
-  console.log('paginated posts', paginatedPosts)
-
   useEffect(() => {
     if (currentPage * postsPerPage >= postList?.length!) {
       setCurrentPage(1)

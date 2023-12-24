@@ -7,7 +7,7 @@ import FeedComponent from '../components/Feed'
 import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { AssetId } from '../enums/assetId'
-import { getPostsByAddress, useGetPostsByAddress } from '../services/api/Posts'
+import { useGetPostsByAddress } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
 import { Post, User } from '../services/api/types'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -30,17 +30,11 @@ const ProfilePage = () => {
   useEffect(() => {
     if (data) {
       setPostsList(data)
-      console.log('postss data', postsList)
     }
   }, [data])
 
   useEffect(() => {
-    const appendInitialUserPosts = async () => {
-      console.log('walletAddress', walletAddress)
-      console.log('walletAddress changed')
-      const data = useGetPostsByAddress(walletAddress!)
-      setPostsList(data)
-    }
+    const appendInitialUserPosts = async () => {}
 
     appendInitialUserPosts()
   }, [])

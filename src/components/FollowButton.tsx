@@ -15,7 +15,6 @@ const FollowButton = ({ walletAddress }: FollowButtonProps) => {
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
   const [buttonState, setButtonState] = useState<'loading' | 'success' | null>(null)
   const handleFollowClick = async (event: React.FormEvent) => {
-    console.log('user data from follow button', userData)
     event?.preventDefault()
     setButtonState('loading')
 
