@@ -1,5 +1,5 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaSpinner } from 'react-icons/fa6'
 import { SlUserFollow, SlUserUnfollow } from 'react-icons/sl'
 import { useOutletContext } from 'react-router-dom'
@@ -8,12 +8,17 @@ import Button from './Button'
 
 interface FollowButtonProps {
   walletAddress: string
+  isFollowing: boolean
 }
 
-const FollowButton = ({ walletAddress }: FollowButtonProps) => {
+const FollowButton = ({ walletAddress, isFollowing }: FollowButtonProps) => {
   const { algod, userData } = useOutletContext() as any
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
   const [buttonState, setButtonState] = useState<'loading' | 'success' | null>(null)
+
+  useEffect(() => {
+    isFollowing ? setButtonState('success') : setButtonState(null)
+  }, [isFollowing])
   const handleFollowClick = async (event: React.FormEvent) => {
     event?.preventDefault()
     setButtonState('loading')
@@ -42,15 +47,7 @@ const FollowButton = ({ walletAddress }: FollowButtonProps) => {
     <form onSubmit={handleFollowClick}>
       <Button
         buttonText={buttonState == 'loading' ? 'loading' : buttonState == 'success' ? 'unfollow' : 'follow'}
-        icon={
-          buttonState == 'loading' ? (
-            <FaSpinner className="animate-spin" />
-          ) : buttonState == 'success' ? (
-            <SlUserUnfollow />
-          ) : (
-            <SlUserFollow />
-          )
-        }
+        icon={buttonState == 'loading' ? <FaSpinner className="animate-spin" /> : isFollowing ? <SlUserUnfollow /> : <SlUserFollow />}
       />
     </form>
   )

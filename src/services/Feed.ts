@@ -99,13 +99,10 @@ export class Feed {
 
   public async getPostsByAddress(address: string) {
     const { data } = await axios.get(`http://localhost:3000/feed/${address}`)
-
-    console.log('data from feed', data)
   }
 
   public async getFeedByWalletAddress(walletAddress: string): Promise<PostInterface[]> {
     const { data } = await axios.get(`http://localhost:3000/feed/by/${walletAddress}`)
-    console.log('feed data', data)
 
     this.feedData = data
 
