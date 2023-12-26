@@ -28,8 +28,6 @@ export const Router = () => {
 
   useEffect(() => {
     async function appendUserData() {
-      console.log('appending user data')
-
       const userServices = new User({
         address: activeAccount?.address ?? '',
         avatar: '',

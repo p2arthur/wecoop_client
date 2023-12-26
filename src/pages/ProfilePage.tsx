@@ -1,3 +1,4 @@
+import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -6,41 +7,50 @@ import FeedComponent from '../components/Feed'
 import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { AssetId } from '../enums/assetId'
-import { Feed } from '../services/Feed'
 import { useGetPostsByAddress } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
 import { Post, User } from '../services/api/types'
 import { ellipseAddress } from '../utils/ellipseAddress'
 
+interface UserDataInterface {
+  data: User | undefined
+  isLoading: boolean
+}
+
 const ProfilePage = () => {
   const { walletAddress } = useParams<{ walletAddress: string }>()
+  const { activeAccount } = useWallet()
   const [user, setUser] = useState<User | null>(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [postsList, setPostsList] = useState<Post[]>([])
+  const [isFollowing, setIsFollowing] = useState<boolean>(false)
 
-  const { data: userData, isLoading: isLoadingUser } = useGetUserInfo(walletAddress as string)
+  const { data: currentUserData, isLoading: isLoadingCurrentUser } = useGetUserInfo(activeAccount?.address as string)
+  const { data: userData, isLoading: isLoadingUser } = useGetUserInfo(walletAddress as string) as UserDataInterface
 
   const { data, isLoading } = useGetPostsByAddress(walletAddress as string)
 
   useEffect(() => {
     if (userData) {
       setUser(userData)
+      setCurrentUser(currentUserData!)
     }
-  }, [userData])
+  }, [userData, currentUserData])
+
+  const getIsFollowing = (): void => {
+    if (currentUser?.followTargets.includes(walletAddress!)) {
+      setIsFollowing(true)
+    } else {
+      setIsFollowing(false)
+    }
+  }
 
   useEffect(() => {
     if (data) {
       setPostsList(data)
+      getIsFollowing()
     }
   }, [data])
-
-  useEffect(() => {
-    const appendInitialUserPosts = async () => {
-      const feedServices = new Feed()
-      const posts = feedServices.getPostsByAddress(walletAddress)
-    }
-
-    appendInitialUserPosts()
-  }, [])
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -66,7 +76,7 @@ const ProfilePage = () => {
           <div className="flex gap-3 justify-between items-center">
             <div className="flex gap-3">
               <div className="border-2 h-16 border-gray-900 rounded-md overflow-hidden">
-                {user?.avatar ? (
+                {user?.avatar !== null ? (
                   <img className="w-16 h-16" src={user?.avatar} alt="profile-photo" />
                 ) : (
                   <img className="w-16 h-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
@@ -75,11 +85,11 @@ const ProfilePage = () => {
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
                   <h3 className="text-xl md:text-3xl font-bold">
-                    {user?.nfd.name !== null ? user?.nfd?.name : ellipseAddress(user?.address)}
+                    {user?.nfd?.name !== null ? user?.nfd?.name : ellipseAddress(user?.address)}
                   </h3>
                 </div>
                 <div className="flex gap-5 items-center">
-                  {user?.balance !== undefined ? (
+                  {user?.balance ? (
                     <div className="flex items-center gap-1">
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
@@ -101,7 +111,7 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
-            <FollowButton walletAddress={userData?.address!} />
+            <FollowButton isFollowing={isFollowing} walletAddress={userData?.address!} />
           </div>
           {/* <div className="flex justify-end">
             <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} type="connect" options={[]} />

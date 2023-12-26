@@ -3,9 +3,9 @@ import axios from 'axios'
 import { User } from './types'
 
 const getUserInfo = async (address: string) => {
-  const { data } = await axios.get(`https://scoopsocial-production.up.railway.app/user/${address}`)
+  const { data } = await axios.get(`http://localhost:3000/user/${address}`)
 
-  return data
+  return data.data
 }
 
 export const useGetUserInfo = (address: string) =>

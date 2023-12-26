@@ -9,9 +9,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
 import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
-import { UserInterface } from '../services/User'
+
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post } from '../services/api/types'
+import { Reply as IReply, Post, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -25,7 +25,7 @@ interface PostPropsInterface {
 
 interface PostInputPropsInterface {
   algod: AlgodClient
-  userData: UserInterface
+  userData: User
 }
 
 const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
@@ -64,11 +64,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
       setIsLoadingLike(false)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     } finally {
       handleNewLike && handleNewLike({ creator_address: userData?.address! }, post.transaction_id as string)
     }
   }
+
+  console.log(userData)
 
   const handlePostReply = async () => {
     setIsLoadingReply(true)
@@ -138,15 +140,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 md:w-12 rounded-md border-2 border-gray-900 dark:bg-gray-100 overflow-hidden border-b-4">
-                  <img
-                    className="w-full bg-cover"
-                    src={!userData?.nfd.avatar ? generateIdIcon(post.creator_address!) : userData.nfd.avatar}
-                    alt=""
-                  />
+                  <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt="" />
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full hover:underline">
-                    {userData?.nfd.name ? userData.nfd.name.toUpperCase() : ellipseAddress(post.creator_address)}
+                    {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)}
                   </h2>
                   {}
                 </a>

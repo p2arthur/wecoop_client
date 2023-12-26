@@ -16,12 +16,10 @@ const Home = () => {
   const feedServices = new Feed()
   const getFeedPosts = async (walletAddress: string) => {
     const posts = await feedServices.getFeedByWalletAddress(walletAddress)
-    console.log(posts)
     setFeedPosts(posts)
   }
 
   useEffect(() => {
-    console.log(data)
     const getFeedPostsEffect = async () => {
       if (activeAccount) {
         await getFeedPosts(activeAccount?.address!)
