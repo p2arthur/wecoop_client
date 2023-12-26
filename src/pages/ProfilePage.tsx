@@ -39,18 +39,23 @@ const ProfilePage = () => {
 
   const getIsFollowing = (): void => {
     if (currentUser?.followTargets.includes(walletAddress!)) {
+      console.log(true)
       setIsFollowing(true)
     } else {
-      setIsFollowing(false)
+      console.log(currentUser?.followTargets)
+      console.log(false)
     }
   }
 
   useEffect(() => {
     if (data) {
       setPostsList(data)
-      getIsFollowing()
     }
   }, [data])
+
+  useEffect(() => {
+    getIsFollowing()
+  }, [currentUser])
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -75,7 +80,7 @@ const ProfilePage = () => {
         <div className="w-full h-44 border-2 flex flex-col gap-6 border-gray-900 border-b-4 p-5">
           <div className="flex gap-3 justify-between items-center">
             <div className="flex gap-3">
-              <div className="border-2 h-16 border-gray-900 rounded-md overflow-hidden">
+              <div className="border-2 border-b-4 h-16 border-gray-900 rounded-md overflow-hidden">
                 {user?.avatar !== null ? (
                   <img className="w-16 h-16" src={user?.avatar} alt="profile-photo" />
                 ) : (
@@ -100,7 +105,7 @@ const ProfilePage = () => {
                           />
                           <div className="flex items-end gap-1">
                             <p className="text-xl">{user.balance}</p>
-                            <p className="border-gray-950 text-sm">{((user.balance / 2100000) * 100).toFixed(2)}% of the supply</p>
+                            <p className="border-gray-950 text-sm">{((user.balance / 2100000) * 100).toFixed(3)}% of the supply</p>
                           </div>{' '}
                         </div>
                       </div>

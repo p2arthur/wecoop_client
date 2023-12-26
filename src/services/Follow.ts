@@ -7,7 +7,7 @@ import { Transaction } from './Transaction'
 
 interface FollowProps {
   subjectUserWalletAddress: string
-  followerUserWalletAddress: string
+  followerUserWalletAddress?: string
 }
 
 export class Follow {
@@ -29,7 +29,7 @@ export class Follow {
       wecoopNote,
     )
     const subjectUserTransaction = await transactionService.createTransaction(
-      followerUserWalletAddress,
+      followerUserWalletAddress!,
       subjectUserWalletAddress,
       subjectUserFee,
       subjectUserNote,
@@ -40,5 +40,23 @@ export class Follow {
     const encodedGroupedTransactions = groupedTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
 
     return encodedGroupedTransactions
+  }
+
+  public async handleUserUnfollow({ subjectUserWalletAddress }: FollowProps) {
+    const transactionService = new Transaction(this.client)
+    const wecoopNote = `${NotePrefix.WeCoopUnfollow}${subjectUserWalletAddress}`
+    const wecoopFee = Fees.FollowWecoopFee
+    const wecoopWalletAddress = import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string
+
+    const wecoopFeeTransaction = await transactionService.createTransaction(
+      wecoopWalletAddress,
+      import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
+      wecoopFee,
+      wecoopNote,
+    )
+
+    const transaction = wecoopFeeTransaction
+    const unsignedTransaction = [algosdk.encodeUnsignedTransaction(transaction)]
+    return unsignedTransaction
   }
 }

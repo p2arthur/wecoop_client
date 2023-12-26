@@ -70,8 +70,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     }
   }
 
-  console.log(userData)
-
   const handlePostReply = async () => {
     setIsLoadingReply(true)
     const country = await getUserCountry()
