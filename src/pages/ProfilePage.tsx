@@ -6,6 +6,7 @@ import FeedComponent from '../components/Feed'
 import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { AssetId } from '../enums/assetId'
+import { Feed } from '../services/Feed'
 import { useGetPostsByAddress } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
 import { Post, User } from '../services/api/types'
@@ -33,7 +34,10 @@ const ProfilePage = () => {
   }, [data])
 
   useEffect(() => {
-    const appendInitialUserPosts = async () => {}
+    const appendInitialUserPosts = async () => {
+      const feedServices = new Feed()
+      const posts = feedServices.getPostsByAddress(walletAddress)
+    }
 
     appendInitialUserPosts()
   }, [])
