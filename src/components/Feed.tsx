@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Post } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
 import PostCard from './PostCard'
@@ -12,30 +12,29 @@ interface FeedPropsInterface {
 const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterface) => {
   const [currentPage, setCurrentPage] = useState(1)
 
+  let pageYOffset = window.pageYOffset
+
+  useLayoutEffect(() => {
+    console.log('got to the bottom')
+    window.scroll({ top: pageYOffset })
+  }, [postList])
+
   const handleScroll = () => {
-    if (!isLoading && window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+    if (!isLoading && window.innerHeight + window.scrollY + 1 > document.documentElement.offsetHeight) {
+      console.log('setting current page')
       setCurrentPage((prevPage) => prevPage + 1)
     }
   }
+  const postsPerPage = 10
 
+  const paginatedPosts = postList?.slice(0, currentPage * postsPerPage)
   useEffect(() => {
     window.addEventListener('scroll', handleScroll)
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      window.addEventListener('scroll', () => {})
     }
-  }, [isLoading])
-
-  const postsPerPage = 10
-
-  const paginatedPosts = postList?.slice(0, currentPage * postsPerPage)
-
-  useEffect(() => {
-    if (currentPage * postsPerPage >= postList?.length!) {
-      setCurrentPage(1)
-    }
-  }, [currentPage, postList, postsPerPage])
-
+  }, [postList])
   if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
 
   return (
