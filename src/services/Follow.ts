@@ -23,7 +23,7 @@ export class Follow {
     const subjectUserFee = Fees.FollowUserFee
 
     const wecoopFeeTransaction = await transactionService.createTransaction(
-      wecoopWalletAddress,
+      followerUserWalletAddress!,
       import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
       wecoopFee,
       wecoopNote,
