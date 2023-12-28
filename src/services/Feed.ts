@@ -13,7 +13,7 @@ export class Feed {
 
   public async getAllPosts({ next }: { next?: string | null }) {
     try {
-      const { data } = await axios.get(`${import.meta.env.WECOOP_API}/feed`)
+      const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed`)
 
       const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
 
@@ -98,11 +98,11 @@ export class Feed {
   }
 
   public async getPostsByAddress(address: string) {
-    const { data } = await axios.get(`${import.meta.env.WECOOP_API}/feed/${address}`)
+    const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/${address}`)
   }
 
   public async getFeedByWalletAddress(walletAddress: string): Promise<PostInterface[]> {
-    const { data } = await axios.get(`${import.meta.env.WECOOP_API}/feed/by/${walletAddress}`)
+    const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/by/${walletAddress}`)
 
     this.feedData = data
 

@@ -15,7 +15,7 @@ export class User {
   }
 
   public async getUserByWalletAddress(walletAddress: string) {
-    const { data } = await axios.get(`${import.meta.env.WECOOP_API}/user/${walletAddress}`)
+    const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/user/${walletAddress}`)
     return data
   }
 
