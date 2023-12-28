@@ -3,7 +3,7 @@ import axios from 'axios'
 import { User } from './types'
 
 const getUserInfo = async (address: string) => {
-  const { data } = await axios.get(`http://localhost:3000/user/${address}`)
+  const { data } = await axios.get(`${import.meta.env.WECOOP_API}/user/${address}`)
 
   return data.data
 }

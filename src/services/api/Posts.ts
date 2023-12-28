@@ -3,14 +3,14 @@ import axios from 'axios'
 import { IGetAllPosts } from './types'
 
 export const getAllPosts = async () => {
-  const { data } = await axios.get('https://scoopsocial-production.up.railway.app/posts')
+  const { data } = await axios.get(`${import.meta.env.WECOOP_API}/posts`)
   return data
 }
 
 export const useGetAllPosts = () => useQuery<IGetAllPosts>({ queryKey: ['getAllPosts'], queryFn: () => getAllPosts() })
 
 export const getPostsByAddress = async (address: string) => {
-  const { data } = await axios.get(`http://localhost:3000/feed/${address}`)
+  const { data } = await axios.get(`${import.meta.env.WECOOP_API}/feed/${address}`)
   return data
 }
 
