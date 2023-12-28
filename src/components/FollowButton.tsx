@@ -31,7 +31,10 @@ const FollowButton = ({ walletAddress, isFollowing }: FollowButtonProps) => {
         followerUserWalletAddress: activeAccount?.address!,
       })
 
+      console.log(encodedGroupedTransactions)
+
       const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      console.log('signed transactions', signedTransactions)
       const waitRoundsToConfirm = 4
 
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)

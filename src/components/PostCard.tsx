@@ -161,7 +161,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-words w-[22rem] md:w-full">{post.text.length > 0 && decodeURIComponent(post.text)}</p>
+              <p className="tracking-wide break-words w-[22rem] md:w-full">{post?.text?.length > 0 && decodeURIComponent(post?.text)}</p>
               <div className={'flex justify-end items-center gap-1 text-md '}>
                 {variant === 'default' && (
                   <button
@@ -169,7 +169,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                     onClick={() => setOpenReplyInput(!openReplyInput)}
                   >
                     <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.replies?.length}</p>
+                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.replies?.length}</p>
                   </button>
                 )}
 
@@ -183,7 +183,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                         onClick={handlePostLike}
                       >
                         <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                        {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post.likes.length}</p>}
+                        {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.likes?.length}</p>}
                       </button>
                     </>
                   )}
@@ -196,7 +196,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 <div className={'grid gap-4'}>
                   <p className={'text-lg'}>replies</p>
 
-                  {post.replies && post.replies.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                  {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
 
                   {!isLoadingReply && (
                     <ReplyInput
