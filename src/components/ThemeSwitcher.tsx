@@ -9,6 +9,7 @@ const ThemeSwitcher = () => {
   const [darkSide, setDarkSide] = useState(colorTheme === 'light' ? true : false)
 
   const toggleDarkMode = () => {
+    setTheme()
     setDarkSide(!darkSide)
   }
 
