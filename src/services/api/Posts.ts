@@ -3,7 +3,7 @@ import axios from 'axios'
 import { IGetAllPosts } from './types'
 
 export const getAllPosts = async () => {
-  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/posts`)
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
   return data
 }
 
