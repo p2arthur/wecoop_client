@@ -6,4 +6,6 @@ export enum Fees {
   UnfollowWecoopFee = convertToDecimals(1),
   LikeWecoopFee = convertToDecimals(0.01),
   LikeUserFee = convertToDecimals(0.1),
+  ReplyWecoopFee = convertToDecimals(0.01),
+  ReplyUserFee = convertToDecimals(0.09),
 }

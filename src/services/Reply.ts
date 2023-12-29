@@ -1,5 +1,6 @@
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import { Fees } from '../enums/Fees'
 import { NotePrefix } from '../enums/notePrefix'
 import { getUserCountry } from '../utils/userUtils'
 import { Transaction } from './Transaction'
@@ -19,13 +20,16 @@ export class Reply {
 
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopReply}${country}:${transactionId}:${text}`
+
+    const wecoopFee = Fees.ReplyWecoopFee
+    const creatorFee = Fees.ReplyUserFee
     const scoopFeeTransaction = await transactionService.createTransaction(
       address,
       import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-      1000,
+      wecoopFee,
       note,
     )
-    const postCreatorFee = await transactionService.createTransaction(address, creatorAddress, 1000, `creator-fee:${note}`)
+    const postCreatorFee = await transactionService.createTransaction(address, creatorAddress, creatorFee, `creator-fee:${note}`)
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]
     const groupedTransactions = algosdk.assignGroupID(transactionsArray)

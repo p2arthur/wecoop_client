@@ -31,6 +31,7 @@ interface PostInputPropsInterface {
 const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
+  const { activeAccount } = useWallet()
   const { sendTransactions, signTransactions } = useWallet()
   const { data: userData } = useGetUserInfo(post.creator_address)
   const { algod } = useOutletContext() as PostInputPropsInterface
@@ -53,7 +54,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       const encodedGroupedTransactions = await likeService.handlePostLike({
         event,
         creatorAddress: post.creator_address,
-        address: userData?.address!,
+        address: activeAccount?.address!,
         transactionId: post.transaction_id as string,
       })
 
@@ -91,7 +92,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
     const encodedGroupedTransactions = await replieservice.handlePostReply({
       creatorAddress: post.creator_address,
-      address: userData?.address!,
+      address: activeAccount?.address!,
       transactionId: post.transaction_id as string,
       text: encodeURIComponent(replyText),
     })

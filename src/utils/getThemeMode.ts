@@ -1,21 +1,15 @@
 import { useEffect, useState } from 'react'
 
 const useDarkMode = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  // Use localStorage value as the initial state or default to false
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const storedMode = localStorage.getItem('dark-mode')
+    return storedMode === 'true'
+  })
 
   const toggleDarkMode = () => {
     setIsDarkMode((prevMode) => !prevMode)
   }
-
-  useEffect(() => {
-    const storedDarkMode = localStorage.getItem('dark-mode')
-
-    if (storedDarkMode !== null) {
-      setIsDarkMode(storedDarkMode === 'true')
-    } else {
-      setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches)
-    }
-  }, [])
 
   useEffect(() => {
     const isDarkModeLabel = isDarkMode ? 'true' : 'false'
