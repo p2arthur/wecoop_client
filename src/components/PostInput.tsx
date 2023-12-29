@@ -4,12 +4,12 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
 import { AssetId } from '../enums/assetId'
 import { NotePrefix } from '../enums/notePrefix'
-import { v4 as uuidv4 } from 'uuid'
 import { Transaction } from '../services/Transaction'
-import { UserInterface } from '../services/User'
+import { User as UserInterface } from '../services/api/types'
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 
@@ -110,7 +110,6 @@ const PostInput = () => {
         status: 'accepted',
         transaction_id: id,
         country,
-        nfd: userData.nfd,
         timestamp: new Date().getDate(),
         replies: [],
         likes: [],

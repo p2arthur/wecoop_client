@@ -1,4 +1,4 @@
-import { UserInterface } from '../services/User'
+import { User as UserInterface } from '../services/api/types'
 import ConnectWallet from './ConnectWallet'
 import ThemeSwitcher from './ThemeSwitcher'
 
