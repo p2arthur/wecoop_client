@@ -1,27 +1,27 @@
 import axios from 'axios'
+import { Post as PostInterface } from './api/types'
 
-export interface PostProps {
-  text: string
-  creator_address: string
-  transaction_id: string | null
-  status: 'loading' | 'accepted' | 'denied' | string | null
-  timestamp: number | null
-  country?: string
-  nfd?: string
-  likes?: number
-  replies?: PostProps[]
+export interface NfdListProps {
+  nfd: string
+  address: string
 }
 
 export class Post {
-  postData: PostProps = { text: '', creator_address: '', transaction_id: null, status: null, timestamp: null, likes: undefined }
+  postData: PostInterface = {
+    text: '',
+    creator_address: '',
+    transaction_id: '',
+    timestamp: null,
+    country: '',
+    nfd: '',
+    likes: [],
+    replies: [],
+    status: null,
+  }
 
-  constructor() {}
-
-  public async setPostData(postDataInput: PostProps): Promise<PostProps> {
+  public async setPostData(postDataInput: PostInterface): Promise<PostInterface> {
     const text = this.decryptPostNote(postDataInput.text!)
     const allText = text.split(':')
-    const nfd = await this.getPostNfd(postDataInput.creator_address!)
-
     this.postData = {
       text: allText[3],
       creator_address: postDataInput.creator_address,
@@ -29,7 +29,6 @@ export class Post {
       status: postDataInput.status,
       timestamp: postDataInput.timestamp! * 1000,
       country: allText[2],
-      nfd: nfd,
       likes: postDataInput.likes,
       replies: postDataInput.replies,
     }
@@ -42,7 +41,7 @@ export class Post {
     return decodedString
   }
 
-  private async getPostNfd(address: string) {
+  public async getPostNfd(address: string) {
     try {
       const { data } = await axios.get(`https://api.nf.domains/nfd/lookup?address=${address}&view=tiny&allowUnverified=true`)
 

@@ -1,23 +1,54 @@
-import { PostProps } from '../services/Post'
+import { useEffect, useState } from 'react'
+import { Post } from '../services/api/types'
+import LoaderSpinner from './LoaderSpinner'
 import PostCard from './PostCard'
 
 interface FeedPropsInterface {
-  postsList: PostProps[]
-  getAllPosts: () => Promise<void>
-
-  handleNewReply?: (newReply: PostProps, transactionCreatorId: string) => void
+  postList: Post[] | null
+  isLoading: boolean
+  handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
 }
 
-const FeedComponent = ({ postsList, getAllPosts, handleNewReply }: FeedPropsInterface) => {
-  const sortedPostList = postsList.sort((a, b) => {
-    return b.timestamp! - a.timestamp!
-  })
+const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterface) => {
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const renderedPosts = sortedPostList.map((post) => (
-    <PostCard key={post.transaction_id} handleNewReply={handleNewReply} post={post} getAllPosts={getAllPosts} />
-  ))
+  const handleScroll = () => {
+    if (!isLoading && window.innerHeight + window.scrollY + 150 > document.documentElement.offsetHeight) {
+      setCurrentPage((prevPage) => prevPage + 1)
+    }
+  }
+  const postsPerPage = 10
 
-  return <>{postsList.length > 0 && renderedPosts}</>
+  const paginatedPosts: Post[] = postList?.slice(0, currentPage * postsPerPage)!
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', () => {})
+    }
+  }, [postList])
+
+  useEffect(() => {
+    if (paginatedPosts && postList) {
+      if (paginatedPosts.length >= postList.length) {
+        window.removeEventListener('scroll', () => {})
+      }
+    }
+  }, [paginatedPosts])
+
+  if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
+
+  return (
+    <div className="flex flex-col gap-4">
+      {paginatedPosts?.length! > 0 &&
+        paginatedPosts?.map((post, index) => <PostCard key={index} handleNewReply={handleNewReply} post={post} />)}
+      {currentPage * postsPerPage >= postList?.length! && !isLoading && (
+        <div className={'w-full justify-center flex'}>
+          <p className="font-bold text-2xl">You're all caught up!</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default FeedComponent

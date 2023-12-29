@@ -1,5 +1,6 @@
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import { Fees } from '../enums/Fees'
 import { NotePrefix } from '../enums/notePrefix'
 import { getUserCountry } from '../utils/userUtils'
 import { Transaction } from './Transaction'
@@ -16,17 +17,20 @@ export class Like {
 
   public async handlePostLike({ event, creatorAddress, transactionId, address }: LikeProps) {
     const transactionService = new Transaction(this.client)
+    const wecoopFee = Fees.LikeWecoopFee
+    const creatorFee = Fees.LikeUserFee
+    const wecoopWalletAddress = import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string
 
     event.preventDefault()
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopLike}${country}:${transactionId}`
-    const scoopFeeTransaction = await transactionService.createTransaction(
+    const scoopFeeTransaction = await transactionService.createTransaction(address, wecoopWalletAddress, wecoopFee, note)
+    const postCreatorFee = await transactionService.createTransaction(
       address,
-      import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-      1000,
-      note,
+      creatorAddress,
+      creatorFee,
+      `WeCoop - ${address} just liked your post`,
     )
-    const postCreatorFee = await transactionService.createTransaction(address, creatorAddress, 1000, `creator-fee:${note}`)
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]
     const groupedTransactions = algosdk.assignGroupID(transactionsArray)

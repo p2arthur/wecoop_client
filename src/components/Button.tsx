@@ -16,8 +16,7 @@ const Button = ({ buttonText, buttonFunction, icon, inactive }: ButtonProps) => 
         onClick={buttonFunction}
         disabled={inactive}
       >
-        {' '}
-        {typeof icon === 'string' ? <img className="w-6" src={icon as string} alt="" /> : icon}
+        <div> {typeof icon === 'string' ? <img className="w-6" src={icon as string} alt="" /> : icon}</div>
         {buttonText}
       </button>
     </div>

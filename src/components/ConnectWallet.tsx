@@ -1,5 +1,5 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { UserInterface } from '../services/User'
+import { User as UserInterface } from '../services/api/types'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { DropDown } from './DropDown'
 
@@ -17,10 +17,10 @@ const ConnectWallet = ({ user }: ConnectWalletProps) => {
       {activeAccount ? (
         <div>
           <DropDown
-            icon={user.avatarUri}
+            icon={user.avatar}
             options={[actualProvider!]}
             type="activeAccount"
-            buttonText={!user.nfd ? ellipseAddress(activeAccount.address) : user.nfd.toUpperCase()}
+            buttonText={user.nfd.name != null ? user?.nfd.name : ellipseAddress(activeAccount.address)}
             address={activeAccount.address}
           />
         </div>

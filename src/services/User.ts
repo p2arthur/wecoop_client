@@ -1,15 +1,8 @@
 import axios from 'axios'
 import { minidenticon } from 'minidenticons'
-import { AssetId } from '../enums/assetId'
+import { User as UserInterface } from '../services/api/types'
 import { Feed } from './Feed'
-import { PostProps } from './Post'
-
-export interface UserInterface {
-  address: string
-  avatarUri?: string
-  nfd?: string
-  balance?: number
-}
+import { Post } from './api/types'
 
 export class User {
   constructor(
@@ -17,20 +10,18 @@ export class User {
     private feedServices: Feed = new Feed(),
   ) {}
 
-  async signTransaction(post: PostProps) {
+  async signTransaction(post: Post) {
     this.feedServices.setAllPosts(post)
   }
 
-  public async getUser() {
-    const user = await this.setUser()
-    return user
+  public async getUserByWalletAddress(walletAddress: string) {
+    const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/user/${walletAddress}`)
+    return data
   }
 
-  public async setUser() {
-    const avatarUri = this.generateIdIcon(this.userData.address)
-    const nfd = await this.getUserNfd(this.userData.address)
-    const balance = await this.getUserAssetBalance(this.userData.address, AssetId.coopCoin)
-    this.userData = { address: this.userData.address, avatarUri, nfd, balance }
+  public async setUser(walletAddress: string) {
+    const { data } = await this.getUserByWalletAddress(walletAddress)
+    this.userData = data
     return this.userData
   }
 

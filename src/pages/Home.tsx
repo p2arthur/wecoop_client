@@ -1,98 +1,83 @@
+import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
 import FeedComponent from '../components/Feed'
-import LoaderSpinner from '../components/LoaderSpinner'
 import PostInput from '../components/PostInput'
+import { usePosts } from '../context/Posts/Posts'
 import { Feed } from '../services/Feed'
-import { PostProps } from '../services/Post'
-import { debounce } from '../utils/debounce'
+import { useGetUserInfo } from '../services/api/Users'
+import { Post } from '../services/api/types'
 
 const Home = () => {
-  const [postsList, setPostsList] = useState<PostProps[]>([])
-  const [nextToken, setNextToken] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [allCaughtUp, setAllCaughtUp] = useState(false)
-
-  const feed = new Feed()
-  const getAllPosts = async () => {
-    if (!loading) {
-      setLoading(true)
-      try {
-        const { data, next } = await feed.getAllPosts({ next: nextToken })
-
-        if (postsList.length === 0) {
-          const existingTransactionIds = postsList.map((post) => post.transaction_id)
-
-          const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id))
-          setPostsList(uniquePosts)
-        } else {
-          const existingTransactionIds = postsList.map((post) => post.transaction_id)
-
-          const uniquePosts = data.filter((post) => !existingTransactionIds.includes(post.transaction_id))
-
-          setPostsList((prev) => [...prev, ...uniquePosts])
-        }
-        if (!next) {
-          setAllCaughtUp(true)
-        }
-        setNextToken(next)
-      } catch (error) {
-        console.error('Error fetching posts:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  const { postList, handleNewReply, isLoading } = usePosts()
+  const { activeAccount } = useWallet()
+  const [feedPosts, setFeedPosts] = useState<Post[]>()
+  const [activeTab, setActiveTab] = useState<'personalized' | 'global'>('global')
+  const { data } = useGetUserInfo(activeAccount?.address!)
+  const feedServices = new Feed()
+  const getFeedPosts = async (walletAddress: string) => {
+    const posts = await feedServices.getFeedByWalletAddress(walletAddress)
+    setFeedPosts(posts)
   }
-
-  const setPosts = (newPost: PostProps) => {
-    setPostsList([newPost, ...postsList])
-  }
-
-  const handleScroll = debounce(() => {
-    const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100
-    if (isAtBottom && nextToken) {
-      getAllPosts().then()
-    }
-  }, 380)
 
   useEffect(() => {
-    getAllPosts().then()
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll)
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [nextToken])
-
-  const handleSetPosts = (newPost: PostProps) => {
-    setPosts(newPost)
-  }
-
-  const handleNewReply = (newReply: PostProps, transactionCreatorId: string) => {
-    const newPostsList = postsList.map((post) => {
-      if (transactionCreatorId === post.transaction_id) {
-        if (post.replies === undefined) {
-          return { ...post, replies: [newReply] }
-        }
-        return { ...post, replies: [...post.replies, newReply] }
+    const getFeedPostsEffect = async () => {
+      if (activeAccount) {
+        await getFeedPosts(activeAccount?.address!)
       }
-      return post
-    })
-    setPostsList(newPostsList)
-  }
+
+      return feedPosts
+    }
+
+    getFeedPostsEffect()
+  }, [activeAccount])
 
   return (
-    <div className="flex flex-col gap-4 p-2 ">
-      <PostInput setPosts={handleSetPosts} />
-      <p className="font-bold text-2xl">Feed - </p>
-      <FeedComponent postsList={postsList} getAllPosts={getAllPosts} handleNewReply={handleNewReply} />
-      {loading && <LoaderSpinner text={'loading feed'} />}
-      {allCaughtUp && (
-        <div className={'w-full justify-center flex'}>
-          <p className="font-bold text-2xl">You're all caught up!</p>
+    <div className="flex flex-col p-2 ">
+      <PostInput />
+
+      <div className="flex mt-6 items-center justify-around gap-10 border-2 border-b-0 border-gray-950 p-2 w-96">
+        {feedPosts ? (
+          <div className="w-1/2 flex justify-center">
+            <p
+              onClick={() => {
+                setActiveTab('personalized')
+              }}
+              className={`font-bold text-xl cursor-pointer hover:scale-105 ${
+                activeTab === 'personalized' ? 'border-b-2 border-gray-900' : 'border-b-2 border-transparent'
+              }`}
+            >
+              Your Feed
+            </p>
+          </div>
+        ) : (
+          <p className="font-bold text-gray-400 text-xl cursor-pointer">Your feed</p>
+        )}
+        <div className="w-1/2 flex justify-center">
+          <p
+            onClick={() => {
+              setActiveTab('global')
+            }}
+            className={`font-bold text-xl cursor-pointer  ${
+              activeTab === 'global' ? 'border-b-2 border-gray-900' : 'border-b-2 border-transparent hover:scale-105'
+            }`}
+          >
+            Global Feed 🌎
+          </p>
         </div>
-      )}
+      </div>
+      <div className="p-2 border-2 border-gray-950">
+        {activeTab === 'personalized' && feedPosts && (
+          <>
+            <FeedComponent postList={feedPosts!} isLoading={isLoading} handleNewReply={handleNewReply} />
+          </>
+        )}
+
+        {activeTab === 'global' && (
+          <>
+            <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
+          </>
+        )}
+      </div>
     </div>
   )
 }
