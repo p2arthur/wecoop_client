@@ -32,10 +32,11 @@ const Home = () => {
   }, [activeAccount])
 
   return (
-    <div className="flex flex-col p-2 ">
-      <PostInput />
-
-      <div className="flex mt-6 items-center justify-around gap-10 border-2 border-b-0 border-gray-950 p-2 w-full md:w-96">
+    <div className="flex flex-col p-2">
+      <div className="mt-20">
+        <PostInput />
+      </div>
+      <div className="flex mt-6 items-center justify-around gap-10 border-2 border-b-0 dark:border-gray-600  border-gray-950 p-2 w-full md:w-96">
         {feedPosts ? (
           <div className="w-1/2 flex justify-center">
             <p
@@ -43,7 +44,7 @@ const Home = () => {
                 setActiveTab('personalized')
               }}
               className={`font-bold text-xl cursor-pointer hover:scale-105 ${
-                activeTab === 'personalized' ? 'border-b-2 border-gray-900' : 'border-b-2 border-transparent'
+                activeTab === 'personalized' ? 'border-b-2 border-gray-900 dark:border-gray-300' : 'border-b-2 border-transparent'
               }`}
             >
               Your Feed
@@ -58,14 +59,14 @@ const Home = () => {
               setActiveTab('global')
             }}
             className={`font-bold text-xl cursor-pointer  ${
-              activeTab === 'global' ? 'border-b-2 border-gray-900' : 'border-b-2 border-transparent hover:scale-105'
+              activeTab === 'global' ? 'border-b-2 border-gray-900 dark:border-gray-300' : 'border-b-2 border-transparent hover:scale-105'
             }`}
           >
             Global Feed 🌎
           </p>
         </div>
       </div>
-      <div className="p-2 border-2 border-gray-950">
+      <div className="p-2 border-2 border-t-4 border-gray-950 dark:border-gray-600">
         {activeTab === 'personalized' && feedPosts && (
           <>
             <FeedComponent postList={feedPosts!} isLoading={isLoading} handleNewReply={handleNewReply} />

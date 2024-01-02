@@ -140,7 +140,7 @@ const PostInput = () => {
             maxLength={300}
             onChange={handleChange}
             placeholder={placeholder}
-            className="w-full border-2  align-top text-start break-all whitespace-normal h-32 p-2 resize-none  z-20 focus:scale-101 focus:border-b-4 border-gray-900 focus:outline-gray-500"
+            className="w-full border-2  align-top text-start break-all whitespace-normal h-32 p-2 resize-none  z-20 focus:scale-101 focus:border-b-4  dark:border-gray-600 border-gray-900 focus:outline-gray-500"
           />
           <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
         </div>
@@ -148,7 +148,7 @@ const PostInput = () => {
           <div className="flex items-center text-red-600 gap-1">
             <FaArrowRight />
 
-            <p>Note: All posts and interactions are permanently recorded on the Algorand blockchain.</p>
+            <p className="w-full">Note: All posts and interactions are permanently recorded on the Algorand blockchain.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

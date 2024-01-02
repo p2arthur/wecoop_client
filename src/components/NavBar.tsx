@@ -8,11 +8,11 @@ interface NavBarProps {
 
 const NavBar = ({ user }: NavBarProps) => {
   return (
-    <div className="p-3 border-b-4 border-gray-900 flex justify-between items-center">
+    <div className="px-3 py-0 fixed z-50 bg-gray-100 dark:bg-gray-950 w-screen border-b-4 border-gray-900 flex justify-between items-center h-14">
       <a href="/">
-        <p className="font-bold text-3xl">WeCOOP</p>
+        <p className="font-bold text-2xl">WeCOOP</p>
       </a>
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <ThemeSwitcher />
         <ConnectWallet user={user} />
       </div>

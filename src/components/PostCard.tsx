@@ -3,7 +3,8 @@ import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { useEffect, useState } from 'react'
-import { FaGlobe, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
@@ -139,20 +140,20 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     <>
       <div>
         {post.status === 'accepted' ? (
-          <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-500">
+          <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-400">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-md border-2 border-gray-900 dark:bg-gray-100 overflow-hidden border-b-4">
                   <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt="" />
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
-                  <h2 className="font-bold text-lg md:text-xl h-full hover:underline">
+                  <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
                     {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)}
                   </h2>
                   {}
                 </a>
               </div>
-              <div className="flex flex-col md:flex-row md:gap-2">
+              <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
                 {post.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
                     <div className="w-6 rounded-full overflow-hidden">
@@ -166,37 +167,53 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-words w-[20rem] md:w-full">{post?.text?.length > 0 && decodeURIComponent(post?.text)}</p>
-              <div className={'flex w-full justify-start md:justify-end items-center gap-1 text-md'}>
-                {variant === 'default' && (
-                  <button
-                    className="rounded-lg gap-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
-                    onClick={() => setOpenReplyInput(!openReplyInput)}
-                  >
-                    <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                    <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.replies?.length}</p>
-                  </button>
-                )}
-
-                <div className={'flex gap-1 items-center'}>
-                  {isLoadingLike ? (
-                    <FaSpinner className="animate-spin text-2xl" />
-                  ) : (
-                    <>
-                      <button
-                        className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
-                        onClick={handlePostLike}
-                      >
-                        <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                        {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.likes?.length}</p>}
-                      </button>
-                    </>
+              <p className="tracking-wide break-all break-words flex w-[21rem]">
+                {post?.text?.length > 0 && decodeURIComponent(post?.text)}
+              </p>
+              <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
+                <div className="flex gap-3 items-center">
+                  {variant === 'default' && (
+                    <button
+                      className="rounded-lg gap-1 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center bg-green-300"
+                      onClick={() => setOpenReplyInput(!openReplyInput)}
+                    >
+                      <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                      <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.replies?.length}</p>
+                    </button>
                   )}
+
+                  <div className={'flex gap-1 items-center '}>
+                    {isLoadingLike ? (
+                      <FaSpinner className="animate-spin text-2xl" />
+                    ) : (
+                      <>
+                        <button
+                          className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
+                          onClick={handlePostLike}
+                        >
+                          <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                          {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.likes?.length}</p>}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <a target="_blank" className={'cursor-pointer'} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
+                    <MdTravelExplore className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
+                  </a>
                 </div>
-                <a target="_blank" className={'cursor-pointer'} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
-                  <FaGlobe className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                </a>
+                <div className="flex md:gap-2 md:hidden">
+                  {post.country ? (
+                    <div className="flex gap-0 items-center justify-center">
+                      <div className="w-6 rounded-full overflow-hidden">
+                        <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
+                      </div>
+                      <p className="w-full text-center">{post.country}</p>
+                    </div>
+                  ) : null}
+                  <p>{handleTimestamp()}</p>
+                </div>
               </div>
+
               {openReplyInput && (
                 <div className={'grid gap-4'}>
                   <p className={'text-lg'}>replies</p>
