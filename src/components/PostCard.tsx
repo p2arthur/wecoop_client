@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaGlobe, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
@@ -11,14 +11,14 @@ import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, User } from '../services/api/types'
+import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
 
 interface PostPropsInterface {
-  post: Post | IReply
+  post: PostRequest | IReply
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
 }
@@ -99,6 +99,10 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
 
+    useEffect(() => {
+      console.log('aaaaa', post.replies)
+    }, [])
+
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
     const acceptedReply: Post = {
@@ -162,8 +166,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-words w-[22rem] md:w-full">{post?.text?.length > 0 && decodeURIComponent(post?.text)}</p>
-              <div className={'flex justify-end items-center gap-1 text-md '}>
+              <p className="tracking-wide break-words w-[20rem] md:w-full">{post?.text?.length > 0 && decodeURIComponent(post?.text)}</p>
+              <div className={'flex w-full justify-start md:justify-end items-center gap-1 text-md'}>
                 {variant === 'default' && (
                   <button
                     className="rounded-lg gap-1 hover:bg-gray-900 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
