@@ -1,12 +1,12 @@
 import { Provider } from '@txnlab/use-wallet'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from './Button'
 
 interface DropDownOption {
   buttonText: string
   options: Provider[] | null
-  icon?: string
+  icon?: string | ReactNode
   type: string
   address?: string
   children?: React.ReactNode
@@ -19,7 +19,7 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
   const dropDownButtonRenderer = () => {
     return (
       <div>
-        <Button icon={icon} buttonText={buttonText} buttonFunction={handleOpenDropDown} />
+        <Button icon={<div className="w-5">{icon}</div>} buttonText={buttonText} buttonFunction={handleOpenDropDown} />
       </div>
     )
   }
@@ -67,7 +67,7 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
 
   return (
     <div onClick={handleOpenDropDown}>
-      <button className="p-2">
+      <button className="">
         <div className="flex flex-col relative z-50">
           {dropDownButtonRenderer()}
           {isOpen ? (

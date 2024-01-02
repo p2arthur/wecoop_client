@@ -1,20 +1,20 @@
-import moon from '../assets/moon.png'
-import sun from '../assets/sun.png'
+import { FaRegMoon } from 'react-icons/fa6'
+import { RiSunLine } from 'react-icons/ri'
 import useDarkMode from '../utils/getThemeMode'
 
 const ThemeSwitcher = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode()
   return (
-    <button onClick={toggleDarkMode} className="p-0.5 border-2 border-black switch-theme flex items-center ">
+    <button onClick={toggleDarkMode} className="p-0.1 border-2 border-black switch-theme flex items-center ">
       <div
         className={`
       moon p-1`}
       >
-        <img src={moon} alt="moon" />
+        <FaRegMoon className="text-gray-950 dark:text-gray-100" />
       </div>
 
       <div className={`bg-black sun p-1`}>
-        <img src={sun} alt="sun" />
+        <RiSunLine className="dark:text-gray-950 text-gray-100" />
       </div>
     </button>
   )

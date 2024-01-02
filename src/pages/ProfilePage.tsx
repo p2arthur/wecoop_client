@@ -77,10 +77,10 @@ const ProfilePage = () => {
   return (
     <div className="flex flex-col ">
       <section className="p-4">
-        <div className="w-full h-44 border-2 flex flex-col gap-6 border-gray-900 border-b-4 p-5">
+        <div className="w-full h-44 border-2 flex flex-col gap-6 border-gray-900 dark:border-gray-500 border-b-4 p-5">
           <div className="flex gap-3 justify-between items-start">
             <div className="flex flex-col  md:flex-row gap-3">
-              <div className="border-2 border-b-4 h-16 w-16 border-gray-900 rounded-md overflow-hidden">
+              <div className="border-2 border-b-4 h-16 w-16 bg-gray-100 border-gray-900 rounded-md overflow-hidden">
                 {user?.avatar !== null ? (
                   <img className="w-16 h-16" src={user?.avatar} alt="profile-photo" />
                 ) : (
