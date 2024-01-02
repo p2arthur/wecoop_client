@@ -167,7 +167,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-all break-words flex w-[19rem] sm:w-[21-rem]">
+              <p className="tracking-wide break-all break-words flex w-[19rem] sm:w-[21-rem] md:w-full">
                 {post?.text?.length > 0 && decodeURIComponent(post?.text)}
               </p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
