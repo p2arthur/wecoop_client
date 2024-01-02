@@ -19,7 +19,7 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
   const dropDownButtonRenderer = () => {
     return (
       <div>
-        <Button icon={<div className="w-5">{icon}</div>} buttonText={buttonText} buttonFunction={handleOpenDropDown} />
+        <Button icon={<div className="w-5 text-md">{icon}</div>} buttonText={buttonText} buttonFunction={handleOpenDropDown} />
       </div>
     )
   }

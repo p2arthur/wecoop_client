@@ -10,11 +10,11 @@ const ThemeSwitcher = () => {
         className={`
       moon p-1`}
       >
-        <FaRegMoon className="text-gray-950 dark:text-gray-100" />
+        <FaRegMoon className="text-gray-950 dark:text-gray-100 text-xs md:text-sm" />
       </div>
 
       <div className={`bg-black sun p-1`}>
-        <RiSunLine className="dark:text-gray-950 text-gray-100" />
+        <RiSunLine className="dark:text-gray-950 text-gray-100 text-xs md:text-sm" />
       </div>
     </button>
   )
