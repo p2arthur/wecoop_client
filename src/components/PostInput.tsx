@@ -134,7 +134,7 @@ const PostInput = () => {
   return (
     <form onSubmit={handleSubmit} action="">
       {' '}
-      <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500">
+      <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative ">
           <textarea
             maxLength={300}

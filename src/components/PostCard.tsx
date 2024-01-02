@@ -140,10 +140,10 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     <>
       <div>
         {post.status === 'accepted' ? (
-          <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-75 cursor-pointer min-h-[120px] post dark:hover:text-gray-100 dark:border-gray-400">
+          <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-md border-2 border-gray-900 dark:bg-gray-100 overflow-hidden border-b-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-md border-2 border-gray-900 bg-white overflow-hidden border-b-4">
                   <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt="" />
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
@@ -171,7 +171,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 {post?.text?.length > 0 && decodeURIComponent(post?.text)}
               </p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-1 items-center">
                   {variant === 'default' && (
                     <button
                       className="rounded-lg gap-1 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
