@@ -177,7 +177,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                       className="rounded-lg gap-1 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center bg-green-300"
                       onClick={() => setOpenReplyInput(!openReplyInput)}
                     >
-                      <FaRegMessage className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                      <FaRegMessage className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                       <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.replies?.length}</p>
                     </button>
                   )}
