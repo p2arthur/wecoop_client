@@ -126,7 +126,7 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
-            <FollowButton isFollowing={isFollowing} walletAddress={userData?.address!} />
+            <FollowButton isFollowing={isFollowing} walletAddress={userData?.address || ''} />
           </div>
           {/* <div className="flex justify-end">
             <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} type="connect" options={[]} />

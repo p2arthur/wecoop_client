@@ -13,7 +13,7 @@ import { User as UserInterface } from '../services/api/types'
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 
-interface PostInputOutletContext {
+export interface PostInputOutletContext {
   algod: AlgodClient
   userData: UserInterface
 }
