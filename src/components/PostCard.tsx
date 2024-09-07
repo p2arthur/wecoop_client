@@ -197,7 +197,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                       </>
                     )}
                   </div>
-                  <a target="_blank" className={'cursor-pointer'} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
+                  <a target="_blank" className={'cursor-pointer'} href={`https://allo.info/tx/${post.transaction_id}`}>
                     <MdTravelExplore className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
                   </a>
                 </div>
