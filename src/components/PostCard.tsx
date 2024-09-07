@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
@@ -141,12 +141,14 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     return parts.map((part, index) => {
       if (urlRegex.test(part)) {
         return (
-          <a href={part} target="_blank" rel="noopener noreferrer" className="mx-2 text-blue-600 underline">
-            {part}
-          </a>
+          <Fragment key={index}>
+            <a href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">
+              {part}
+            </a>
+          </Fragment>
         )
       }
-      return <span key={index}>{part}</span>
+      return part
     })
   }
 
@@ -183,7 +185,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </div>
 
             <div className="grid gap-2" onClick={(e) => e.stopPropagation()}>
-              <p className="tracking-wide break-all break-words flex w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
+              <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
                   {variant === 'default' && (
