@@ -12,7 +12,7 @@ import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
+import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -165,9 +165,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </div>
 
             <div className="grid gap-2">
-              <p className="tracking-wide break-all break-words flex w-[19rem] sm:w-[21-rem] md:w-full">
-                {post?.text?.length > 0 && decodeURIComponent(post?.text)}
-              </p>
+              <p className="tracking-wide break-all break-words flex w-full">{post?.text?.length > 0 && decodeURIComponent(post?.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
                   {variant === 'default' && (

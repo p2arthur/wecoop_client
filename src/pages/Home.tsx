@@ -36,7 +36,7 @@ const Home = () => {
       <div className="mt-20 bg-gray">
         <PostInput />
       </div>
-      <div className="flex mt-6 items-center justify-around gap-10 border-2 border-b-0 dark:border-gray-800  border-gray-950 bg-gray-100 dark:bg-gray-900 p-2 w-full md:w-96">
+      <div className="flex mt-6 items-center justify-around gap-10 border-2 border-b-0 dark:border-gray-800  border-gray-950 bg-gray-100 dark:bg-gray-900 p-2 w-full">
         {feedPosts ? (
           <div className="w-1/2 flex justify-center">
             <p
