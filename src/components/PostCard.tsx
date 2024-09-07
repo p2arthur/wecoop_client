@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
@@ -101,10 +101,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
 
-    useEffect(() => {
-      console.log('aaaaa', post.replies)
-    }, [])
-
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
     const acceptedReply: Post = {
@@ -128,13 +124,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
   const handleTimestamp = () => {
     const date = post.timestamp! * 1000
-    const formattedDate = formatDateFromTimestamp(date)
-
-    if (!formattedDate.time) {
-      return 'Just now'
-    } else {
-      return `${formattedDate.time} ${formattedDate.measure} ago`
-    }
+    return formatDateFromTimestamp(date)
   }
 
   const handleGoToPostPage = () => {
