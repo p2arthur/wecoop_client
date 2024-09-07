@@ -131,6 +131,25 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     window.location.href = `/post?id=${post.transaction_id}`
   }
 
+  const handleTextPost = (text: string) => {
+    const decodedText = decodeURIComponent(text)
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g
+
+    const parts = decodedText.split(urlRegex)
+
+    return parts.map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a href={part} target="_blank" rel="noopener noreferrer" className="mx-2 text-blue-600 underline">
+            {part}
+          </a>
+        )
+      }
+      return <span key={index}>{part}</span>
+    })
+  }
+
   return (
     <>
       <div>
@@ -148,7 +167,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
                     {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)}
                   </h2>
-                  {}
                 </a>
               </div>
               <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
@@ -164,8 +182,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               </div>
             </div>
 
-            <div className="grid gap-2">
-              <p className="tracking-wide break-all break-words flex w-full">{post?.text?.length > 0 && decodeURIComponent(post?.text)}</p>
+            <div className="grid gap-2" onClick={(e) => e.stopPropagation()}>
+              <p className="tracking-wide break-all break-words flex w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
                   {variant === 'default' && (
@@ -249,7 +267,9 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 </div>
                 <h2 className="font-bold text-xl h-full">{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
               </div>
-              <p className="w-full">{decodeURIComponent(post.text)}</p>
+              <p className="w-full" onClick={(e) => e.stopPropagation()}>
+                {handleTextPost(post.text)}
+              </p>
             </div>
             <span>
               <FaSpinner className="w-6 animate-spin" />
