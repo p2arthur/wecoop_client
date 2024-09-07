@@ -1,7 +1,8 @@
-import { Provider } from '@txnlab/use-wallet'
-import { ReactNode, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import {Provider} from '@txnlab/use-wallet'
+import {ReactNode, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 import Button from './Button'
+import {toast} from "react-toastify";
 
 interface DropDownOption {
   buttonText: string
@@ -12,17 +13,34 @@ interface DropDownOption {
   children?: React.ReactNode
 }
 
-const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) => {
+const DropDown = ({options, buttonText, icon, type, address}: DropDownOption) => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
 
   const dropDownButtonRenderer = () => {
     return (
       <div>
-        <Button icon={<div className="w-5 text-md">{icon}</div>} buttonText={buttonText} buttonFunction={handleOpenDropDown} />
+        <Button icon={<div className="w-5 text-md">{icon}</div>} buttonText={buttonText} buttonFunction={handleOpenDropDown}/>
       </div>
     )
   }
+
+  const handleShareProfile = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/profile/${address}`).catch(() => {
+      toast('Failed to copy profile link to clipboard', {
+        position: 'bottom-right',
+        className: "black-background",
+        bodyClassName: "grow-font-size",
+        progressClassName: "fancy-progress-bar",
+      })
+    })
+
+    toast('Profile link copied to clipboard', {
+      position: 'bottom-right',
+      theme: 'dark'
+    })
+  }
+
 
   const optionRenderer = () => {
     if (options) {
@@ -34,7 +52,7 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
               onClick={option.connect}
             >
               <div className="rounded-full overflow-hidden flex items-center justify-center w-5">
-                <img className="w-5" src={option.metadata.icon} alt="" />
+                <img className="w-5" src={option.metadata.icon} alt=""/>
               </div>
               <p className="font-bold">{option.metadata.name}</p>
             </button>
@@ -52,6 +70,12 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
               onClick={() => navigate(`/profile/${address}`)}
             >
               profile
+            </button>
+            <button
+              className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
+              onClick={handleShareProfile}
+            >
+              share profile
             </button>
           </div>
         ) : null
@@ -81,4 +105,4 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
   )
 }
 
-export { DropDown }
+export {DropDown}
