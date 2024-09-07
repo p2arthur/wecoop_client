@@ -1,23 +1,23 @@
-import {useQueryClient} from '@tanstack/react-query'
-import {useWallet} from '@txnlab/use-wallet'
+import { useQueryClient } from '@tanstack/react-query'
+import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import {minidenticon} from 'minidenticons'
-import {useEffect, useState} from 'react'
-import {FaRegMessage, FaRegThumbsUp, FaSpinner} from 'react-icons/fa6'
-import {MdTravelExplore} from 'react-icons/md'
-import {useOutletContext} from 'react-router-dom'
-import {v4 as uuidv4} from 'uuid'
-import {usePosts} from '../context/Posts/Posts'
-import {Like} from '../services/Like'
-import {Reply} from '../services/Reply'
+import { minidenticon } from 'minidenticons'
+import { useEffect, useState } from 'react'
+import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { MdTravelExplore } from 'react-icons/md'
+import { useOutletContext } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
+import { usePosts } from '../context/Posts/Posts'
+import { Like } from '../services/Like'
+import { Reply } from '../services/Reply'
 
-import {useGetUserInfo} from '../services/api/Users'
-import {Post, PostRequest, Reply as IReply, User} from '../services/api/types'
+import { useGetUserInfo } from '../services/api/Users'
+import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
-import {ellipseAddress} from '../utils/ellipseAddress'
-import {getUserCountry} from '../utils/userUtils'
-import {ReplyInput} from './ReplyInput'
-import {ShareButton} from "./ShareButton";
+import { ellipseAddress } from '../utils/ellipseAddress'
+import { getUserCountry } from '../utils/userUtils'
+import { ReplyInput } from './ReplyInput'
+import { ShareButton } from './ShareButton'
 
 interface PostPropsInterface {
   post: PostRequest | IReply
@@ -30,13 +30,13 @@ interface PostInputPropsInterface {
   userData: User
 }
 
-const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterface) => {
+const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
   const queryClient = useQueryClient()
-  const {handleNewLike} = usePosts()
-  const {activeAccount} = useWallet()
-  const {sendTransactions, signTransactions} = useWallet()
-  const {data: userData} = useGetUserInfo(post.creator_address)
-  const {algod} = useOutletContext() as PostInputPropsInterface
+  const { handleNewLike } = usePosts()
+  const { activeAccount } = useWallet()
+  const { sendTransactions, signTransactions } = useWallet()
+  const { data: userData } = useGetUserInfo(post.creator_address)
+  const { algod } = useOutletContext() as PostInputPropsInterface
   const replieservice = new Reply(algod)
   const likeService = new Like(algod)
 
@@ -56,7 +56,7 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
       const encodedGroupedTransactions = await likeService.handlePostLike({
         event,
         creatorAddress: post.creator_address,
-        address: activeAccount?.address!,
+        address: activeAccount?.address || '',
         transactionId: post.transaction_id as string,
       })
 
@@ -69,7 +69,7 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
     } catch (error) {
       console.error(error)
     } finally {
-      handleNewLike && handleNewLike({creator_address: userData?.address!}, post.transaction_id as string)
+      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
     }
   }
 
@@ -79,7 +79,7 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
 
     const newReply: Post = {
       text: encodeURIComponent(replyText),
-      creator_address: userData?.address!,
+      creator_address: userData?.address || '',
       status: 'loading',
       country: country,
       likes: [],
@@ -94,7 +94,7 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
 
     const encodedGroupedTransactions = await replieservice.handlePostReply({
       creatorAddress: post.creator_address,
-      address: activeAccount?.address!,
+      address: activeAccount?.address || '',
       transactionId: post.transaction_id as string,
       text: encodeURIComponent(replyText),
     })
@@ -105,10 +105,10 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
       console.log('aaaaa', post.replies)
     }, [])
 
-    const {id} = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
     const acceptedReply: Post = {
-      creator_address: userData?.address!,
+      creator_address: userData?.address || '',
       text: encodeURIComponent(replyText),
       status: 'accepted',
       transaction_id: id,
@@ -123,7 +123,7 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
 
     setReplyText('')
     setIsLoadingReply(false)
-    queryClient.invalidateQueries({queryKey: ['getAllPosts']})
+    queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
   }
 
   const handleTimestamp = () => {
@@ -145,12 +145,14 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
     <>
       <div>
         {post.status === 'accepted' ? (
-          <div onClick={handleGoToPostPage}
-               className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950">
+          <div
+            onClick={handleGoToPostPage}
+            className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-md border-2 border-gray-900 bg-white overflow-hidden border-b-4">
-                  <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt=""/>
+                  <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt="" />
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
@@ -163,7 +165,7 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
                 {post.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
                     <div className="w-6 rounded-full overflow-hidden">
-                      <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt=""/>
+                      <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
                     </div>
                     <p className="w-full text-center">{post.country}</p>
                   </div>
@@ -183,42 +185,44 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
                       className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                       onClick={() => setOpenReplyInput(!openReplyInput)}
                     >
-                      <FaRegMessage className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500"/>
-                      <p
-                        className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500">{post?.replies?.length}</p>
+                      <FaRegMessage className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
+                      <p className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500">
+                        {post?.replies?.length}
+                      </p>
                     </button>
                   )}
 
                   <div className={'flex gap-1 items-center '}>
                     {isLoadingLike ? (
-                      <FaSpinner className="animate-spin text-2xl"/>
+                      <FaSpinner className="animate-spin text-2xl" />
                     ) : (
                       <>
                         <button
                           className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                           onClick={handlePostLike}
                         >
-                          <FaRegThumbsUp className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900"/>
+                          <FaRegThumbsUp className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                           {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.likes?.length}</p>}
                         </button>
                       </>
                     )}
                   </div>
                   <button
-                    className={'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'}
+                    className={
+                      'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'
+                    }
                   >
-                    <a target="_blank"
-                       href={`https://allo.info/tx/${post.transaction_id}`}>
-                      <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500"/>
+                    <a target="_blank" href={`https://allo.info/tx/${post.transaction_id}`}>
+                      <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
                     </a>
                   </button>
-                  <ShareButton id={post.transaction_id}/>
+                  <ShareButton id={post.transaction_id} />
                 </div>
                 <div className="flex md:gap-2 md:hidden">
                   {post.country ? (
                     <div className="flex gap-0 items-center justify-center">
                       <div className="w-6 rounded-full overflow-hidden">
-                        <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt=""/>
+                        <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
                       </div>
                       <p className="w-full text-center">{post.country}</p>
                     </div>
@@ -231,7 +235,7 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
                 <div className={'grid gap-4'}>
                   <p className={'text-lg'}>replies</p>
 
-                  {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'}/>)}
+                  {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
 
                   {!isLoadingReply && (
                     <ReplyInput
@@ -253,14 +257,14 @@ const PostCard = ({post, variant = 'default', handleNewReply}: PostPropsInterfac
             <div className="flex flex-col">
               <div className="flex items-center gap-3">
                 <div className="w-10 rounded-full border-2 border-gray-900">
-                  <img className="w-full" src={generateIdIcon(post.creator_address!)} alt=""/>
+                  <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
                 </div>
                 <h2 className="font-bold text-xl h-full">{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
               </div>
               <p className="w-full">{decodeURIComponent(post.text)}</p>
             </div>
             <span>
-              <FaSpinner className="w-6 animate-spin"/>
+              <FaSpinner className="w-6 animate-spin" />
             </span>
           </div>
         ) : (
