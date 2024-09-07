@@ -222,7 +222,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               </div>
 
               {openReplyInput && (
-                <div className={'grid gap-4'}>
+                <div className={'grid gap-4'} onClick={(e) => e.stopPropagation()}>
                   <p className={'text-lg'}>replies</p>
 
                   {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
