@@ -1,28 +1,36 @@
 import Footer from '../components/Footer'
-import {ellipseAddress} from '../utils/ellipseAddress'
+import { ellipseAddress } from '../utils/ellipseAddress'
 
 const Whitepaper = () => (
-  <div className=" w-full px-4 flex flex-col py-20 dark:bg-gray-950 bg-gray-100">
-    <h1 className="text-4xl font-bold mb-4">WeCoop v1.0 Whitepaper</h1>
+  <div className="w-full px-4 flex flex-col py-20 dark:bg-gray-950 bg-gray-100">
+    <h1 className="text-4xl font-bold mb-4 text-center">WeCoop v1.0 Whitepaper</h1>
+    <p className="text-center italic text-gray-500 mb-8">Developed by iam_p2 and Felipe — Proud Brazilian Developers</p>
 
-    <div className="text-lg leading-7 text-gray-700">
-      <p>
-        <strong>Abstract:</strong> WeCoop v1.0 is an innovative social media platform built on the Algorand blockchain, leveraging
-        Algorand's speed, efficiency, and low transaction costs to provide a seamless and permissionless social media experience. Users can
-        connect with their Algorand wallets, including Pera Wallet, Defly, and Daffi Wallet, enabling frictionless transactions and
-        interactions. This whitepaper outlines the core features, principles, and economic model of WeCoop v1.0.
+    <div className="text-lg leading-7 text-gray-700 max-w-4xl mx-auto">
+      <p className="mb-6">
+        <strong>Abstract:</strong> WeCoop v1.0 is an innovative, decentralized, and permissionless social media platform, proudly built by
+        Brazilian developers iam_p2 and Felipe. Designed to support users facing political blockages on social networks in Brazil, WeCoop
+        offers a free, open space for expression. Leveraging the Algorand blockchain’s speed, efficiency, and low transaction costs, WeCoop
+        enables seamless social interactions and transactions. With wallet integrations such as Pera Wallet, Defly, and Daffi Wallet, users
+        experience smooth access and engagement. This whitepaper outlines the core features, guiding principles, and economic model behind
+        WeCoop v1.0, along with our vision for its future.
       </p>
 
       <section className="my-6">
         <h2 className="text-2xl font-bold mb-2">1. Introduction:</h2>
         <p>
-          WeCoop v1.0 serves as an experimental proof of concept, showcasing the capabilities of the Algorand blockchain in the realm of
-          social media. With a fixed supply of 21 million{' '}
+          WeCoop v1.0 is a groundbreaking proof of concept, demonstrating the power of Algorand's blockchain in the social media space.
+          Created by two passionate Brazilian developers committed to freedom of expression, WeCoop offers a new platform for users who have
+          experienced censorship or social media restrictions due to political issues in Brazil. With a fixed supply of 21 million{' '}
           <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
-            CoopCoin
+            CoopCoins
           </a>
-          s, WeCoop aims to deliver a decentralized and user-centric platform that fosters genuine interactions. The platform's design
-          ensures fast, secure, and cost-effective transactions, paving the way for a new era of social media on the Algorand blockchain.
+          , WeCoop delivers a decentralized, user-centric experience that facilitates fast, secure, and affordable transactions. We aim to
+          set a new standard for social media platforms, particularly in environments where open dialogue is needed most.
+        </p>
+        <p className="mt-4">
+          As a decentralized and permissionless platform, WeCoop empowers users to interact freely, ensuring that no centralized entity
+          controls their ability to communicate.
         </p>
       </section>
 
@@ -35,39 +43,33 @@ const Whitepaper = () => (
           ($COOP):
         </h2>
         <p>
-          Fixed Supply:{' '}
-          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
-            CoopCoin
-          </a>{' '}
-          maintains a fixed supply of 21 million, promoting scarcity and value retention. Distribution: Fully distributed, ensures fair and
-          equitable distribution among users. Anti-Rugpull:{' '}
-          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
-            CoopCoin
-          </a>{' '}
-          is resistant to rug pulls, providing users with a secure and trustworthy digital asset on the Algorand blockchain.
+          Fixed Supply: CoopCoin’s fixed supply of 21 million fosters scarcity and long-term value retention. Distribution: CoopCoin is
+          fairly distributed among users, ensuring a democratic and inclusive system. Anti-Rugpull: Designed to prevent rug pulls, CoopCoin
+          provides a secure and trustworthy digital asset within the Algorand blockchain ecosystem.
         </p>
       </section>
+
       <section className="my-6">
         <h2 className="text-2xl font-bold mb-2">3. Platform Mechanics:</h2>
         <p>
-          User Interaction: Users can create posts, like, and reply to content, with each interaction incurring a 0.1 $COOP fee. Wallet
-          Integration: WeCoop v1.0 seamlessly integrates with Algorand wallets, including Pera Wallet, Defly, and Daffi Wallet, enhancing
-          user accessibility. Transaction Notes: All posts and interactions are permanently recorded on the Algorand blockchain through
-          transaction notes made to the platform wallet.
+          User Interaction: Users can create posts, likes, and replies, each interaction incurring a 0.1 $COOP fee, ensuring a vibrant and
+          engaging community. Wallet Integration: WeCoop integrates seamlessly with Algorand wallets such as Pera Wallet, Defly, and Daffi
+          Wallet, providing frictionless access for users. Transaction Notes: All posts and interactions are permanently recorded on the
+          Algorand blockchain through transaction notes, ensuring transparency and immutability.
         </p>
       </section>
 
       <section className="my-6">
         <h2 className="text-2xl font-bold mb-2">4. Economic Model:</h2>
         <p>
-          Sustainability: Transaction fees play a vital role in sustaining the WeCoop ecosystem. The 0.1 $COOP fee ensures a balance between
-          incentivizing user engagement and maintaining the platform's financial health. Wealth Distribution: Allocation of fees to both
-          content creators and the platform wallet promotes a fair and transparent wealth distribution model.
+          Sustainability: The 0.1 $COOP transaction fee strikes a balance between promoting user engagement and ensuring the platform's
+          sustainability over the long term. Wealth Distribution: Fees are allocated between content creators and the platform wallet,
+          promoting a fair and transparent wealth distribution model that rewards active participation.
         </p>
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2 break-words">5. Platform Wallet:</h2>
+        <h2 className="text-2xl font-bold mb-2">5. Platform Wallet:</h2>
         <p>
           The platform wallet{' '}
           <a
@@ -76,8 +78,8 @@ const Whitepaper = () => (
           >
             {ellipseAddress('DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM')}
           </a>{' '}
-          acts as the repository for transaction fees generated on the platform. Transparency and accountability are maintained to build
-          trust within the community.
+          serves as the repository for transaction fees collected on the platform. Transparency and accountability are foundational to
+          building trust within the community.
         </p>
       </section>
 
@@ -88,19 +90,39 @@ const Whitepaper = () => (
           <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
             CoopCoin
           </a>{' '}
-          ($COOP), a community coin we believe is exemplary. Our choice reflects our commitment to fostering a robust and engaging social
-          media experience within the Algorand ecosystem.
+          ($COOP), the cornerstone of our decentralized social media ecosystem. As a community-driven coin, CoopCoin represents our
+          commitment to creating a dynamic, censorship-resistant platform that thrives within the Algorand blockchain. We are focused on
+          growing the WeCoop platform, introducing new features to support and boost communities—initially within the Algorand ecosystem—
+          while fostering real-world impact through decentralized solutions.
         </p>
       </section>
 
-      <p className="mt-4">
-        <strong>Conclusion:</strong> WeCoop v1.0 stands at the intersection of blockchain technology and social media, providing a
-        decentralized and efficient platform powered by Algorand. As a proof of concept, WeCoop showcases the integration of blockchain into
-        mainstream social media, demonstrating the viability and potential of the Algorand blockchain for creating innovative solutions.
-        Join us in building the future of decentralized social interactions with WeCoop v1.0.
+      <section className="my-6">
+        <h2 className="text-2xl font-bold mb-2">Future Plans:</h2>
+        <p>
+          As WeCoop continues to evolve, we plan to introduce many new features aimed at empowering communities and expanding the platform’s
+          capabilities. Our vision is to build a space where users can connect and collaborate, beginning with the Algorand community, and
+          gradually expanding to support other coins and blockchain ecosystems. By integrating multiple communities, we aim to create a
+          unified platform where everyone can come together within this tool of freedom.
+        </p>
+        <p className="mt-4">
+          WeCoop is not just about social interaction; it is about building bridges between diverse communities and giving individuals the
+          power to express themselves openly, without fear of censorship. Created by two young developers with a passion for building
+          innovative solutions, WeCoop is designed to make the world a better place by championing freedom of expression through
+          decentralized technology.
+        </p>
+      </section>
+
+      <p className="mt-6">
+        <strong>Conclusion:</strong> WeCoop v1.0 represents more than just a new social media platform—it is a statement of freedom,
+        designed by proud Brazilian developers iam_p2 and Felipe. With its decentralized, permissionless infrastructure, WeCoop provides a
+        secure, open space for individuals to express themselves without centralized control. By integrating Algorand’s cutting-edge
+        blockchain technology, WeCoop sets the stage for the future of social media, where censorship is no longer a barrier. Join us in
+        shaping the future of decentralized social networks, and be part of a movement that brings people together from all over the world
+        through WeCoop v1.0.
       </p>
     </div>
-    <Footer/>
+    <Footer />
   </div>
 )
 
