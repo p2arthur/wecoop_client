@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
@@ -12,11 +12,12 @@ import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
+import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
+import { ShareButton } from './ShareButton'
 
 interface PostPropsInterface {
   post: PostRequest | IReply
@@ -55,7 +56,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       const encodedGroupedTransactions = await likeService.handlePostLike({
         event,
         creatorAddress: post.creator_address,
-        address: activeAccount?.address!,
+        address: activeAccount?.address || '',
         transactionId: post.transaction_id as string,
       })
 
@@ -68,7 +69,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     } catch (error) {
       console.error(error)
     } finally {
-      handleNewLike && handleNewLike({ creator_address: userData?.address! }, post.transaction_id as string)
+      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
     }
   }
 
@@ -78,7 +79,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
     const newReply: Post = {
       text: encodeURIComponent(replyText),
-      creator_address: userData?.address!,
+      creator_address: userData?.address || '',
       status: 'loading',
       country: country,
       likes: [],
@@ -93,21 +94,17 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
     const encodedGroupedTransactions = await replieservice.handlePostReply({
       creatorAddress: post.creator_address,
-      address: activeAccount?.address!,
+      address: activeAccount?.address || '',
       transactionId: post.transaction_id as string,
       text: encodeURIComponent(replyText),
     })
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
 
-    useEffect(() => {
-      console.log('aaaaa', post.replies)
-    }, [])
-
     const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
     const acceptedReply: Post = {
-      creator_address: userData?.address!,
+      creator_address: userData?.address || '',
       text: encodeURIComponent(replyText),
       status: 'accepted',
       transaction_id: id,
@@ -127,20 +124,21 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
   const handleTimestamp = () => {
     const date = post.timestamp! * 1000
-    const formattedDate = formatDateFromTimestamp(date)
+    return formatDateFromTimestamp(date)
+  }
 
-    if (!formattedDate.time) {
-      return 'Just now'
-    } else {
-      return `${formattedDate.time} ${formattedDate.measure} ago`
-    }
+  const handleGoToPostPage = () => {
+    window.location.href = `/post?id=${post.transaction_id}`
   }
 
   return (
     <>
       <div>
         {post.status === 'accepted' ? (
-          <div className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950">
+          <div
+            onClick={handleGoToPostPage}
+            className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-md border-2 border-gray-900 bg-white overflow-hidden border-b-4">
@@ -171,14 +169,16 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 {post?.text?.length > 0 && decodeURIComponent(post?.text)}
               </p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
-                <div className="flex gap-1 items-center">
+                <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
                   {variant === 'default' && (
                     <button
-                      className="rounded-lg gap-1 dark:hover:bg-gray-100 p-1 group transition-all flex items-center justify-center"
+                      className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                       onClick={() => setOpenReplyInput(!openReplyInput)}
                     >
-                      <FaRegMessage className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900" />
-                      <p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.replies?.length}</p>
+                      <FaRegMessage className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
+                      <p className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500">
+                        {post?.replies?.length}
+                      </p>
                     </button>
                   )}
 
@@ -191,15 +191,22 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                           className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                           onClick={handlePostLike}
                         >
-                          <FaRegThumbsUp className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                          <FaRegThumbsUp className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                           {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.likes?.length}</p>}
                         </button>
                       </>
                     )}
                   </div>
-                  <a target="_blank" className={'cursor-pointer'} href={`https://algoexplorer.io/tx/${post.transaction_id}`}>
-                    <MdTravelExplore className="text-xl group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
-                  </a>
+                  <button
+                    className={
+                      'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'
+                    }
+                  >
+                    <a target="_blank" href={`https://allo.info/tx/${post.transaction_id}`}>
+                      <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
+                    </a>
+                  </button>
+                  <ShareButton id={post.transaction_id} />
                 </div>
                 <div className="flex md:gap-2 md:hidden">
                   {post.country ? (
@@ -215,7 +222,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               </div>
 
               {openReplyInput && (
-                <div className={'grid gap-4'}>
+                <div className={'grid gap-4'} onClick={(e) => e.stopPropagation()}>
                   <p className={'text-lg'}>replies</p>
 
                   {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}

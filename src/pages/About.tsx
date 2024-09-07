@@ -1,8 +1,8 @@
 import Footer from '../components/Footer'
-import { ellipseAddress } from '../utils/ellipseAddress'
+import {ellipseAddress} from '../utils/ellipseAddress'
 
 const Whitepaper = () => (
-  <div className="my-8 w-full px-4">
+  <div className=" w-full px-4 flex flex-col py-20 dark:bg-gray-950 bg-gray-100">
     <h1 className="text-4xl font-bold mb-4">WeCoop v1.0 Whitepaper</h1>
 
     <div className="text-lg leading-7 text-gray-700">
@@ -100,7 +100,7 @@ const Whitepaper = () => (
         Join us in building the future of decentralized social interactions with WeCoop v1.0.
       </p>
     </div>
-    <Footer />
+    <Footer/>
   </div>
 )
 
