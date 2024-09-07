@@ -11,6 +11,7 @@ import ProfilePage from '../pages/ProfilePage'
 import { User } from '../services/User'
 import { User as UserInterface } from '../services/api/types'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
+import PostPage from "../pages/PostPage";
 
 export const Router = () => {
   const { activeAccount } = useWallet()
@@ -64,6 +65,7 @@ export const Router = () => {
         { path: '/profile/:walletAddress', element: <ProfilePage /> },
         { path: '/feed/by/:walletAddress', element: <FeedPage /> },
         { path: '/about', element: <Whitepaper /> },
+        { path: '/post', element: <PostPage /> },
       ],
     },
   ])

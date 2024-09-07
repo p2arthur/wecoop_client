@@ -1,19 +1,22 @@
-import { DeflyWalletConnect } from '@blockshake/defly-connect'
-import { DaffiWalletConnect } from '@daffiwallet/connect'
-import { PeraWalletConnect } from '@perawallet/connect'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { PROVIDER_ID, ProvidersArray, WalletProvider, useInitializeProviders } from '@txnlab/use-wallet'
+import {DeflyWalletConnect} from '@blockshake/defly-connect'
+import {DaffiWalletConnect} from '@daffiwallet/connect'
+import {PeraWalletConnect} from '@perawallet/connect'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {PROVIDER_ID, ProvidersArray, useInitializeProviders, WalletProvider} from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
-import { SnackbarProvider } from 'notistack'
-import { PostsProvider } from './context/Posts/Posts'
-import { Router } from './routes'
-import { getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
+import {SnackbarProvider} from 'notistack'
+import {PostsProvider} from './context/Posts/Posts'
+import {Router} from './routes'
+import {getIndexerConfigFromViteEnvironment} from './utils/network/getAlgoClientConfigs'
+
+import 'react-toastify/dist/ReactToastify.css';
+import {ToastContainer} from "react-toastify";
 
 const providersArray: ProvidersArray = [
-  { id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect },
-  { id: PROVIDER_ID.PERA, clientStatic: PeraWalletConnect },
-  { id: PROVIDER_ID.DAFFI, clientStatic: DaffiWalletConnect },
-  { id: PROVIDER_ID.EXODUS },
+  {id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect},
+  {id: PROVIDER_ID.PERA, clientStatic: PeraWalletConnect},
+  {id: PROVIDER_ID.DAFFI, clientStatic: DaffiWalletConnect},
+  {id: PROVIDER_ID.EXODUS},
 ]
 
 const queryClient = new QueryClient({
@@ -41,7 +44,8 @@ export default function App() {
       <WalletProvider value={walletProviders}>
         <QueryClientProvider client={queryClient}>
           <PostsProvider>
-            <Router />
+            <Router/>
+            <ToastContainer toastStyle={{fontFamily: 'dogica', fontSize: '12px'}}/>
           </PostsProvider>
         </QueryClientProvider>
       </WalletProvider>
