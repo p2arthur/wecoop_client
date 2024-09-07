@@ -37,6 +37,26 @@ const ProfilePage = () => {
     }
   }, [userData, currentUserData])
 
+  useEffect(() => {
+    if (data) {
+      setPostsList(updateRepliesStatus(data))
+    }
+  }, [data])
+
+  useEffect(() => {
+    getIsFollowing()
+  }, [currentUser])
+
+  const updateRepliesStatus = (posts: Post[]): Post[] => {
+    return posts.map((post) => ({
+      ...post,
+      replies: post.replies.map((reply) => ({
+        ...reply,
+        status: 'accepted',
+      })),
+    }))
+  }
+
   const getIsFollowing = (): void => {
     if (currentUser?.followTargets.includes(walletAddress!)) {
       console.log(true)
@@ -45,20 +65,6 @@ const ProfilePage = () => {
       console.log(currentUser?.followTargets)
       console.log(false)
     }
-  }
-
-  useEffect(() => {
-    if (data) {
-      setPostsList(data)
-    }
-  }, [data])
-
-  useEffect(() => {
-    getIsFollowing()
-  }, [currentUser])
-
-  const generateIdIcon = (creatorAddress: string) => {
-    return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
   const handleNewReply = (newReply: Post, transactionCreatorId: string) => {
@@ -71,7 +77,11 @@ const ProfilePage = () => {
       }
       return post
     })
-    setPostsList(newPostsList)
+    setPostsList(updateRepliesStatus(newPostsList))
+  }
+
+  const generateIdIcon = (creatorAddress: string) => {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
   return (

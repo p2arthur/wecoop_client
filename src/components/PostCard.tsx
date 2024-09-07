@@ -12,7 +12,7 @@ import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
+import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -220,7 +220,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               </div>
 
               {openReplyInput && (
-                <div className={'grid gap-4'} onClick={(e) => e.stopPropagation()}>
+                <div className={'grid gap-4 h-full'} onClick={(e) => e.stopPropagation()}>
                   <p className={'text-lg'}>replies</p>
 
                   {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
