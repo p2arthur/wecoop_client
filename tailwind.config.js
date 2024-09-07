@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Pixelify Sans'],
+        sans: ['SF Pixelate'],
       },
       scale: { 101: '1.01' },
     },
