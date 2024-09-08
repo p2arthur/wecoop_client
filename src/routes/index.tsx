@@ -2,7 +2,6 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk, { AlgodTokenHeader } from 'algosdk'
 import { useEffect, useState } from 'react'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
-import Footer from '../components/Footer'
 import NavBar from '../components/NavBar'
 import Whitepaper from '../pages/About'
 import FeedPage from '../pages/FeedPage'
@@ -57,7 +56,7 @@ export const Router = () => {
         <>
           <NavBar user={userData} />
           <Outlet context={{ algod, userData }} />
-          <Footer />
+          {/* <Footer /> */}
         </>
       ),
       children: [

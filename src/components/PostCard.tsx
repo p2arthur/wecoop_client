@@ -158,7 +158,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         {post.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-2 overflow-hidden border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950"
+            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-full  transition-all duration-75 cursor-pointer dark:border-gray-950 bg-white dark:bg-gray-950"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

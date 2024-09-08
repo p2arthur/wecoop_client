@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Post } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
 import PostCard from './PostCard'
@@ -11,39 +11,47 @@ interface FeedPropsInterface {
 
 const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterface) => {
   const [currentPage, setCurrentPage] = useState(1)
+  const feedContainerRef = useRef<HTMLDivElement | null>(null)
+  const postsPerPage = 10
 
   const handleScroll = () => {
-    if (!isLoading && window.innerHeight + window.scrollY + 150 > document.documentElement.offsetHeight) {
+    const container = feedContainerRef.current
+    if (container && !isLoading && container.scrollTop + container.clientHeight + 150 >= container.scrollHeight) {
       setCurrentPage((prevPage) => prevPage + 1)
     }
   }
-  const postsPerPage = 10
 
   const paginatedPosts: Post[] | undefined = postList?.slice(0, currentPage * postsPerPage)
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll)
 
-    return () => {
-      window.removeEventListener('scroll', () => {})
+  useEffect(() => {
+    const container = feedContainerRef.current
+    if (container) {
+      container.addEventListener('scroll', handleScroll)
     }
-  }, [postList])
-
-  useEffect(() => {
-    if (paginatedPosts && postList) {
-      if (paginatedPosts.length >= postList.length) {
-        window.removeEventListener('scroll', () => {})
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll)
       }
     }
-  }, [paginatedPosts])
+  }, [isLoading, postList])
+
+  useEffect(() => {
+    if (paginatedPosts && postList && paginatedPosts.length >= postList.length) {
+      const container = feedContainerRef.current
+      if (container) {
+        container.removeEventListener('scroll', handleScroll)
+      }
+    }
+  }, [paginatedPosts, postList])
 
   if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
 
   return (
-    <div className="flex flex-col gap-4">
+    <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full">
       {paginatedPosts &&
         paginatedPosts.length! > 0 &&
-        paginatedPosts?.map((post, index) => <PostCard key={index} handleNewReply={handleNewReply} post={post} />)}
-      {postList && currentPage * postsPerPage >= postList?.length && !isLoading && (
+        paginatedPosts.map((post, index) => <PostCard key={index} handleNewReply={handleNewReply} post={post} />)}
+      {postList && currentPage * postsPerPage >= postList.length && !isLoading && (
         <div className={'w-full justify-center flex'}>
           <p className="font-bold text-2xl">You're all caught up!</p>
         </div>
