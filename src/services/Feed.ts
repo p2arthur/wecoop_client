@@ -1,6 +1,6 @@
 import axios from 'axios'
 import base64 from 'base-64'
-import { Post as PostInterface } from '../services/api/types'
+import { Post, Post as PostInterface } from '../services/api/types'
 import { getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 import { Post as PostService } from './Post'
 import { TransactionInterface } from './Transaction'
@@ -99,6 +99,11 @@ export class Feed {
 
   public async getPostsByAddress(address: string) {
     const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/${address}`)
+  }
+
+  public async getPostByAddress(address: string) {
+    const { data } = await axios.get<Post>(`${import.meta.env.VITE_WECOOP_API}/post/${address}`)
+    return data
   }
 
   public async getFeedByWalletAddress(walletAddress: string): Promise<PostInterface[]> {

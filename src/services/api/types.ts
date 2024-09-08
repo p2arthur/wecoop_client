@@ -37,7 +37,7 @@ export interface Reply {
   nfd?: string
   likes: Like[]
   replies: Reply[]
-  status: 'accepted' | 'loading' | 'rejected' | null
+  status: 'accepted' | 'loading' | 'rejected' | string | null
 }
 
 export interface ReplyResponse {

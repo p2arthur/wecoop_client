@@ -19,7 +19,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
   }
   const postsPerPage = 10
 
-  const paginatedPosts: Post[] = postList?.slice(0, currentPage * postsPerPage)!
+  const paginatedPosts: Post[] | undefined = postList?.slice(0, currentPage * postsPerPage)
   useEffect(() => {
     window.addEventListener('scroll', handleScroll)
 
@@ -40,9 +40,10 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
 
   return (
     <div className="flex flex-col gap-4">
-      {paginatedPosts?.length! > 0 &&
+      {paginatedPosts &&
+        paginatedPosts.length! > 0 &&
         paginatedPosts?.map((post, index) => <PostCard key={index} handleNewReply={handleNewReply} post={post} />)}
-      {currentPage * postsPerPage >= postList?.length! && !isLoading && (
+      {postList && currentPage * postsPerPage >= postList?.length && !isLoading && (
         <div className={'w-full justify-center flex'}>
           <p className="font-bold text-2xl">You're all caught up!</p>
         </div>

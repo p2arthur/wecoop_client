@@ -4,7 +4,6 @@ import FeedComponent from '../components/Feed'
 import PostInput from '../components/PostInput'
 import { usePosts } from '../context/Posts/Posts'
 import { Feed } from '../services/Feed'
-import { useGetUserInfo } from '../services/api/Users'
 import { Post } from '../services/api/types'
 
 const Home = () => {
@@ -12,7 +11,6 @@ const Home = () => {
   const { activeAccount } = useWallet()
   const [feedPosts, setFeedPosts] = useState<Post[]>()
   const [activeTab, setActiveTab] = useState<'personalized' | 'global'>('global')
-  const { data } = useGetUserInfo(activeAccount?.address!)
   const feedServices = new Feed()
   const getFeedPosts = async (walletAddress: string) => {
     const posts = await feedServices.getFeedByWalletAddress(walletAddress)
@@ -22,7 +20,7 @@ const Home = () => {
   useEffect(() => {
     const getFeedPostsEffect = async () => {
       if (activeAccount) {
-        await getFeedPosts(activeAccount?.address!)
+        await getFeedPosts(activeAccount?.address || '')
       }
 
       return feedPosts

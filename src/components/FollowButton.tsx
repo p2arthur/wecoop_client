@@ -5,6 +5,7 @@ import { RiUserFollowFill, RiUserUnfollowFill } from 'react-icons/ri'
 import { useOutletContext } from 'react-router-dom'
 import { Follow } from '../services/Follow'
 import Button from './Button'
+import { PostInputOutletContext } from './PostInput'
 
 interface FollowButtonProps {
   walletAddress: string
@@ -12,7 +13,7 @@ interface FollowButtonProps {
 }
 
 const FollowButton = ({ walletAddress, isFollowing }: FollowButtonProps) => {
-  const { algod, userData } = useOutletContext() as any
+  const { algod } = useOutletContext() as PostInputOutletContext
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
   const [buttonState, setButtonState] = useState<'loading' | 'success' | null>(null)
   const followServices = new Follow(algod)
@@ -28,7 +29,7 @@ const FollowButton = ({ walletAddress, isFollowing }: FollowButtonProps) => {
     try {
       const encodedGroupedTransactions = await followServices.handleUserFollow({
         subjectUserWalletAddress: walletAddress,
-        followerUserWalletAddress: activeAccount?.address!,
+        followerUserWalletAddress: activeAccount?.address || '',
       })
 
       console.log(encodedGroupedTransactions)
