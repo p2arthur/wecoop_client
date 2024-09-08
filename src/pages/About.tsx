@@ -3,23 +3,23 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 
 const Whitepaper = () => (
   <div className="w-full px-4 flex flex-col py-20 dark:bg-gray-950 bg-gray-100">
-    <h1 className="text-4xl font-bold mb-4 text-center">WeCoop v1.0 Whitepaper</h1>
+    <h1 className="text-4xl font-bold mb-4 text-center">WeCoop Beta Whitepaper</h1>
     <p className="text-center italic text-gray-500 mb-8">Developed by iam_p2 and Felipe — Proud Brazilian Developers</p>
 
     <div className="text-lg leading-7 text-gray-700 max-w-4xl mx-auto">
       <p className="mb-6">
-        <strong>Abstract:</strong> WeCoop v1.0 is an innovative, decentralized, and permissionless social media platform, proudly built by
+        <strong>Abstract:</strong> WeCoop Beta is an innovative, decentralized, and permissionless social media platform, proudly built by
         Brazilian developers iam_p2 and Felipe. Designed to support users facing political blockages on social networks in Brazil, WeCoop
         offers a free, open space for expression. Leveraging the Algorand blockchain’s speed, efficiency, and low transaction costs, WeCoop
         enables seamless social interactions and transactions. With wallet integrations such as Pera Wallet, Defly, and Daffi Wallet, users
         experience smooth access and engagement. This whitepaper outlines the core features, guiding principles, and economic model behind
-        WeCoop v1.0, along with our vision for its future.
+        WeCoop Beta, along with our vision for its future.
       </p>
 
       <section className="my-6">
         <h2 className="text-2xl font-bold mb-2">1. Introduction:</h2>
         <p>
-          WeCoop v1.0 is a groundbreaking proof of concept, demonstrating the power of Algorand's blockchain in the social media space.
+          WeCoop Beta is a groundbreaking proof of concept, demonstrating the power of Algorand's blockchain in the social media space.
           Created by two passionate Brazilian developers committed to freedom of expression, WeCoop offers a new platform for users who have
           experienced censorship or social media restrictions due to political issues in Brazil. With a fixed supply of 21 million{' '}
           <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
@@ -86,7 +86,7 @@ const Whitepaper = () => (
       <section className="my-6">
         <h2 className="text-2xl font-bold mb-2">6. Platform Power:</h2>
         <p>
-          WeCoop v1.0 is powered by{' '}
+          WeCoop Beta is powered by{' '}
           <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
             CoopCoin
           </a>{' '}
@@ -100,10 +100,10 @@ const Whitepaper = () => (
       <section className="my-6">
         <h2 className="text-2xl font-bold mb-2">Future Plans:</h2>
         <p>
-          As WeCoop continues to evolve, we plan to introduce many new features aimed at empowering communities and expanding the platform’s
-          capabilities. Our vision is to build a space where users can connect and collaborate, beginning with the Algorand community, and
-          gradually expanding to support other coins and blockchain ecosystems. By integrating multiple communities, we aim to create a
-          unified platform where everyone can come together within this tool of freedom.
+          As WeCoop continues to evolve, some features planned for the full v1.0 release include the addition of other coins like $ALGO and
+          $xUSD for cross-community interactions, enhanced layout and bugfixes, an MVP for communities that allows creators and followers to
+          benefit from the economy within WeCoop, better analytics, and a fee restructure that ensures economic viability for both
+          developers and users.
         </p>
         <p className="mt-4">
           WeCoop is not just about social interaction; it is about building bridges between diverse communities and giving individuals the
@@ -114,12 +114,12 @@ const Whitepaper = () => (
       </section>
 
       <p className="mt-6">
-        <strong>Conclusion:</strong> WeCoop v1.0 represents more than just a new social media platform—it is a statement of freedom,
+        <strong>Conclusion:</strong> WeCoop Beta represents more than just a new social media platform—it is a statement of freedom,
         designed by proud Brazilian developers iam_p2 and Felipe. With its decentralized, permissionless infrastructure, WeCoop provides a
         secure, open space for individuals to express themselves without centralized control. By integrating Algorand’s cutting-edge
         blockchain technology, WeCoop sets the stage for the future of social media, where censorship is no longer a barrier. Join us in
         shaping the future of decentralized social networks, and be part of a movement that brings people together from all over the world
-        through WeCoop v1.0.
+        through WeCoop.
       </p>
     </div>
     <Footer />
