@@ -235,7 +235,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                       <p className="text-center">{post.country}</p>
                     </div>
                   ) : null}
-                  <p>{handleTimestamp()}</p>
+                  <p className="text-center">{handleTimestamp()}</p>
                 </div>
               </div>
 
