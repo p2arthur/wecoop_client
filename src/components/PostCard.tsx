@@ -12,7 +12,7 @@ import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
+import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -158,7 +158,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         {post.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-2 border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950"
+            className="border-2 overflow-hidden border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -184,7 +184,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               </div>
             </div>
 
-            <div className="grid gap-2" onClick={(e) => e.stopPropagation()}>
+            <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
@@ -226,13 +226,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                   </button>
                   <ShareButton id={post.transaction_id} />
                 </div>
-                <div className="flex md:gap-2 md:hidden">
+                <div className="flex flex-col md:gap-2 md:hidden">
                   {post.country ? (
-                    <div className="flex gap-0 items-center justify-center">
+                    <div className="flex items-center justify-center gap-2">
                       <div className="w-6 rounded-full overflow-hidden">
                         <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
                       </div>
-                      <p className="w-full text-center">{post.country}</p>
+                      <p className="text-center">{post.country}</p>
                     </div>
                   ) : null}
                   <p>{handleTimestamp()}</p>
