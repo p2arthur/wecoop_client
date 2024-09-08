@@ -6,6 +6,7 @@ import { FaArrowRight } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
+import { usableAssetsList } from '../data/usableAssetsList'
 import { AssetId } from '../enums/assetId'
 import { NotePrefix } from '../enums/notePrefix'
 import { Transaction } from '../services/Transaction'
@@ -154,6 +155,11 @@ const PostInput = () => {
         <div className="flex items-center gap-2">
           {' '}
           <div className="flex gap-1">
+            <select name="usable-asset" id="">
+              {usableAssetsList.map((asset) => (
+                <option>{asset.name}</option>
+              ))}
+            </select>
             <span>
               <img className="h-6 w-6" src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`} alt="" />
             </span>
