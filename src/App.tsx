@@ -11,6 +11,8 @@ import { getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClie
 
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import MobileSidebar from './components/interface/MobileSidebar'
+import { MobileSidebarProvider } from './context/Interface/MobileSidebar'
 
 const providersArray: ProvidersArray = [
   { id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect },
@@ -40,15 +42,18 @@ export default function App() {
   })
 
   return (
-    <SnackbarProvider maxSnack={3}>
-      <WalletProvider value={walletProviders}>
-        <QueryClientProvider client={queryClient}>
-          <PostsProvider>
-            <Router />
-            <ToastContainer toastStyle={{ fontFamily: 'SF Pixelate', fontSize: '16px' }} />
-          </PostsProvider>
-        </QueryClientProvider>
-      </WalletProvider>
-    </SnackbarProvider>
+    <MobileSidebarProvider>
+      <SnackbarProvider maxSnack={3}>
+        <WalletProvider value={walletProviders}>
+          <QueryClientProvider client={queryClient}>
+            <PostsProvider>
+              <MobileSidebar />
+              <Router />
+              <ToastContainer toastStyle={{ fontFamily: 'SF Pixelate', fontSize: '16px' }} />
+            </PostsProvider>
+          </QueryClientProvider>
+        </WalletProvider>
+      </SnackbarProvider>
+    </MobileSidebarProvider>
   )
 }
