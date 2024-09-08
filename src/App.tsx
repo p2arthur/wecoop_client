@@ -9,10 +9,15 @@ import { PostsProvider } from './context/Posts/Posts'
 import { Router } from './routes'
 import { getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 
+import ReactGA from 'react-ga'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import MobileSidebar from './components/interface/MobileSidebar'
 import { MobileSidebarProvider } from './context/Interface/MobileSidebar'
+
+const TRACKING_ID = 'G-V7TZ80M30M'
+
+ReactGA.initialize(TRACKING_ID)
 
 const providersArray: ProvidersArray = [
   { id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect },
