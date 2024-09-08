@@ -167,7 +167,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
-                    {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)}
+                    {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)} {<img />}
                   </h2>
                 </a>
               </div>
@@ -188,6 +188,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
+                  <img className="h-5 w-5" src={`https://asa-list.tinyman.org/assets/${post.assetId}/icon.png`} alt={post.assetId} />
                   {variant === 'default' && (
                     <button
                       className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"

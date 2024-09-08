@@ -22,6 +22,7 @@ export interface PostRequest {
   likes: Like[]
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | null
+  assetId: number
 }
 
 export interface Like {
@@ -38,6 +39,7 @@ export interface Reply {
   likes: Like[]
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | string | null
+  assetId: number | null
 }
 
 export interface ReplyResponse {

@@ -7,11 +7,11 @@ import NavBar from '../components/NavBar'
 import Whitepaper from '../pages/About'
 import FeedPage from '../pages/FeedPage'
 import Home from '../pages/Home'
+import PostPage from '../pages/PostPage'
 import ProfilePage from '../pages/ProfilePage'
 import { User } from '../services/User'
 import { User as UserInterface } from '../services/api/types'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
-import PostPage from '../pages/PostPage'
 
 export const Router = () => {
   const { activeAccount } = useWallet()
@@ -62,6 +62,7 @@ export const Router = () => {
       ),
       children: [
         { path: '/', element: <Home /> },
+        { path: '/:assetId', element: <Home /> },
         { path: '/profile/:walletAddress', element: <ProfilePage /> },
         { path: '/feed/by/:walletAddress', element: <FeedPage /> },
         { path: '/about', element: <Whitepaper /> },
