@@ -1,15 +1,15 @@
 import { useSearchParams } from 'react-router-dom'
-import { useGetPostByTransactionId } from '../services/api/Posts'
 import PostCard from '../components/PostCard'
 import { usePosts } from '../context/Posts/Posts'
 import { Post } from '../services/api/types'
 
 const PostPage = () => {
   const [searchParams] = useSearchParams()
+  const { handleGetPostByTransactionId, handleNewReply } = usePosts()
 
-  const id = searchParams.get('id') || ''
+  const transactionId = searchParams.get('id') || ''
 
-  const { data, isLoading } = useGetPostByTransactionId(id)
+  const post = handleGetPostByTransactionId(transactionId)
 
   const updateRepliesStatus = (post: Post) => {
     return {
@@ -21,13 +21,11 @@ const PostPage = () => {
     }
   }
 
-  const postWithUpdatedReplies = data ? updateRepliesStatus(data) : null
-
-  const { handleNewReply } = usePosts()
+  const postWithUpdatedReplies = post ? updateRepliesStatus(post) : null
 
   return (
     <div className="flex flex-col p-2 pt-24 dark:bg-gray-950 bg-gray-100">
-      {isLoading ? (
+      {!post ? (
         <div className="flex justify-center items-center h-96">
           <p>Loading...</p>
         </div>

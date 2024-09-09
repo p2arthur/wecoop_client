@@ -9,7 +9,7 @@ export interface Post {
   nfd?: string
   likes: Like[]
   replies: Reply[]
-  status: 'accepted' | 'loading' | 'rejected' | null
+  status: 'accepted' | 'loading' | 'rejected' | string | null
 }
 
 export interface PostRequest {

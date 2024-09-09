@@ -1,14 +1,15 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { useGetAllPosts } from '../../services/api/Posts'
+import { useGetAllPosts, useGetPostByTransactionId } from '../../services/api/Posts'
 import { Like, Post } from '../../services/api/types'
 
 type IPostsContext = {
   postList: Post[] | null
-  handleGetPostByAddress(address: string): void
+  handleGetPostByAddress(address: string): Post | undefined
   handleAddNewPost(post: Post): void
   handleNewReply(newReply: Post, transactionCreatorId: string): void
   handleNewLike(newLike: Like, transactionCreatorId: string): void
   handleDeletePost(transactionCreatorId: string): void
+  handleGetPostByTransactionId(transactionId: string): Post | undefined
   isLoading: boolean
 }
 
@@ -18,42 +19,72 @@ interface IPostsProviderProps {
 
 const PostsContext = createContext<IPostsContext>({
   postList: null,
-  handleGetPostByAddress: () => Object,
-  handleAddNewPost: () => Object,
-  handleNewReply: () => Object,
-  handleNewLike: () => Object,
-  handleDeletePost: () => Object,
+  handleGetPostByAddress: () => undefined,
+  handleAddNewPost: () => undefined,
+  handleNewReply: () => undefined,
+  handleNewLike: () => undefined,
+  handleDeletePost: () => undefined,
+  handleGetPostByTransactionId: () => undefined,
   isLoading: false,
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
   const [postList, setPostList] = useState<Post[]>([])
 
-  const { data, isLoading } = useGetAllPosts()
+  const [transactionId, setTransactionId] = useState<string>('')
+
+  const { data, isLoading, refetch } = useGetAllPosts(false)
+
+  const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
+
+  useEffect(() => {
+    const savedPosts = localStorage.getItem('postList')
+    if (savedPosts) {
+      setPostList(JSON.parse(savedPosts))
+    } else {
+      refetch()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (postList.length > 0) {
+      localStorage.setItem('postList', JSON.stringify(postList))
+    }
+  }, [postList])
 
   useEffect(() => {
     if (data) {
       setPostList(
-        data.map((post) => {
-          return {
-            ...post,
+        data.map((post) => ({
+          ...post,
+          status: 'accepted',
+          replies: post.replies.map((reply) => ({
+            ...reply,
             status: 'accepted',
-            replies: post.replies.map((reply) => {
-              return { ...reply, status: 'accepted' }
-            }),
-          }
-        }),
+          })),
+        })),
       )
     }
   }, [data])
 
   const handleDeletePost = (transactionCreatorId: string) => {
-    const newPostsList = postList?.filter((post) => post.transaction_id !== transactionCreatorId)
-    setPostList(newPostsList!)
+    const newPostsList = postList.filter((post) => post.transaction_id !== transactionCreatorId)
+    setPostList(newPostsList)
   }
 
   const handleGetPostByAddress = (address: string) => {
-    return postList?.find((post) => post.creator_address === address)
+    return postList.find((post) => post.creator_address === address)
+  }
+
+  const handleGetPostByTransactionId = (transactionId: string) => {
+    const postLocal = postList.find((post) => post.transaction_id === transactionId)
+    if (postLocal) {
+      return postLocal
+    } else {
+      setTransactionId(transactionId)
+      refetchPostData()
+      return postData
+    }
   }
 
   const handleAddNewPost = (post: Post) => {
@@ -61,29 +92,23 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }
 
   const handleNewReply = (newReply: Post, transactionCreatorId: string) => {
-    const newPostsList = postList?.map((post) => {
+    const newPostsList = postList.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
-        if (post.replies === undefined) {
-          return { ...post, replies: [newReply] }
-        }
-        return { ...post, replies: [...post.replies, newReply] }
+        return { ...post, replies: [...(post.replies || []), newReply] }
       }
-      return post as Post
+      return post
     })
     setPostList(newPostsList)
   }
 
   const handleNewLike = (newLike: Like, transactionCreatorId: string) => {
-    const newPostsList = postList?.map((post) => {
+    const newPostsList = postList.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
-        if (post.likes === undefined) {
-          return { ...post, likes: [newLike] }
-        }
-        return { ...post, likes: [...post.likes, newLike] }
+        return { ...post, likes: [...(post.likes || []), newLike] }
       }
       return post
     })
-    setPostList(newPostsList!)
+    setPostList(newPostsList)
   }
 
   const postProviderValues = useMemo(
@@ -92,11 +117,12 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       handleNewLike,
       handleNewReply,
       handleGetPostByAddress,
+      handleGetPostByTransactionId,
       handleAddNewPost,
       handleDeletePost,
       isLoading,
     }),
-    [handleAddNewPost, handleDeletePost, handleNewReply, handleGetPostByAddress, handleNewLike, isLoading],
+    [postList, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>
