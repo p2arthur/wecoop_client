@@ -1,6 +1,5 @@
 import * as algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 
 export interface TransactionInterface {
   note: string
@@ -19,8 +18,7 @@ export class Transaction {
     }
   }
 
-  async createTransaction(from: string, to: string, amount: number, note: string) {
-    const token = getIndexerConfigFromViteEnvironment().token
+  async createTransaction(from: string, to: string, amount: number, note: string, token: number) {
     const suggestedParams = await this.client.getTransactionParams().do()
 
     const ptxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
@@ -30,7 +28,7 @@ export class Transaction {
       undefined,
       amount,
       new Uint8Array(Buffer.from(note)),
-      Number(token),
+      token,
       suggestedParams,
     )
 

@@ -9,3 +9,9 @@ export enum Fees {
   ReplyWecoopFee = convertToDecimals(0.01),
   ReplyUserFee = convertToDecimals(0.09),
 }
+
+// These values are based on dollar
+export enum InteractionPrices {
+  Post = 0.01,
+  Like = 0.01,
+}

@@ -68,8 +68,9 @@ const PostInput = () => {
       const transaction = await new Transaction(algod).createTransaction(
         userData.address,
         import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-        100000,
+        1000,
         note,
+        usableAsset.assetId,
       )
 
       const signedTransactions = await signTransactions([algosdk.encodeUnsignedTransaction(transaction)])
