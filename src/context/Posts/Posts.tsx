@@ -10,6 +10,7 @@ type IPostsContext = {
   handleNewLike(newLike: Like, transactionCreatorId: string): void
   handleDeletePost(transactionCreatorId: string): void
   handleGetPostByTransactionId(transactionId: string): Post | undefined
+  handleRefreshPosts(): void
   isLoading: boolean
 }
 
@@ -25,6 +26,7 @@ const PostsContext = createContext<IPostsContext>({
   handleNewLike: () => undefined,
   handleDeletePost: () => undefined,
   handleGetPostByTransactionId: () => undefined,
+  handleRefreshPosts: () => undefined,
   isLoading: false,
 })
 
@@ -33,7 +35,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   const [transactionId, setTransactionId] = useState<string>('')
 
-  const { data, isLoading, refetch } = useGetAllPosts(false)
+  const { data, isFetching: isLoading, refetch } = useGetAllPosts(false)
 
   const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
 
@@ -66,6 +68,24 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       )
     }
   }, [data])
+
+  const handleRefreshPosts = () => {
+    localStorage.removeItem('postList')
+    refetch().then(() => {
+      if (data) {
+        setPostList(
+          data.map((post) => ({
+            ...post,
+            status: 'accepted',
+            replies: post.replies.map((reply) => ({
+              ...reply,
+              status: 'accepted',
+            })),
+          })),
+        )
+      }
+    })
+  }
 
   const handleDeletePost = (transactionCreatorId: string) => {
     const newPostsList = postList.filter((post) => post.transaction_id !== transactionCreatorId)
@@ -118,6 +138,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       handleNewReply,
       handleGetPostByAddress,
       handleGetPostByTransactionId,
+      handleRefreshPosts,
       handleAddNewPost,
       handleDeletePost,
       isLoading,

@@ -2,7 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
-import { FaAngleDown, FaArrowRight } from 'react-icons/fa6'
+import { FaAngleDown, FaArrowRight, FaArrowsRotate } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
@@ -22,7 +22,7 @@ export interface PostInputOutletContext {
 const PostInput = () => {
   const { assetId } = useParams<{ assetId: string }>()
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
-  const { handleAddNewPost, handleDeletePost } = usePosts()
+  const { handleAddNewPost, handleDeletePost, handleRefreshPosts } = usePosts()
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
   const [selectedAsset, setSelectedAsset] = useState(usableAssetsList[0])
@@ -158,6 +158,7 @@ const PostInput = () => {
               )}
             </div>
           </div>
+          <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
           {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance! > 0.1 ? (
             <Button buttonText="Send your message" />
           ) : (
