@@ -6,6 +6,7 @@ import { usePosts } from '../context/Posts/Posts'
 import { Feed } from '../services/Feed'
 import { Post } from '../services/api/types'
 import { MenuFeed } from '../components/templates/MenuFeed'
+import { ProfileMenu } from '../components/templates/ProfileMenu'
 
 const Home = () => {
   const { postList, handleNewReply, isLoading } = usePosts()
@@ -31,10 +32,10 @@ const Home = () => {
   }, [activeAccount])
 
   return (
-    <div className="flex dark:bg-gray-950 bg-gray-100 overflow-hidden">
+    <div className="flex  pt-14 dark:bg-gray-950 bg-gray-100 overflow-hidden max-h-screen w-full">
       <MenuFeed hasFeedPosts={(feedPosts && feedPosts?.length > 0) || false} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="p-2 border-2 border-gray-950 dark:border-gray-800 h-screen flex flex-col gap-5 w-full">
-        <div className="mt-12 bg-gray">
+      <div className="p-2 border-2 w-4/6 border-gray-950 dark:border-gray-800 h-screen flex flex-col gap-5 w-full h-screen">
+        <div className=" bg-gray">
           <PostInput />
         </div>
         {activeTab === 'personalized' && feedPosts && (
@@ -53,6 +54,7 @@ const Home = () => {
           </div>
         )}
       </div>
+      <ProfileMenu />
     </div>
   )
 }

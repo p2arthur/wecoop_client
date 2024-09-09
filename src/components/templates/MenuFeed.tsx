@@ -8,7 +8,7 @@ interface IMenuFeed {
 
 export const MenuFeed = ({ hasFeedPosts, setActiveTab, activeTab }: IMenuFeed) => {
   return (
-    <div className="flex pt-14 border-t-0 flex-col w-1/3 h-screen items-start justify-between border-2 border-b-0 dark:border-gray-800  border-gray-950 bg-gray-100 dark:bg-gray-900">
+    <div className="flex  border-t-0 flex-col w-1/6 items-start justify-between border-2 border-b-0 dark:border-gray-800  border-gray-950 bg-gray-100 dark:bg-gray-900">
       <div className="w-full">
         <div className="p-3">
           <div className="flex items-center justify-between p-3 gap-3 border-2 border-black w-full">

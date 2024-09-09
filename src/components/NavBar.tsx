@@ -13,7 +13,7 @@ const NavBar = ({ user }: NavBarProps) => {
   const { isOpen, openSidebar } = useMobileSidebar()
   const { isDarkMode } = useDarkMode()
   return (
-    <div className="px-2 py-0 fixed z-40 bg-gray-100 dark:bg-gray-950 w-screen border-b-4 border-gray-900 flex justify-between items-center h-14">
+    <div className="px-2 py-0 py fixed z-40 bg-gray-100 dark:bg-gray-950 w-screen border-b-4 border-gray-900 flex justify-between items-center h-14">
       <a className="flex gap-2 items-center" href="/">
         <img
           className="w-4 md:w-5 "
