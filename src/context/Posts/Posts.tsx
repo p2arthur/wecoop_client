@@ -40,7 +40,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
 
   useEffect(() => {
-    const savedPosts = localStorage.getItem('postList')
+    const savedPosts = sessionStorage.getItem('postList')
     if (savedPosts) {
       setPostList(JSON.parse(savedPosts))
     } else {
@@ -50,7 +50,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   useEffect(() => {
     if (postList.length > 0) {
-      localStorage.setItem('postList', JSON.stringify(postList))
+      sessionStorage.setItem('postList', JSON.stringify(postList))
     }
   }, [postList])
 
@@ -70,7 +70,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }, [data])
 
   const handleRefreshPosts = () => {
-    localStorage.removeItem('postList')
+    sessionStorage.removeItem('postList')
     refetch().then(() => {
       if (data) {
         setPostList(
