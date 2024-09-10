@@ -11,6 +11,7 @@ import { usePosts } from '../context/Posts/Posts'
 import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
+import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
 import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
@@ -44,6 +45,9 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [openReplyInput, setOpenReplyInput] = useState(false)
+
+  const currentPostUsableAsset = usableAssetsList.find((usableAsset) => post.assetId === usableAsset.assetId)
+  const [currentPostAsset, setCurrentPostAsset] = useState(currentPostUsableAsset)
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -188,7 +192,12 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
-                  <img className="h-5 w-5" src={`https://asa-list.tinyman.org/assets/${post.assetId}/icon.png`} alt={post.assetId} />
+                  <img
+                    className="h-5 w-5"
+                    src={`https://asa-list.tinyman.org/assets/${post.assetId}/icon.png`}
+                    alt={`${post.assetId}`}
+                    onError={(e) => (e.currentTarget.src = currentPostUsableAsset?.image!)}
+                  />
                   {variant === 'default' && (
                     <button
                       className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"

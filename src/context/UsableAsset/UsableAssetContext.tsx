@@ -3,6 +3,7 @@ import { createContext, useContext, useMemo, useState } from 'react'
 export interface UsableAssetInterface {
   name: string
   assetId: number
+  image: string
 }
 
 type IUsableAssetContext = {
@@ -15,12 +16,12 @@ interface IUsableAssetProviderProps {
 }
 
 const UsableAssetContext = createContext<IUsableAssetContext>({
-  usableAsset: { name: 'coop', assetId: 1234 },
+  usableAsset: { name: 'coop', assetId: 1234, image: '' },
   setUsableAsset: (usableAsset: UsableAssetInterface) => {},
 })
 
 const UsableAssetProvider = ({ children }: IUsableAssetProviderProps) => {
-  const [usableAsset, setUsableAsset] = useState<UsableAssetInterface>({ name: 'coop', assetId: 796425061 })
+  const [usableAsset, setUsableAsset] = useState<UsableAssetInterface>({ name: 'coop', assetId: 796425061, image: '' })
 
   const defineUsableAsset = (usableAsset: UsableAssetInterface) => {
     setUsableAsset(usableAsset)
