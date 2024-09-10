@@ -13,7 +13,7 @@ import { Reply } from '../services/Reply'
 
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
+import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -123,7 +123,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
     setReplyText('')
     setIsLoadingReply(false)
-    queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
   }
 
   const handleTimestamp = () => {

@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { useGetAllPosts, useGetPostByTransactionId } from '../../services/api/Posts'
+import { useGetAllPosts, useGetAllPostsByWalletAddress, useGetPostByTransactionId } from '../../services/api/Posts'
 import { Like, Post } from '../../services/api/types'
+import { useWallet } from '@txnlab/use-wallet'
+
+export type FeedType = 'personalized' | 'global'
 
 type IPostsContext = {
   postList: Post[] | null
@@ -11,6 +14,8 @@ type IPostsContext = {
   handleDeletePost(transactionCreatorId: string): void
   handleGetPostByTransactionId(transactionId: string): Post | undefined
   handleRefreshPosts(): void
+  handleChangeFeed(feed: FeedType): void
+  activeFeed?: FeedType
   isLoading: boolean
 }
 
@@ -27,17 +32,30 @@ const PostsContext = createContext<IPostsContext>({
   handleDeletePost: () => undefined,
   handleGetPostByTransactionId: () => undefined,
   handleRefreshPosts: () => undefined,
+  handleChangeFeed: () => undefined,
+  activeFeed: 'global',
   isLoading: false,
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
   const [postList, setPostList] = useState<Post[]>([])
 
+  const [activeFeed, setActiveFeed] = useState<FeedType>('global')
+  const { activeAccount } = useWallet()
+
   const [transactionId, setTransactionId] = useState<string>('')
 
-  const { data, isFetching: isLoading, refetch } = useGetAllPosts(false)
+  const { data, isFetching: isLoadingGetAllPosts, refetch } = useGetAllPosts(false)
 
   const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
+
+  const {
+    data: postDataByWalletAddress,
+    isFetching: isLoadingPostDataByWalletAddress,
+    refetch: refetchPostByWalletAddress,
+  } = useGetAllPostsByWalletAddress(activeAccount?.address || '', false)
+
+  const isLoading = isLoadingGetAllPosts || isLoadingPostDataByWalletAddress
 
   useEffect(() => {
     const savedPosts = sessionStorage.getItem('postList')
@@ -55,9 +73,26 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }, [postList])
 
   useEffect(() => {
-    if (data) {
+    if (activeFeed === 'global') {
+      if (data) {
+        setPostList(
+          data.map((post) => ({
+            ...post,
+            status: 'accepted',
+            replies: post.replies.map((reply) => ({
+              ...reply,
+              status: 'accepted',
+            })),
+          })),
+        )
+      }
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (postDataByWalletAddress && activeFeed === 'personalized') {
       setPostList(
-        data.map((post) => ({
+        postDataByWalletAddress.map((post) => ({
           ...post,
           status: 'accepted',
           replies: post.replies.map((reply) => ({
@@ -67,7 +102,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
         })),
       )
     }
-  }, [data])
+  }, [postDataByWalletAddress])
 
   const handleRefreshPosts = () => {
     sessionStorage.removeItem('postList')
@@ -85,6 +120,16 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
         )
       }
     })
+  }
+
+  const handleChangeFeed = (feed: FeedType) => {
+    setActiveFeed(feed)
+
+    if (feed === 'personalized') {
+      refetchPostByWalletAddress()
+    } else if (feed === 'global') {
+      refetch()
+    }
   }
 
   const handleDeletePost = (transactionCreatorId: string) => {
@@ -135,15 +180,17 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     () => ({
       postList,
       handleNewLike,
+      activeFeed,
       handleNewReply,
       handleGetPostByAddress,
       handleGetPostByTransactionId,
       handleRefreshPosts,
       handleAddNewPost,
       handleDeletePost,
+      handleChangeFeed,
       isLoading,
     }),
-    [postList, isLoading],
+    [postList, activeFeed, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>

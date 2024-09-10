@@ -1,60 +1,40 @@
-import { useWallet } from '@txnlab/use-wallet'
-import { useEffect, useState } from 'react'
 import FeedComponent from '../components/Feed'
 import PostInput from '../components/PostInput'
 import { usePosts } from '../context/Posts/Posts'
-import { Feed } from '../services/Feed'
-import { Post } from '../services/api/types'
 import { MenuFeed } from '../components/templates/MenuFeed'
 import { ProfileMenu } from '../components/templates/ProfileMenu'
+import { isMobileDevice } from '../utils/isMobile'
+import { useWallet } from '@txnlab/use-wallet'
 
 const Home = () => {
-  const { postList, handleNewReply, isLoading } = usePosts()
+  const { postList, handleNewReply, isLoading, activeFeed, handleChangeFeed } = usePosts()
   const { activeAccount } = useWallet()
-  const [feedPosts, setFeedPosts] = useState<Post[]>()
-  const [activeTab, setActiveTab] = useState<'personalized' | 'global'>('global')
-  const feedServices = new Feed()
-  const getFeedPosts = async (walletAddress: string) => {
-    const posts = await feedServices.getFeedByWalletAddress(walletAddress)
-    setFeedPosts(posts)
-  }
-
-  useEffect(() => {
-    const getFeedPostsEffect = async () => {
-      if (activeAccount) {
-        await getFeedPosts(activeAccount?.address || '')
-      }
-
-      return feedPosts
-    }
-
-    getFeedPostsEffect()
-  }, [activeAccount])
+  const isMobile = isMobileDevice()
 
   return (
     <div className="flex  pt-14 dark:bg-gray-950 bg-gray-100 overflow-hidden max-h-screen w-full">
-      <MenuFeed hasFeedPosts={(feedPosts && feedPosts?.length > 0) || false} activeTab={activeTab} setActiveTab={setActiveTab} />
+      {!isMobile && (
+        <div className="flex  border-t-0 flex-col w-1/6 items-start justify-between border-2 border-b-0 dark:border-gray-800  border-gray-950 bg-gray-100 dark:bg-gray-900">
+          <MenuFeed hasFeedPosts={activeAccount !== null} activeFeed={activeFeed || 'global'} handleChangeFeed={handleChangeFeed} />
+        </div>
+      )}
       <div className="p-2 border-2 w-4/6 border-gray-950 dark:border-gray-800 h-screen flex flex-col gap-5 w-full h-screen">
         <div className=" bg-gray">
           <PostInput />
         </div>
-        {activeTab === 'personalized' && feedPosts && (
+        {activeFeed === 'personalized' && (
           <div className="overflow-y-hidden h-full">
-            {' '}
-            {/* Make this container scrollable */}
-            <FeedComponent postList={feedPosts!} isLoading={isLoading} handleNewReply={handleNewReply} />
+            <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
           </div>
         )}
 
-        {activeTab === 'global' && (
+        {activeFeed === 'global' && (
           <div className="overflow-y-hidden h-full">
-            {' '}
-            {/* Make this container scrollable */}
             <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
           </div>
         )}
       </div>
-      <ProfileMenu />
+      {!isMobile && <ProfileMenu />}
     </div>
   )
 }

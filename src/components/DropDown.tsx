@@ -1,8 +1,9 @@
-import {Provider} from '@txnlab/use-wallet'
-import {ReactNode, useState} from 'react'
-import {useNavigate} from 'react-router-dom'
+import { Provider } from '@txnlab/use-wallet'
+import { ReactNode, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Button from './Button'
-import {toast} from "react-toastify";
+import { toast } from 'react-toastify'
+import { isMobileDevice } from '../utils/isMobile'
 
 interface DropDownOption {
   buttonText: string
@@ -13,14 +14,20 @@ interface DropDownOption {
   children?: React.ReactNode
 }
 
-const DropDown = ({options, buttonText, icon, type, address}: DropDownOption) => {
+const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
+  const isMobile = isMobileDevice()
 
   const dropDownButtonRenderer = () => {
     return (
       <div>
-        <Button icon={<div className="w-5 text-md">{icon}</div>} buttonText={buttonText} buttonFunction={handleOpenDropDown}/>
+        <Button
+          icon={<div className="w-5 text-md">{icon}</div>}
+          ellipsis={isMobile}
+          buttonText={buttonText}
+          buttonFunction={handleOpenDropDown}
+        />
       </div>
     )
   }
@@ -29,18 +36,17 @@ const DropDown = ({options, buttonText, icon, type, address}: DropDownOption) =>
     navigator.clipboard.writeText(`${window.location.origin}/profile/${address}`).catch(() => {
       toast('Failed to copy profile link to clipboard', {
         position: 'bottom-right',
-        className: "black-background",
-        bodyClassName: "grow-font-size",
-        progressClassName: "fancy-progress-bar",
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
       })
     })
 
     toast('Profile link copied to clipboard', {
       position: 'bottom-right',
-      theme: 'dark'
+      theme: 'dark',
     })
   }
-
 
   const optionRenderer = () => {
     if (options) {
@@ -52,7 +58,7 @@ const DropDown = ({options, buttonText, icon, type, address}: DropDownOption) =>
               onClick={option.connect}
             >
               <div className="rounded-full overflow-hidden flex items-center justify-center w-5">
-                <img className="w-5" src={option.metadata.icon} alt=""/>
+                <img className="w-5" src={option.metadata.icon} alt="" />
               </div>
               <p className="font-bold">{option.metadata.name}</p>
             </button>
@@ -105,4 +111,4 @@ const DropDown = ({options, buttonText, icon, type, address}: DropDownOption) =>
   )
 }
 
-export {DropDown}
+export { DropDown }
