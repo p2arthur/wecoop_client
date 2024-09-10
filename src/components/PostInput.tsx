@@ -135,6 +135,7 @@ const PostInput = () => {
                     className="h-5 w-5"
                     src={`https://asa-list.tinyman.org/assets/${usableAsset.assetId}/icon.png`}
                     alt={usableAsset.name}
+                    onError={(e) => (e.currentTarget.src = usableAsset.image)}
                   />
                   <span className="font-bold">{usableAsset.name}</span>
                 </div>
@@ -149,7 +150,12 @@ const PostInput = () => {
                       onClick={() => handleAssetSelect(asset)}
                     >
                       <div className="flex gap-1 items-center">
-                        <img className="h-6 w-6" src={`https://asa-list.tinyman.org/assets/${asset.assetId}/icon.png`} alt={asset.name} />
+                        <img
+                          className="h-6 w-6"
+                          src={`https://asa-list.tinyman.org/assets/${asset.assetId}/icon.png`}
+                          alt={asset.name}
+                          onError={(e) => (e.currentTarget.src = asset.image)}
+                        />
                         <span className="text-sm">{asset.name}</span>
                       </div>
                       <span className="text-sm">{userData.balance || 0}</span>
