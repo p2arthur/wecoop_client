@@ -257,7 +257,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 <div className={'grid gap-4 h-full'} onClick={(e) => e.stopPropagation()}>
                   <p className={'text-lg'}>replies</p>
 
-                  {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                  {post?.replies &&
+                    post?.replies?.length > 0 &&
+                    post.replies
+                      .sort((a, b) => {
+                        return a.timestamp! - b.timestamp!
+                      })
+                      .map((reply) => <PostCard post={reply} variant={'reply'} />)}
 
                   {!isLoadingReply && (
                     <ReplyInput
