@@ -2,7 +2,6 @@ export type IGetAllPosts = PostRequest[]
 
 export interface Post {
   isPersonalized: unknown
-  assetId: import('/home/d2dods/WeCoop/wecoop_client/src/context/Posts/Posts').AssetId
   text: string
   creator_address: string
   transaction_id: string

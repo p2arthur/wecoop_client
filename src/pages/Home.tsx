@@ -12,16 +12,12 @@ const Home = () => {
   const { activeAccount } = useWallet()
   const isMobile = isMobileDevice()
 
-  // Estado para a moeda ativa
   const [activeAssetId, setActiveAssetId] = useState<AssetId | null>(null)
 
-  // Função para atualizar a moeda ativa
   const handleChangeAssetId = (assetId: AssetId | null) => {
     setActiveAssetId(assetId)
-    // Aqui você pode adicionar lógica para atualizar a lista de posts com base na moeda, se necessário
   }
 
-  // Filtrar posts com base no feed e moeda ativos
   const filteredPosts =
     postList?.filter(
       (post) => (activeAssetId ? post.assetId === activeAssetId : true) && (activeFeed === 'personalized' ? post.isPersonalized : true), // Ajuste conforme a lógica do feed
@@ -35,8 +31,8 @@ const Home = () => {
             hasFeedPosts={activeAccount !== null}
             activeFeed={activeFeed || 'global'}
             handleChangeFeed={handleChangeFeed}
-            handleChangeAssetId={handleChangeAssetId} // Passando a função para MenuFeed
-            activeAssetId={activeAssetId} // Passando o estado para MenuFeed
+            handleChangeAssetId={handleChangeAssetId}
+            activeAssetId={activeAssetId}
           />
         </div>
       )}

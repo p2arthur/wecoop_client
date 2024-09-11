@@ -50,7 +50,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   const [activeFeed, setActiveFeed] = useState<FeedType>('global')
   const { activeAccount } = useWallet()
-  const [assetId, setAssetId] = useState<AssetId | null>(null) // Alterado para AssetId | null
+  const [assetId, setAssetId] = useState<AssetId | null>(null)
 
   const [transactionId, setTransactionId] = useState<string>('')
 
@@ -71,9 +71,9 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     if (savedPosts) {
       setPostList(JSON.parse(savedPosts))
     } else {
-      refetch() // Adicionado refetch como dependência para garantir que o efeito execute corretamente
+      refetch()
     }
-  }, [refetch]) // Adicionado refetch como dependência
+  }, [refetch])
 
   useEffect(() => {
     if (postList.length > 0) {
@@ -85,7 +85,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     if (activeFeed === 'global' && data) {
       setPostList(
         data
-          .filter((post) => !assetId || post.assetId === assetId) // Lógica de filtragem corrigida
+          .filter((post) => !assetId || post.assetId === assetId)
           .map((post) => ({
             ...post,
             status: 'accepted',
@@ -102,7 +102,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     if (postDataByWalletAddress && activeFeed === 'personalized') {
       setPostList(
         postDataByWalletAddress
-          .filter((post) => !assetId || post.assetId === assetId) // Filtro por assetId
+          .filter((post) => !assetId || post.assetId === assetId)
           .map((post) => ({
             ...post,
             status: 'accepted',
