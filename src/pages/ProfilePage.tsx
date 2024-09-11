@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import EmptyFeed from '../components/EmptyFeed'
 import LoaderSpinner from '../components/LoaderSpinner'
-import { AssetId } from '../enums/assetId'
 import { useGetPostsByAddress } from '../services/api/Posts'
 import { Post, User } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import FeedComponent from '../components/Feed'
 import FollowButton from '../components/FollowButton'
+import { usableAssetsList } from '../data/usableAssetsList'
 
 interface UserDataInterface {
   data: User | undefined
@@ -89,6 +89,10 @@ const ProfilePage = () => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
+  const getAssetById = (assetId: string) => {
+    return usableAssetsList.find((asset) => asset.assetId === Number(assetId))
+  }
+
   return (
     <div className="flex flex-col ">
       <section className="p-4">
@@ -113,12 +117,15 @@ const ProfilePage = () => {
                     <div className="flex items-center gap-1">
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <img
-                            className="w-6 h-6"
-                            src={`https://asa-list.tinyman.org/assets/${AssetId.coopCoin}/icon.png`}
-                            alt="coopcoin-icon"
-                          />
                           <div className="flex items-end gap-1">
+                            <ul className="grid grid-cols-3 mt-2 gap-1">
+                              {Object.keys(user.balance).map((key) => (
+                                <div className={'flex gap-2'}>
+                                  <img src={getAssetById(key)?.image} alt="asset icon" className="w-5 h-5" />
+                                  <p> {user.balance[key]}</p>
+                                </div>
+                              ))}
+                            </ul>
                             {/* <p className="text-xl">{user?.balance}</p>
                             <p className="border-gray-950 text-sm">{((user?.balance / 2100000) * 100).toFixed(3)}% of the supply</p> */}
                           </div>{' '}

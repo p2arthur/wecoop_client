@@ -1,7 +1,7 @@
 export const usableAssetsList = [
-  { name: 'Coop', assetId: 796425061, image: '' },
-  { name: 'Algo', assetId: 0, image: '' },
-  { name: 'xUSD', assetId: 760037151, image: '' },
+  { name: 'Coop', assetId: 796425061, image: 'https://asa-list.tinyman.org/assets/796425061/icon.png' },
+  { name: 'Algo', assetId: 0, image: 'https://asa-list.tinyman.org/assets/0/icon.png' },
+  { name: 'xUSD', assetId: 760037151, image: 'https://asa-list.tinyman.org/assets/760037151/icon.png' },
   {
     name: '$JAWS',
     assetId: 2155690250,
