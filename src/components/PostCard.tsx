@@ -14,7 +14,7 @@ import { Reply } from '../services/Reply'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
+import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -98,34 +98,52 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
     handleNewReply && handleNewReply(newReply, parentReplyId)
 
-    const encodedGroupedTransactions = await replieservice.handlePostReply({
-      creatorAddress: post.creator_address,
-      address: activeAccount?.address || '',
-      transactionId: post.transaction_id as string,
-      text: encodeURIComponent(replyText),
-      assetId: usableAsset.assetId,
-    })
-    const signedTransactions = await signTransactions(encodedGroupedTransactions)
-    const waitRoundsToConfirm = 4
+    try {
+      const encodedGroupedTransactions = await replieservice.handlePostReply({
+        creatorAddress: post.creator_address,
+        address: activeAccount?.address || '',
+        transactionId: post.transaction_id as string,
+        text: encodeURIComponent(replyText),
+        assetId: usableAsset.assetId,
+      })
+      const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      const waitRoundsToConfirm = 4
 
-    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-    const acceptedReply: Post = {
-      creator_address: userData?.address || '',
-      text: encodeURIComponent(replyText),
-      status: 'accepted',
-      transaction_id: id,
-      likes: [],
-      country,
-      nfd: userData?.nfd.name,
-      timestamp: Date.now(),
-      replies: [],
-      isPersonalized: undefined,
-      assetId: usableAsset.assetId,
+      const acceptedReply: Post = {
+        creator_address: userData?.address || '',
+        text: encodeURIComponent(replyText),
+        status: 'accepted',
+        transaction_id: id,
+        likes: [],
+        country,
+        nfd: userData?.nfd.name,
+        timestamp: Date.now(),
+        replies: [],
+        isPersonalized: undefined,
+        assetId: usableAsset.assetId,
+      }
+
+      handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+    } catch (error) {
+      console.error(error)
+      const rejectedReply: Post = {
+        creator_address: userData?.address || '',
+        text: encodeURIComponent(replyText),
+        status: 'rejected',
+        transaction_id: uuidv4(),
+        likes: [],
+        country,
+        nfd: userData?.nfd.name,
+        timestamp: Date.now(),
+        replies: [],
+        isPersonalized: undefined,
+        assetId: usableAsset.assetId,
+      }
+      handleNewReply && handleNewReply(rejectedReply, parentReplyId)
+      han
     }
-
-    handleNewReply && handleNewReply(acceptedReply, parentReplyId)
-
     setReplyText('')
     setIsLoadingReply(false)
   }
@@ -166,7 +184,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         {post.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-full  transition-all duration-75 cursor-pointer dark:border-gray-950 bg-white dark:bg-gray-900"
+            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-gray-950 bg-white dark:bg-gray-900"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
