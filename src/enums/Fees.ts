@@ -15,3 +15,9 @@ export enum InteractionPrices {
   Post = 0.01,
   Like = 0.01,
 }
+
+export enum InteractionMultipliers {
+  Post = 2,
+  Reply = 1.5,
+  Like = 1,
+}

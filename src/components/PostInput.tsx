@@ -11,6 +11,8 @@ import { usableAssetsList } from '../data/usableAssetsList'
 import { NotePrefix } from '../enums/notePrefix'
 import { Transaction } from '../services/Transaction'
 import { User as UserInterface } from '../services/api/types'
+import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
+import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 
@@ -50,31 +52,37 @@ const PostInput = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
+
     const country = await getUserCountry()
-    handleAddNewPost({
-      text: inputText,
-      creator_address: userData.address,
-      status: 'loading',
-      timestamp: new Date().getDate(),
-      country: country,
-      replies: [],
-      likes: [],
-      transaction_id: 'loading_id',
-    })
+
+    // Calculate the fee price based on the asset
+    const feePrice = await getFeePriceByAsset(usableAsset.assetId, InteractionMultipliers.Post)
+
+    // Split the fee by interaction type
+    const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'post' })
+
+    console.log('split fee', splitFee)
+
+    // Example calculation to ensure platformFee is used as an integer
+    const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
+
+    console.log('fee final', finalFeeForTransaction)
     const encodedInputText = encodeURIComponent(inputText)
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
     try {
+      // Create transaction using final integer fee
       const transaction = await new Transaction(algod).createTransaction(
         userData.address,
         import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-        1000,
+        finalFeeForTransaction,
         note,
         usableAsset.assetId,
       )
 
       const signedTransactions = await signTransactions([algosdk.encodeUnsignedTransaction(transaction)])
       const { id } = await sendTransactions(signedTransactions, 4)
+
       handleDeletePost('loading_id')
       handleAddNewPost({
         creator_address: userData.address,
