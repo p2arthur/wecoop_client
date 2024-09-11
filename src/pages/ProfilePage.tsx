@@ -9,6 +9,8 @@ import { useGetPostsByAddress } from '../services/api/Posts'
 import { Post, User } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import { ellipseAddress } from '../utils/ellipseAddress'
+import FeedComponent from '../components/Feed'
+import FollowButton from '../components/FollowButton'
 
 interface UserDataInterface {
   data: User | undefined
@@ -58,6 +60,7 @@ const ProfilePage = () => {
 
     return updatedPosts
   }
+  console.log(user, 'user')
 
   const getIsFollowing = (): void => {
     if (currentUser?.followTargets.includes(walletAddress!)) {
@@ -96,8 +99,7 @@ const ProfilePage = () => {
                 {user?.avatar !== null ? (
                   <img className="w-16 h-16" src={user?.avatar} alt="profile-photo" />
                 ) : (
-                  'a'
-                  // <img className="w-16 h-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
+                  <img className="w-16 h-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
                 )}
               </div>
               <div className="flex flex-col">
@@ -129,7 +131,7 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
-            {/* <FollowButton isFollowing={isFollowing} walletAddress={userData?.address || ''} /> */}
+            <FollowButton isFollowing={isFollowing} walletAddress={userData?.address || ''} />
           </div>
           {/* <div className="flex justify-end">
             <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} type="connect" options={[]} />
@@ -140,7 +142,7 @@ const ProfilePage = () => {
         <LoaderSpinner text="loading posts" />
       ) : postsList.length > 0 ? (
         <section className="p-4 flex flex-col gap-3">
-          {/* <FeedComponent postList={postsList} isLoading={isLoading} handleNewReply={handleNewReply} /> */}
+          <FeedComponent postList={postsList} isLoading={isLoading} handleNewReply={handleNewReply} />
         </section>
       ) : (
         <EmptyFeed />
