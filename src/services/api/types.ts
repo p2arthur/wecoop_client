@@ -1,6 +1,7 @@
 export type IGetAllPosts = PostRequest[]
 
 export interface Post {
+  isPersonalized: unknown
   text: string
   creator_address: string
   transaction_id: string
@@ -23,6 +24,7 @@ export interface PostRequest {
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | null
   assetId: number
+  isPersonalized: boolean
 }
 
 export interface Like {

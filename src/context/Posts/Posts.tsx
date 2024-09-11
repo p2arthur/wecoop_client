@@ -1,7 +1,18 @@
+import { useWallet } from '@txnlab/use-wallet'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { useGetAllPosts, useGetPostByTransactionId } from '../../services/api/Posts'
+import { useGetAllPosts, useGetAllPostsByWalletAddress, useGetPostByTransactionId } from '../../services/api/Posts'
 import { Like, Post } from '../../services/api/types'
 
+export enum AssetId {
+  coopCoin = 796425061,
+  xusd = 760037151,
+}
+
+export type FeedType = 'personalized' | 'global'
+export type ExtendedFeedType = {
+  feed: FeedType
+  assetId?: AssetId
+}
 type IPostsContext = {
   postList: Post[] | null
   handleGetPostByAddress(address: string): Post | undefined
@@ -11,6 +22,8 @@ type IPostsContext = {
   handleDeletePost(transactionCreatorId: string): void
   handleGetPostByTransactionId(transactionId: string): Post | undefined
   handleRefreshPosts(): void
+  handleChangeFeed(feed: FeedType): void
+  activeFeed?: FeedType
   isLoading: boolean
 }
 
@@ -27,17 +40,31 @@ const PostsContext = createContext<IPostsContext>({
   handleDeletePost: () => undefined,
   handleGetPostByTransactionId: () => undefined,
   handleRefreshPosts: () => undefined,
+  handleChangeFeed: () => undefined,
+  activeFeed: 'global',
   isLoading: false,
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
   const [postList, setPostList] = useState<Post[]>([])
 
+  const [activeFeed, setActiveFeed] = useState<FeedType>('global')
+  const { activeAccount } = useWallet()
+  const [assetId, setAssetId] = useState<AssetId | null>(null)
+
   const [transactionId, setTransactionId] = useState<string>('')
 
-  const { data, isFetching: isLoading, refetch } = useGetAllPosts(false)
+  const { data, isFetching: isLoadingGetAllPosts, refetch } = useGetAllPosts(false)
 
   const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
+
+  const {
+    data: postDataByWalletAddress,
+    isFetching: isLoadingPostDataByWalletAddress,
+    refetch: refetchPostByWalletAddress,
+  } = useGetAllPostsByWalletAddress(activeAccount?.address || '', false)
+
+  const isLoading = isLoadingGetAllPosts || isLoadingPostDataByWalletAddress
 
   useEffect(() => {
     const savedPosts = sessionStorage.getItem('postList')
@@ -46,7 +73,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     } else {
       refetch()
     }
-  }, [])
+  }, [refetch])
 
   useEffect(() => {
     if (postList.length > 0) {
@@ -55,19 +82,38 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }, [postList])
 
   useEffect(() => {
-    if (data) {
+    if (activeFeed === 'global' && data) {
       setPostList(
-        data.map((post) => ({
-          ...post,
-          status: 'accepted',
-          replies: post.replies.map((reply) => ({
-            ...reply,
+        data
+          .filter((post) => !assetId || post.assetId === assetId)
+          .map((post) => ({
+            ...post,
             status: 'accepted',
+            replies: post.replies.map((reply) => ({
+              ...reply,
+              status: 'accepted',
+            })),
           })),
-        })),
       )
     }
-  }, [data])
+  }, [data, assetId, activeFeed])
+
+  useEffect(() => {
+    if (postDataByWalletAddress && activeFeed === 'personalized') {
+      setPostList(
+        postDataByWalletAddress
+          .filter((post) => !assetId || post.assetId === assetId)
+          .map((post) => ({
+            ...post,
+            status: 'accepted',
+            replies: post.replies.map((reply) => ({
+              ...reply,
+              status: 'accepted',
+            })),
+          })),
+      )
+    }
+  }, [postDataByWalletAddress, assetId, activeFeed])
 
   const handleRefreshPosts = () => {
     sessionStorage.removeItem('postList')
@@ -85,6 +131,17 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
         )
       }
     })
+  }
+
+  const handleChangeFeed = (feed: FeedType, assetIdFilter?: number) => {
+    setActiveFeed(feed)
+    setAssetId(assetIdFilter || null)
+
+    if (feed === 'personalized') {
+      refetchPostByWalletAddress()
+    } else if (feed === 'global') {
+      refetch()
+    }
   }
 
   const handleDeletePost = (transactionCreatorId: string) => {
@@ -135,15 +192,17 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     () => ({
       postList,
       handleNewLike,
+      activeFeed,
       handleNewReply,
       handleGetPostByAddress,
       handleGetPostByTransactionId,
       handleRefreshPosts,
       handleAddNewPost,
       handleDeletePost,
+      handleChangeFeed,
       isLoading,
     }),
-    [postList, isLoading],
+    [postList, activeFeed, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>

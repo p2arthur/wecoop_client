@@ -117,13 +117,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       nfd: userData?.nfd.name,
       timestamp: Date.now(),
       replies: [],
+      isPersonalized: undefined,
     }
 
     handleNewReply && handleNewReply(acceptedReply, parentReplyId)
 
     setReplyText('')
     setIsLoadingReply(false)
-    queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
   }
 
   const handleTimestamp = () => {
