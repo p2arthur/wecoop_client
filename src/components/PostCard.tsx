@@ -166,7 +166,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         {post.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-full  transition-all duration-75 cursor-pointer dark:border-gray-950 bg-white dark:bg-gray-950"
+            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-full  transition-all duration-75 cursor-pointer dark:border-gray-950 bg-white dark:bg-gray-900"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -197,7 +197,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
                   <img
-                    className="h-5 w-5"
+                    className="h-8 w-8"
                     src={`https://asa-list.tinyman.org/assets/${post.assetId}/icon.png`}
                     alt={`${post.assetId}`}
                     onError={(e) => (e.currentTarget.src = currentPostUsableAsset?.image!)}
@@ -214,13 +214,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                     </button>
                   )}
 
-                  <div className={'flex gap-1 items-center '}>
+                  <div className={'flex gap-1 items-center'}>
                     {isLoadingLike ? (
                       <FaSpinner className="animate-spin text-2xl" />
                     ) : (
                       <>
                         <button
-                          className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
+                          className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                           onClick={handlePostLike}
                         >
                           <FaRegThumbsUp className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900" />

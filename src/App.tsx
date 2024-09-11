@@ -15,6 +15,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import MobileSidebar from './components/interface/MobileSidebar'
 import { MobileSidebarProvider } from './context/Interface/MobileSidebar'
 import { UsableAssetProvider } from './context/UsableAsset/UsableAssetContext'
+import { AnalyticsProvider } from './context/analytics/Analytics'
 
 const TRACKING_ID = 'G-V7TZ80M30M'
 
@@ -48,20 +49,22 @@ export default function App() {
   })
 
   return (
-    <UsableAssetProvider>
-      <MobileSidebarProvider>
-        <SnackbarProvider maxSnack={3}>
-          <WalletProvider value={walletProviders}>
-            <QueryClientProvider client={queryClient}>
-              <PostsProvider>
-                <MobileSidebar />
-                <Router />
-                <ToastContainer toastStyle={{ fontFamily: 'SF Pixelate', fontSize: '16px' }} />
-              </PostsProvider>
-            </QueryClientProvider>
-          </WalletProvider>
-        </SnackbarProvider>
-      </MobileSidebarProvider>
-    </UsableAssetProvider>
+    <AnalyticsProvider>
+      <UsableAssetProvider>
+        <MobileSidebarProvider>
+          <SnackbarProvider maxSnack={3}>
+            <WalletProvider value={walletProviders}>
+              <QueryClientProvider client={queryClient}>
+                <PostsProvider>
+                  <MobileSidebar />
+                  <Router />
+                  <ToastContainer toastStyle={{ fontFamily: 'SF Pixelate', fontSize: '16px' }} />
+                </PostsProvider>
+              </QueryClientProvider>
+            </WalletProvider>
+          </SnackbarProvider>
+        </MobileSidebarProvider>
+      </UsableAssetProvider>
+    </AnalyticsProvider>
   )
 }

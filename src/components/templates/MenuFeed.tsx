@@ -23,11 +23,13 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
           onClick={() => {
             handleChangeFeed('personalized')
           }}
-          className={`w-full flex justify-start  p-3 cursor-pointer ${activeFeed === 'personalized' ? 'bg-black text-white' : ''}`}
+          className={`w-full flex justify-start  p-3 cursor-pointer ${
+            activeFeed === 'personalized' ? 'bg-black text-white dark:bg-white dark:text-black' : ''
+          }`}
         >
           <p
             className={`font-bold text-xl cursor-pointer hover:scale-105 ${
-              activeFeed === 'personalized' ? 'border-b-2 border-gray-900 dark:border-gray-600' : 'border-b-2 border-transparent'
+              activeFeed === 'personalized' ? 'border-b-2 border-gray-900 dark:border-black' : 'border-b-2 border-transparent'
             }`}
           >
             Your Feed
@@ -40,11 +42,13 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
         onClick={() => {
           handleChangeFeed('global')
         }}
-        className={`w-full flex justify-start  p-3 cursor-pointer ${activeFeed === 'global' ? 'bg-black text-white' : ''}`}
+        className={`w-full flex justify-start  p-3 cursor-pointer ${
+          activeFeed === 'global' ? 'bg-black text-white dark:bg-white dark:text-black' : ''
+        }`}
       >
         <p
           className={`font-bold text-xl cursor-pointer ${
-            activeFeed === 'global' ? 'border-b-2 border-gray-900 dark:border-gray-300' : 'border-b-2 border-transparent hover:scale-105'
+            activeFeed === 'global' ? 'border-b-2 border-gray-900 dark:border-black' : 'border-b-2 border-transparent hover:scale-105'
           }`}
         >
           Global Feed 🌎

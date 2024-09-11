@@ -3,13 +3,11 @@ import { minidenticon } from 'minidenticons'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import EmptyFeed from '../components/EmptyFeed'
-import FeedComponent from '../components/Feed'
-import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { AssetId } from '../enums/assetId'
 import { useGetPostsByAddress } from '../services/api/Posts'
-import { useGetUserInfo } from '../services/api/Users'
 import { Post, User } from '../services/api/types'
+import { useGetUserInfo } from '../services/api/Users'
 import { ellipseAddress } from '../utils/ellipseAddress'
 
 interface UserDataInterface {
@@ -25,7 +23,6 @@ const ProfilePage = () => {
   const [postsList, setPostsList] = useState<Post[]>([])
   const [isFollowing, setIsFollowing] = useState<boolean>(false)
 
-  const { data: currentUserData, isLoading: isLoadingCurrentUser } = useGetUserInfo(activeAccount?.address as string)
   const { data: userData, isLoading: isLoadingUser } = useGetUserInfo(walletAddress as string) as UserDataInterface
 
   const { data, isLoading } = useGetPostsByAddress(walletAddress as string)
@@ -33,13 +30,14 @@ const ProfilePage = () => {
   useEffect(() => {
     if (userData) {
       setUser(userData)
-      setCurrentUser(currentUserData!)
+      setCurrentUser(userData!)
     }
-  }, [userData, currentUserData])
+  }, [userData, userData])
 
   useEffect(() => {
     if (data) {
-      setPostsList(updateRepliesStatus(data))
+      const posts = setPostsList(updateRepliesStatus(data))
+      console.log('posts', posts)
     }
   }, [data])
 
@@ -48,13 +46,17 @@ const ProfilePage = () => {
   }, [currentUser])
 
   const updateRepliesStatus = (posts: Post[]): Post[] => {
-    return posts.map((post) => ({
+    const updatedPosts = posts.map((post) => ({
       ...post,
       replies: post.replies.map((reply) => ({
         ...reply,
         status: 'accepted',
       })),
     }))
+
+    console.log('updated posts', updatedPosts)
+
+    return updatedPosts
   }
 
   const getIsFollowing = (): void => {
@@ -94,7 +96,8 @@ const ProfilePage = () => {
                 {user?.avatar !== null ? (
                   <img className="w-16 h-16" src={user?.avatar} alt="profile-photo" />
                 ) : (
-                  <img className="w-16 h-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
+                  'a'
+                  // <img className="w-16 h-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
                 )}
               </div>
               <div className="flex flex-col">
@@ -114,8 +117,8 @@ const ProfilePage = () => {
                             alt="coopcoin-icon"
                           />
                           <div className="flex items-end gap-1">
-                            <p className="text-xl">{user.balance}</p>
-                            <p className="border-gray-950 text-sm">{((user.balance / 2100000) * 100).toFixed(3)}% of the supply</p>
+                            {/* <p className="text-xl">{user?.balance}</p>
+                            <p className="border-gray-950 text-sm">{((user?.balance / 2100000) * 100).toFixed(3)}% of the supply</p> */}
                           </div>{' '}
                         </div>
                       </div>
@@ -126,18 +129,18 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
-            <FollowButton isFollowing={isFollowing} walletAddress={userData?.address || ''} />
+            {/* <FollowButton isFollowing={isFollowing} walletAddress={userData?.address || ''} /> */}
           </div>
           {/* <div className="flex justify-end">
             <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} type="connect" options={[]} />
           </div> */}
         </div>
       </section>
-      {isLoading || isLoadingUser ? (
+      {isLoading ? (
         <LoaderSpinner text="loading posts" />
       ) : postsList.length > 0 ? (
         <section className="p-4 flex flex-col gap-3">
-          <FeedComponent postList={postsList} isLoading={isLoading} handleNewReply={handleNewReply} />
+          {/* <FeedComponent postList={postsList} isLoading={isLoading} handleNewReply={handleNewReply} /> */}
         </section>
       ) : (
         <EmptyFeed />
