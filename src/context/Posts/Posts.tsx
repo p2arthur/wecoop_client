@@ -1,10 +1,18 @@
+import { useWallet } from '@txnlab/use-wallet'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetAllPosts, useGetAllPostsByWalletAddress, useGetPostByTransactionId } from '../../services/api/Posts'
 import { Like, Post } from '../../services/api/types'
-import { useWallet } from '@txnlab/use-wallet'
+
+export enum AssetId {
+  coopCoin = 796425061,
+  xusd = 760037151,
+}
 
 export type FeedType = 'personalized' | 'global'
-
+export type ExtendedFeedType = {
+  feed: FeedType
+  assetId?: AssetId
+}
 type IPostsContext = {
   postList: Post[] | null
   handleGetPostByAddress(address: string): Post | undefined
@@ -42,6 +50,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   const [activeFeed, setActiveFeed] = useState<FeedType>('global')
   const { activeAccount } = useWallet()
+  const [assetId, setAssetId] = useState<AssetId | null>(null) // Alterado para AssetId | null
 
   const [transactionId, setTransactionId] = useState<string>('')
 
@@ -62,9 +71,9 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     if (savedPosts) {
       setPostList(JSON.parse(savedPosts))
     } else {
-      refetch()
+      refetch() // Adicionado refetch como dependência para garantir que o efeito execute corretamente
     }
-  }, [])
+  }, [refetch]) // Adicionado refetch como dependência
 
   useEffect(() => {
     if (postList.length > 0) {
@@ -73,10 +82,11 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }, [postList])
 
   useEffect(() => {
-    if (activeFeed === 'global') {
-      if (data) {
-        setPostList(
-          data.map((post) => ({
+    if (activeFeed === 'global' && data) {
+      setPostList(
+        data
+          .filter((post) => !assetId || post.assetId === assetId) // Lógica de filtragem corrigida
+          .map((post) => ({
             ...post,
             status: 'accepted',
             replies: post.replies.map((reply) => ({
@@ -84,25 +94,26 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
               status: 'accepted',
             })),
           })),
-        )
-      }
+      )
     }
-  }, [data])
+  }, [data, assetId, activeFeed])
 
   useEffect(() => {
     if (postDataByWalletAddress && activeFeed === 'personalized') {
       setPostList(
-        postDataByWalletAddress.map((post) => ({
-          ...post,
-          status: 'accepted',
-          replies: post.replies.map((reply) => ({
-            ...reply,
+        postDataByWalletAddress
+          .filter((post) => !assetId || post.assetId === assetId) // Filtro por assetId
+          .map((post) => ({
+            ...post,
             status: 'accepted',
+            replies: post.replies.map((reply) => ({
+              ...reply,
+              status: 'accepted',
+            })),
           })),
-        })),
       )
     }
-  }, [postDataByWalletAddress])
+  }, [postDataByWalletAddress, assetId, activeFeed])
 
   const handleRefreshPosts = () => {
     sessionStorage.removeItem('postList')
@@ -122,8 +133,9 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     })
   }
 
-  const handleChangeFeed = (feed: FeedType) => {
+  const handleChangeFeed = (feed: FeedType, assetIdFilter?: number) => {
     setActiveFeed(feed)
+    setAssetId(assetIdFilter || null)
 
     if (feed === 'personalized') {
       refetchPostByWalletAddress()

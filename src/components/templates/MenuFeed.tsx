@@ -1,13 +1,15 @@
 import { RiSearchLine } from 'react-icons/ri'
-import { FeedType } from '../../context/Posts/Posts'
+import { AssetId, FeedType } from '../../context/Posts/Posts'
 
 interface IMenuFeed {
   hasFeedPosts: boolean
   activeFeed: FeedType
   handleChangeFeed: (feed: FeedType) => void
+  handleChangeAssetId: (assetId: AssetId | null) => void
+  activeAssetId: AssetId | null
 }
 
-export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed }: IMenuFeed) => {
+export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleChangeAssetId, activeAssetId }: IMenuFeed) => {
   return (
     <div className="w-full">
       <div className="p-3">
@@ -47,6 +49,39 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed }: IMenuFe
         >
           Global Feed 🌎
         </p>
+      </div>
+
+      <div className="p-3">
+        <button
+          onClick={() => handleChangeAssetId(AssetId.coopCoin)}
+          className={`w-full p-3 border rounded-lg shadow-sm transition-colors duration-300 ease-in-out ${
+            activeAssetId === AssetId.coopCoin
+              ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
+              : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
+          }`}
+        >
+          CoopCoin
+        </button>
+        <button
+          onClick={() => handleChangeAssetId(AssetId.xusd)}
+          className={`w-full p-3 border rounded-lg shadow-sm transition-colors duration-300 ease-in-out ${
+            activeAssetId === AssetId.xusd
+              ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
+              : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
+          }`}
+        >
+          xUSD
+        </button>
+        <button
+          onClick={() => handleChangeAssetId(null)}
+          className={`w-full p-3 border rounded-lg shadow-sm transition-colors duration-300 ease-in-out ${
+            activeAssetId === null
+              ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
+              : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
+          }`}
+        >
+          All Assets
+        </button>
       </div>
     </div>
   )
