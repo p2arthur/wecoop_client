@@ -20,6 +20,7 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
+import { toast } from 'react-toastify'
 
 interface PostPropsInterface {
   post: PostRequest | IReply
@@ -45,6 +46,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [openReplyInput, setOpenReplyInput] = useState(false)
+  const [userCountry, setUserContry] = useState('')
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
@@ -80,25 +82,12 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   }
 
   const handlePostReply = async () => {
-    setIsLoadingReply(true)
-    const country = await getUserCountry()
-
-    const newReply: Post = {
-      text: encodeURIComponent(replyText),
-      creator_address: userData?.address || '',
-      status: 'loading',
-      country: country,
-      likes: [],
-      timestamp: new Date().getDate(),
-      transaction_id: uuidv4(),
-      replies: [],
-    }
-
-    const parentReplyId = post.transaction_id as string
-
-    handleNewReply && handleNewReply(newReply, parentReplyId)
-
     try {
+      setIsLoadingReply(true)
+      const country = await getUserCountry()
+      setUserContry(country)
+
+      const parentReplyId = post.transaction_id as string
       const encodedGroupedTransactions = await replieservice.handlePostReply({
         creatorAddress: post.creator_address,
         address: activeAccount?.address || '',
@@ -126,26 +115,16 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       }
 
       handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+      setReplyText('')
+      setIsLoadingReply(false)
     } catch (error) {
-      console.error(error)
-      const rejectedReply: Post = {
-        creator_address: userData?.address || '',
-        text: encodeURIComponent(replyText),
-        status: 'rejected',
-        transaction_id: uuidv4(),
-        likes: [],
-        country,
-        nfd: userData?.nfd.name,
-        timestamp: Date.now(),
-        replies: [],
-        isPersonalized: undefined,
-        assetId: usableAsset.assetId,
-      }
-      handleNewReply && handleNewReply(rejectedReply, parentReplyId)
-      han
+      toast('Error sending reply', {
+        position: 'bottom-right',
+        theme: 'dark',
+      })
+      setReplyText('')
+      setIsLoadingReply(false)
     }
-    setReplyText('')
-    setIsLoadingReply(false)
   }
 
   const handleTimestamp = () => {
@@ -282,6 +261,21 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                         return a.timestamp! - b.timestamp!
                       })
                       .map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                  {isLoadingReply && (
+                    <PostCard
+                      post={{
+                        text: `${encodeURIComponent(replyText)}`,
+                        creator_address: userData?.address || '',
+                        status: 'loading',
+                        country: userCountry,
+                        likes: [],
+                        timestamp: new Date().getDate(),
+                        transaction_id: uuidv4(),
+                        replies: [],
+                      }}
+                      variant={'reply'}
+                    />
+                  )}
 
                   {!isLoadingReply && (
                     <ReplyInput
