@@ -18,7 +18,7 @@ export class Transaction {
     }
   }
 
-  async createTransaction(from: string, to: string, amount: number, note: string, token: number) {
+  async createTransaction(from: string, to: string, amount: number, note: string, token: number = 796425061) {
     const suggestedParams = await this.client.getTransactionParams().do()
 
     const ptxn = algosdk.makeAssetTransferTxnWithSuggestedParams(

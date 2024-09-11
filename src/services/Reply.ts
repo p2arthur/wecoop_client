@@ -1,7 +1,9 @@
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { Fees } from '../enums/Fees'
+import { InteractionMultipliers } from '../enums/Fees'
 import { NotePrefix } from '../enums/notePrefix'
+import { getFeePriceByAsset } from '../utils/interaction_pricing/getFeePriceByAsset'
+import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
 import { Transaction } from './Transaction'
 
@@ -10,26 +12,35 @@ interface ReplyProps {
   creatorAddress: string
   text: string
   transactionId: string
+  assetId: number
 }
 
 export class Reply {
   constructor(private client: AlgodClient) {}
 
-  public async handlePostReply({ creatorAddress, transactionId, address, text }: ReplyProps) {
+  public async handlePostReply({ creatorAddress, transactionId, address, text, assetId }: ReplyProps) {
     const transactionService = new Transaction(this.client)
+
+    const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.Post)
+
+    const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'reply' })
+
+    const finalPlatformFee = Math.floor(splitFee.platformFee * 1000 * 1000)
+    const finalUserFee = Math.floor(splitFee.creatorFee * 1000 * 1000)
 
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopReply}${country}:${transactionId}:${text}`
 
-    const wecoopFee = Fees.ReplyWecoopFee
-    const creatorFee = Fees.ReplyUserFee
     const scoopFeeTransaction = await transactionService.createTransaction(
       address,
       import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-      wecoopFee,
+      finalPlatformFee,
       note,
+      assetId,
     )
-    const postCreatorFee = await transactionService.createTransaction(address, creatorAddress, creatorFee, `creator-fee:${note}`)
+
+    console.log('selected asset', assetId)
+    const postCreatorFee = await transactionService.createTransaction(address, creatorAddress, finalUserFee, `creator-fee:${note}`, assetId)
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]
     const groupedTransactions = algosdk.assignGroupID(transactionsArray)

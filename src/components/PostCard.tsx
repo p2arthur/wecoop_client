@@ -11,6 +11,7 @@ import { usePosts } from '../context/Posts/Posts'
 import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
+import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
 import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
@@ -40,11 +41,12 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const { algod } = useOutletContext() as PostInputPropsInterface
   const replieservice = new Reply(algod)
   const likeService = new Like(algod)
-
   const [isLoadingLike, setIsLoadingLike] = useState(false)
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [openReplyInput, setOpenReplyInput] = useState(false)
+
+  const { usableAsset, setUsableAsset } = useUsableAsset()
 
   const currentPostUsableAsset = usableAssetsList.find((usableAsset) => post.assetId === usableAsset.assetId)
   const [currentPostAsset, setCurrentPostAsset] = useState(currentPostUsableAsset)
@@ -101,6 +103,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       address: activeAccount?.address || '',
       transactionId: post.transaction_id as string,
       text: encodeURIComponent(replyText),
+      assetId: usableAsset.assetId,
     })
     const signedTransactions = await signTransactions(encodedGroupedTransactions)
     const waitRoundsToConfirm = 4
@@ -118,6 +121,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       timestamp: Date.now(),
       replies: [],
       isPersonalized: undefined,
+      assetId: usableAsset.assetId,
     }
 
     handleNewReply && handleNewReply(acceptedReply, parentReplyId)

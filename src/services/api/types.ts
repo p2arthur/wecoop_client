@@ -11,6 +11,7 @@ export interface Post {
   likes: Like[]
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | string | null
+  assetId: number
 }
 
 export interface PostRequest {
@@ -67,7 +68,7 @@ export interface User {
     name: string
     avatar: string
   }
-  balance: number
+  balance: { [key: string]: number }
   followTargets: string[]
 }
 

@@ -93,6 +93,8 @@ const PostInput = () => {
         timestamp: new Date().getDate(),
         replies: [],
         likes: [],
+        isPersonalized: {},
+        assetId: usableAsset.assetId,
       })
     } catch (error) {
       console.error(error)
@@ -107,6 +109,8 @@ const PostInput = () => {
           replies: [],
           country,
           likes: [],
+          isPersonalized: {},
+          assetId: usableAsset.assetId,
         })
       }, 1000)
     }
@@ -139,34 +143,38 @@ const PostInput = () => {
                 onClick={() => handleAssetSelect(selectedAsset)}
               >
                 <div className="flex gap-2">
-                  <img
-                    className="h-5 w-5"
-                    src={`https://asa-list.tinyman.org/assets/${usableAsset.assetId}/icon.png`}
-                    alt={usableAsset.name}
-                    onError={(e) => (e.currentTarget.src = usableAsset.image)}
-                  />
+                  <div className="rounded-full overflow-hidden border-b-4 border-black">
+                    <img
+                      className="h-5 w-5"
+                      src={`https://asa-list.tinyman.org/assets/${usableAsset.assetId}/icon.png`}
+                      alt={usableAsset.name}
+                      onError={(e) => (e.currentTarget.src = usableAsset.image)}
+                    />
+                  </div>
                   <span className="font-bold">{usableAsset.name}</span>
                 </div>
                 <FaAngleDown />
               </div>
               {selectorOpen && (
-                <ul className="absolute bg-white border-2 border-black border-b-4 mt-2 w-full z-10 max-h-64 overflow-y-auto select-none">
+                <ul className="absolute overflow-x-hidden bg-white border-2 border-black border-b-4 mt-2 w-56 -translate-x-1/2 left-3/4 md:left-1/2 z-10 max-h-64 overflow-y-auto select-none">
                   {usableAssetsList.map((asset) => (
                     <li
                       key={asset.assetId}
-                      className="flex items-center justify-between px-2 py-2 cursor-pointer hover:bg-gray-200"
+                      className="flex items-center justify-between px-2 py-2 cursor-pointer hover:bg-gray-200 hover:scale-105"
                       onClick={() => handleAssetSelect(asset)}
                     >
                       <div className="flex gap-1 items-center">
-                        <img
-                          className="h-6 w-6"
-                          src={`https://asa-list.tinyman.org/assets/${asset.assetId}/icon.png`}
-                          alt={asset.name}
-                          onError={(e) => (e.currentTarget.src = asset.image)}
-                        />
+                        <div className="rounded-full overflow-hidden border-b-4 border-black hover:scale-110">
+                          <img
+                            className="h-6 w-6"
+                            src={`https://asa-list.tinyman.org/assets/${asset.assetId}/icon.png`}
+                            alt={asset.name}
+                            onError={(e) => (e.currentTarget.src = asset.image)}
+                          />
+                        </div>
                         <span className="text-sm">{asset.name}</span>
                       </div>
-                      <span className="text-sm">{userData.balance || 0}</span>
+                      <span className="text-sm">{userData.balance[asset.assetId] || 0}</span>
                     </li>
                   ))}
                 </ul>
@@ -174,7 +182,7 @@ const PostInput = () => {
             </div>
           </div>
           <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
-          {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance! > 0.1 ? (
+          {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
             <Button buttonText="Send your message" />
           ) : (
             <Button inactive={true} buttonText="Send your message" />

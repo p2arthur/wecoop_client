@@ -14,4 +14,10 @@ export const usableAssetsList = [
     image:
       'https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2023/12/27/9e4d1ca7fc5a408b87b2f47b50e4749b.png?width=200&quality=70',
   },
+  {
+    name: 'NIKO',
+    assetId: 1265975021,
+    image:
+      'https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2024/01/02/d9699190064a41679493a0b5c30d0d83.png?width=200&quality=70',
+  },
 ]
