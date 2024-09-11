@@ -1,4 +1,5 @@
 import { RiSearchLine } from 'react-icons/ri'
+import packageJson from '../../../package.json'
 import { AssetId, FeedType } from '../../context/Posts/Posts'
 
 interface IMenuFeed {
@@ -8,6 +9,12 @@ interface IMenuFeed {
   handleChangeAssetId: (assetId: AssetId | null) => void
   activeAssetId: AssetId | null
 }
+
+interface PackageJson {
+  version: string
+}
+
+const version = (packageJson as PackageJson).version
 
 export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleChangeAssetId, activeAssetId }: IMenuFeed) => {
   return (
@@ -86,6 +93,10 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
         >
           All Assets
         </button>
+      </div>
+
+      <div className="fixed bottom-0 p-3">
+        <p className="text-gray-600">Version: {version} </p>
       </div>
     </div>
   )
