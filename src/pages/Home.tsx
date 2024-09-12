@@ -1,9 +1,10 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import FeedComponent from '../components/Feed'
 import PostInput from '../components/PostInput'
-import { MenuFeed } from '../components/templates/MenuFeed'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
+import { MenuFeed } from '../components/templates/MenuFeed'
 import { AssetId, usePosts } from '../context/Posts/Posts'
 import { isMobileDevice } from '../utils/isMobile'
 
@@ -11,12 +12,17 @@ const Home = () => {
   const { postList, handleNewReply, isLoading, activeFeed, handleChangeFeed } = usePosts()
   const { activeAccount } = useWallet()
   const isMobile = isMobileDevice()
+  const navigate = useNavigate()
 
   const [activeAssetId, setActiveAssetId] = useState<AssetId | null>(null)
 
   const handleChangeAssetId = (assetId: AssetId | null) => {
     setActiveAssetId(assetId)
   }
+
+  useEffect(() => {
+    navigate('/global/796425061')
+  }, [])
 
   const filteredPosts =
     postList?.filter(

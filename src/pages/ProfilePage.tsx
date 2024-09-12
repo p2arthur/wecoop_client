@@ -3,14 +3,14 @@ import { minidenticon } from 'minidenticons'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import EmptyFeed from '../components/EmptyFeed'
+import FeedComponent from '../components/Feed'
+import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
+import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetPostsByAddress } from '../services/api/Posts'
 import { Post, User } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import { ellipseAddress } from '../utils/ellipseAddress'
-import FeedComponent from '../components/Feed'
-import FollowButton from '../components/FollowButton'
-import { usableAssetsList } from '../data/usableAssetsList'
 
 interface UserDataInterface {
   data: User | undefined
@@ -99,16 +99,16 @@ const ProfilePage = () => {
         <div className=" mt-14 w-full h-44 border-2 flex flex-col gap-6 border-gray-900 dark:border-gray-500 border-b-4 p-5">
           <div className="flex gap-3 justify-between items-start">
             <div className="flex flex-col  md:flex-row gap-3">
-              <div className="border-2 border-b-4 h-16 w-16 bg-gray-100 border-gray-900 rounded-md overflow-hidden">
+              <div className="border-2 border-b-4 h-32 w-32 bg-gray-100 border-gray-900 rounded-md overflow-hidden">
                 {user?.avatar !== null ? (
-                  <img className="w-16 h-16" src={user?.avatar} alt="profile-photo" />
+                  <img className="w-32 h-32" src={user?.avatar} alt="profile-photo" />
                 ) : (
-                  <img className="w-16 h-16" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
+                  <img className="w-32 h-32" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
                 )}
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col justify-between">
                 <div className="flex items-center gap-1">
-                  <h3 className="text-xl md:text-3xl font-bold">
+                  <h3 className="text-2xl md:text-4xl font-bold">
                     {user?.nfd?.name !== null ? user?.nfd?.name : ellipseAddress(user?.address)}
                   </h3>
                 </div>
@@ -118,10 +118,12 @@ const ProfilePage = () => {
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
                           <div className="flex items-end gap-1">
-                            <ul className="grid grid-cols-3 mt-2 gap-1">
+                            <ul className="grid grid-cols-3 mt-2 gap-3 gap-y-5">
                               {Object.keys(user.balance).map((key) => (
-                                <div className={'flex gap-2'}>
-                                  <img src={getAssetById(key)?.image} alt="asset icon" className="w-5 h-5" />
+                                <div className={'flex gap-2 items-end'}>
+                                  <div className="w-6 h-6 rounded-full overflow-hidden border-b-4 border-black">
+                                    <img src={getAssetById(key)?.image} alt="asset icon" className="w-6 h-6" />
+                                  </div>
                                   <p> {user.balance[key]}</p>
                                 </div>
                               ))}

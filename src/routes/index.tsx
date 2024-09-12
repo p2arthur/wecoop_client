@@ -22,7 +22,7 @@ export const Router = () => {
       name: '',
       avatar: '',
     },
-    balance: 0,
+    balance: {},
     followTargets: [],
   })
 
@@ -32,7 +32,7 @@ export const Router = () => {
         address: activeAccount?.address ?? '',
         avatar: '',
         nfd: { name: '', avatar: '' },
-        balance: 0,
+        balance: {},
         followTargets: [],
       })
       const userData = await userServices.setUser(activeAccount?.address || '')
@@ -61,7 +61,8 @@ export const Router = () => {
       ),
       children: [
         { path: '/', element: <Home /> },
-        { path: '/:assetId', element: <Home /> },
+        { path: '/global', element: <Home /> },
+        { path: '/global/:usableAssetId', element: <Home /> },
         { path: '/profile/:walletAddress', element: <ProfilePage /> },
         { path: '/feed/by/:walletAddress', element: <FeedPage /> },
         { path: '/about', element: <Whitepaper /> },
