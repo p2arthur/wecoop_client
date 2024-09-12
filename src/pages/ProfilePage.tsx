@@ -25,16 +25,22 @@ const ProfilePage = () => {
   const [postsList, setPostsList] = useState<Post[]>([])
   const [isFollowing, setIsFollowing] = useState<boolean>(false)
 
+  // Get the profile data for the walletAddress being viewed
   const { data: userData, isLoading: isLoadingUser } = useGetUserInfo(walletAddress as string) as UserDataInterface
+  // Get the current logged-in user data
+  const { data: currentUserData, isLoading: isLoadingCurrentUser } = useGetUserInfo(activeAccount?.address as string)
 
   const { data, isLoading } = useGetPostsByAddress(walletAddress as string)
 
+  // Set user and currentUser separately
   useEffect(() => {
     if (userData) {
-      setUser(userData)
-      setCurrentUser(userData!)
+      setUser(userData) // This is the profile being viewed
     }
-  }, [userData, userData])
+    if (currentUserData) {
+      setCurrentUser(currentUserData) // This is the logged-in user
+    }
+  }, [userData, currentUserData])
 
   useEffect(() => {
     if (data) {
@@ -44,8 +50,10 @@ const ProfilePage = () => {
   }, [data])
 
   useEffect(() => {
-    getIsFollowing()
-  }, [currentUser])
+    if (currentUser && user) {
+      getIsFollowing()
+    }
+  }, [currentUser, user])
 
   const updateRepliesStatus = (posts: Post[]): Post[] => {
     const updatedPosts = posts.map((post) => ({
@@ -60,15 +68,15 @@ const ProfilePage = () => {
 
     return updatedPosts
   }
-  console.log(user, 'user')
 
   const getIsFollowing = (): void => {
-    if (currentUser?.followTargets.includes(walletAddress!)) {
+    if (currentUser?.followTargets.includes(user?.address!)) {
       console.log(true)
       setIsFollowing(true)
     } else {
       console.log(currentUser?.followTargets)
       console.log(false)
+      setIsFollowing(false)
     }
   }
 
@@ -96,7 +104,7 @@ const ProfilePage = () => {
   return (
     <div className="flex flex-col ">
       <section className="p-4">
-        <div className=" mt-14 w-full h-44 border-2 flex flex-col gap-6 border-gray-900 dark:border-gray-500 border-b-4 p-5">
+        <div className=" mt-14 w-full h-44 border-2 flex flex-col gap-6 border-gray-900 bg-gray-900 dark:border-gray-900 border-b-4 p-5">
           <div className="flex gap-3 justify-between items-start">
             <div className="flex flex-col  md:flex-row gap-3">
               <div className="border-2 border-b-4 h-32 w-32 bg-gray-100 border-gray-900 rounded-md overflow-hidden">
@@ -140,11 +148,8 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
-            <FollowButton isFollowing={isFollowing} walletAddress={userData?.address || ''} />
+            <FollowButton isFollowing={isFollowing} walletAddress={user?.address || ''} />
           </div>
-          {/* <div className="flex justify-end">
-            <DropDown buttonText="Donate $COOP" children={<>aaaaa</>} type="connect" options={[]} />
-          </div> */}
         </div>
       </section>
       {isLoading ? (

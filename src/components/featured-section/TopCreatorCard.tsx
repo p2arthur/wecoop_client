@@ -31,7 +31,10 @@ export default function TopCreatorCard({ topCreator }: TopCreatorCardInterface) 
   }, [])
 
   return (
-    <a href={`/profile/${currentCreator.address}`} className="bg-white border-2 border-black p-2 flex gap-2 hover:scale-101">
+    <a
+      href={`/profile/${currentCreator.address}`}
+      className="bg-white dark:bg-gray-900 border-2 border-black p-2 flex gap-2 hover:scale-101"
+    >
       <div className="w-10 h-10 rounded-full overflow-hidden">
         <img
           className="bg-gray-100 w-full h-full"
