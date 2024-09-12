@@ -11,16 +11,16 @@ import { usePosts } from '../context/Posts/Posts'
 import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
+import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
+import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
-import { toast } from 'react-toastify'
 
 interface PostPropsInterface {
   post: PostRequest | IReply
@@ -272,6 +272,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                         timestamp: new Date().getDate(),
                         transaction_id: uuidv4(),
                         replies: [],
+                        assetId: 0,
                       }}
                       variant={'reply'}
                     />

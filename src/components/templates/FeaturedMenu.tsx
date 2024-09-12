@@ -22,7 +22,7 @@ export const ProfileMenu = () => {
         content={
           <div className="flex flex-col gap-2">
             {allAnalytics.topCreators.map((creator) => (
-              <TopCreatorCard topCreator={creator} />
+              <TopCreatorCard topCreator={creator as any} />
             ))}
           </div>
         }

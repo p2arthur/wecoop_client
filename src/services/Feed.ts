@@ -75,6 +75,8 @@ export class Feed {
               likes: likes.length,
               replies: replies,
               country: '',
+              isPersonalized: false,
+              assetId: 0,
             }
 
             const post = await this.postServices.setPostData(postData)
