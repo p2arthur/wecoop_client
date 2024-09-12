@@ -6,13 +6,14 @@ import { Like, Post } from '../../services/api/types'
 export enum AssetId {
   coopCoin = 796425061,
   xusd = 760037151,
+  algo = 0,
+  jaws = 2155690250,
+  ora = 1284444444,
+  niko = 1265975021,
 }
 
-export type FeedType = 'personalized' | 'global'
-export type ExtendedFeedType = {
-  feed: FeedType
-  assetId?: AssetId
-}
+export type FeedType = 'personalized' | 'global' | 'coinFeed'
+
 type IPostsContext = {
   postList: Post[] | null
   handleGetPostByAddress(address: string): Post | undefined
@@ -21,8 +22,10 @@ type IPostsContext = {
   handleNewLike(newLike: Like, transactionCreatorId: string): void
   handleDeletePost(transactionCreatorId: string): void
   handleGetPostByTransactionId(transactionId: string): Post | undefined
+  handleFilterByAssetId(assetId: number | null): void
   handleRefreshPosts(): void
   handleChangeFeed(feed: FeedType): void
+  activeAssetId?: AssetId | null
   activeFeed?: FeedType
   isLoading: boolean
 }
@@ -41,7 +44,9 @@ const PostsContext = createContext<IPostsContext>({
   handleGetPostByTransactionId: () => undefined,
   handleRefreshPosts: () => undefined,
   handleChangeFeed: () => undefined,
+  handleFilterByAssetId: () => undefined,
   activeFeed: 'global',
+  activeAssetId: null,
   isLoading: false,
 })
 
@@ -115,6 +120,13 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     }
   }, [postDataByWalletAddress, assetId, activeFeed])
 
+  const handleFilterByAssetId = (assetId: number) => {
+    setAssetId(assetId)
+    setPostList(data?.filter((post) => post.assetId === assetId) || [])
+  }
+
+  console.log(assetId, 'assetid', postList)
+
   const handleRefreshPosts = () => {
     sessionStorage.removeItem('postList')
     refetch().then(() => {
@@ -135,11 +147,12 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   const handleChangeFeed = (feed: FeedType, assetIdFilter?: number) => {
     setActiveFeed(feed)
-    setAssetId(assetIdFilter || null)
 
     if (feed === 'personalized') {
+      setAssetId(assetIdFilter || null)
       refetchPostByWalletAddress()
     } else if (feed === 'global') {
+      setAssetId(assetIdFilter || null)
       refetch()
     }
   }
@@ -191,8 +204,10 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   const postProviderValues = useMemo(
     () => ({
       postList,
-      handleNewLike,
+      isLoading,
       activeFeed,
+      activeAssetId: assetId,
+      handleNewLike,
       handleNewReply,
       handleGetPostByAddress,
       handleGetPostByTransactionId,
@@ -200,9 +215,9 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       handleAddNewPost,
       handleDeletePost,
       handleChangeFeed,
-      isLoading,
+      handleFilterByAssetId,
     }),
-    [postList, activeFeed, isLoading],
+    [assetId, postList, activeFeed, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>

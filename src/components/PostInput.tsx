@@ -2,7 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
-import { FaAngleDown, FaArrowRight, FaArrowsRotate } from 'react-icons/fa6'
+import { FaArrowRight, FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
@@ -15,6 +15,7 @@ import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction
 import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
+import { CoinDropdown } from './CoinDropdown'
 
 export interface PostInputOutletContext {
   algod: AlgodClient
@@ -25,6 +26,7 @@ const PostInput = () => {
   const { usableAssetId } = useParams<{ usableAssetId: string }>()
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
   const { handleAddNewPost, handleDeletePost, handleRefreshPosts } = usePosts()
+  const [openTooltip, setOpenTooltip] = useState(false)
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
   const [selectedAsset, setSelectedAsset] = useState(usableAssetsList[0])
@@ -42,8 +44,6 @@ const PostInput = () => {
   }, [usableAsset])
 
   const handleAssetSelect = (asset: any) => {
-    console.log('asset', asset)
-
     navigate(`/global/${asset.assetId}`)
     setSelectorOpen(!selectorOpen)
     setUsableAsset(asset)
@@ -65,8 +65,6 @@ const PostInput = () => {
     // Split the fee by interaction type
     const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'post' })
 
-    console.log('split fee', splitFee)
-
     // Example calculation to ensure platformFee is used as an integer
     const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
 
@@ -75,7 +73,6 @@ const PostInput = () => {
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
     try {
-      // Create transaction using final integer fee
       const transaction = await new Transaction(algod).createTransaction(
         userData.address,
         import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
@@ -138,59 +135,39 @@ const PostInput = () => {
             <p className="w-full">Note: All posts and interactions are permanently recorded on the Algorand blockchain.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1">
-            {/* Custom Dropdown */}
-            <div className="relative">
-              <div
-                className="px-2 border-2 border-black dark:border-white border-b-4 cursor-pointer flex items-center gap-8"
-                onClick={() => handleAssetSelect(selectedAsset)}
-              >
-                <div className="flex gap-2 items-center">
-                  <div className="rounded-full overflow-hidden border-b-4 border-black dark:border-white ">
-                    <img
-                      className="h-6 w-6"
-                      src={`https://asa-list.tinyman.org/assets/${usableAsset.assetId}/icon.png`}
-                      alt={usableAsset.name}
-                      onError={(e) => (e.currentTarget.src = usableAsset.image)}
-                    />
-                  </div>
-                  <span className="font-bold">{usableAsset.name}</span>
+        <div className="grid gap-4  w-full justify-end">
+          <div className={'flex gap-4 '}>
+            <CoinDropdown
+              usableAsset={usableAsset}
+              handleAssetSelect={handleAssetSelect}
+              selectedAsset={selectedAsset}
+              selectorOpen={selectorOpen}
+            />
+            <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
+          </div>
+          <div className={'flex justify-end items-center gap-4'}>
+            <div className={'relative'}>
+              <Button icon={<FaCircleInfo />} buttonFunction={() => setOpenTooltip(!openTooltip)} />
+              {openTooltip && (
+                <div
+                  className={
+                    'absolute translate-x-1/2 top-8 w-48 right-0 border-2 border-gray-900\n' +
+                    'p-1  bg-white font-bold\n' +
+                    'hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-sm md:text-md'
+                  }
+                >
+                  <p className={'text-red-600 text-center'}>
+                    Note: All posts and interactions are permanently recorded on the Algorand blockchain.
+                  </p>
                 </div>
-                <FaAngleDown />
-              </div>
-              {selectorOpen && (
-                <ul className="absolute overflow-x-hidden bg-white dark:bg-gray-900 border-2 border-black  border-b-4 mt-2 w-56 dark:border-gray-500 -translate-x-1/2 left-3/4 md:left-1/2 z-10 max-h-64 overflow-y-auto select-none">
-                  {usableAssetsList.map((asset) => (
-                    <li
-                      key={asset.assetId}
-                      className="flex items-center justify-between px-2 py-2 cursor-pointer dark:hover:bg-gray-800 hover:bg-gray-200 hover:scale-105"
-                      onClick={() => handleAssetSelect(asset)}
-                    >
-                      <div className="flex gap-1 items-center">
-                        <div className="rounded-full overflow-hidden border-b-4 border-black dark:border-white hover:scale-110">
-                          <img
-                            className="h-6 w-6"
-                            src={`https://asa-list.tinyman.org/assets/${asset.assetId}/icon.png`}
-                            alt={asset.name}
-                            onError={(e) => (e.currentTarget.src = asset.image)}
-                          />
-                        </div>
-                        <span className="text-sm">{asset.name}</span>
-                      </div>
-                      <span className="text-sm">{userData.balance[asset.assetId] || 0}</span>
-                    </li>
-                  ))}
-                </ul>
               )}
             </div>
+            {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
+              <Button buttonText="Send your message" full justify={'center'} />
+            ) : (
+              <Button inactive={true} buttonText="Send your message" full justify={'center'} />
+            )}
           </div>
-          <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
-          {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
-            <Button buttonText="Send your message" />
-          ) : (
-            <Button inactive={true} buttonText="Send your message" />
-          )}
         </div>
       </div>
     </form>

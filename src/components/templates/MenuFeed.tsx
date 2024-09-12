@@ -1,6 +1,8 @@
 import { RiSearchLine } from 'react-icons/ri'
 import packageJson from '../../../package.json'
-import { AssetId, FeedType } from '../../context/Posts/Posts'
+import { AssetId, FeedType, usePosts } from '../../context/Posts/Posts'
+import { useState } from 'react'
+import { usableAssetsList } from '../../data/usableAssetsList'
 
 interface IMenuFeed {
   hasFeedPosts: boolean
@@ -17,6 +19,9 @@ interface PackageJson {
 const version = (packageJson as PackageJson).version
 
 export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleChangeAssetId, activeAssetId }: IMenuFeed) => {
+  const [openCoinFeed, setOpenCoinFeed] = useState<boolean>(false)
+  const { isLoading } = usePosts()
+
   return (
     <div className="w-full">
       <div className="p-3">
@@ -61,39 +66,50 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
           Global Feed 🌎
         </p>
       </div>
-
-      <div className="p-3">
-        <button
-          onClick={() => handleChangeAssetId(AssetId.coopCoin)}
-          className={`w-full p-3 border rounded-lg shadow-sm transition-colors duration-300 ease-in-out ${
-            activeAssetId === AssetId.coopCoin
-              ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
+      <div
+        onClick={() => {
+          if (!isLoading) {
+            setOpenCoinFeed(!openCoinFeed)
+            handleChangeFeed('coinFeed')
+          }
+        }}
+        className={`w-full flex justify-start  p-3 cursor-pointer ${openCoinFeed ? 'border-1-black  dark:bg-white dark:text-black' : ''}
+         ${isLoading ? 'text-gray-400' : ''}`}
+      >
+        <p
+          className={`font-bold text-xl cursor-pointer ${
+            openCoinFeed ? 'border-b-2 border-gray-900 dark:border-black' : 'border-b-2 border-transparent hover:scale-105'
           }`}
+          onClick={() => {
+            setOpenCoinFeed(!openCoinFeed)
+          }}
         >
-          CoopCoin
-        </button>
-        <button
-          onClick={() => handleChangeAssetId(AssetId.xusd)}
-          className={`w-full p-3 border rounded-lg shadow-sm transition-colors duration-300 ease-in-out ${
-            activeAssetId === AssetId.xusd
-              ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
-          }`}
-        >
-          xUSD
-        </button>
-        <button
-          onClick={() => handleChangeAssetId(null)}
-          className={`w-full p-3 border rounded-lg shadow-sm transition-colors duration-300 ease-in-out ${
-            activeAssetId === null
-              ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
-          }`}
-        >
-          All Assets
-        </button>
+          Coin Feed's 🪙
+        </p>
       </div>
+
+      {openCoinFeed && (
+        <div>
+          {usableAssetsList.map((asset) => (
+            <div
+              onClick={() => handleChangeAssetId(asset.assetId)}
+              className={`w-full flex justify-center  p-3 cursor-pointer ${
+                activeAssetId === asset.assetId ? 'bg-black text-white dark:bg-white dark:text-black' : ''
+              }`}
+            >
+              <p
+                className={`font-bold flex gap-2 text-xl cursor-pointer ${
+                  activeAssetId === asset.assetId
+                    ? 'border-b-2 border-gray-900 dark:border-black'
+                    : 'border-b-2 border-transparent hover:scale-105'
+                }`}
+              >
+                {asset.name} <img src={asset.image} alt={asset.name} className="w-6 h-6" />
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="fixed bottom-0 p-3">
         <p className="text-gray-600">Version: {version} </p>

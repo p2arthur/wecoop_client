@@ -1,33 +1,28 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import FeedComponent from '../components/Feed'
 import PostInput from '../components/PostInput'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
 import { MenuFeed } from '../components/templates/MenuFeed'
-import { AssetId, usePosts } from '../context/Posts/Posts'
-import { isMobileDevice } from '../utils/isMobile'
+import { usePosts } from '../context/Posts/Posts'
+import { useEffect } from 'react'
 
 const Home = () => {
-  const { postList, handleNewReply, isLoading, activeFeed, handleChangeFeed } = usePosts()
+  const { postList, handleNewReply, isLoading, activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
   const { activeAccount } = useWallet()
-  const isMobile = isMobileDevice()
+  const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const [activeAssetId, setActiveAssetId] = useState<AssetId | null>(null)
-
-  const handleChangeAssetId = (assetId: AssetId | null) => {
-    setActiveAssetId(assetId)
-  }
-
   useEffect(() => {
-    navigate('/global/796425061')
+    navigate('/feed')
+    if (activeFeed === 'global') {
+      setParams({ type: 'global' })
+    } else if (activeFeed === 'personalized') {
+      setParams({ type: 'personalized' })
+    } else if (activeFeed === 'coinFeed' && activeAssetId) {
+      setParams({ type: 'coinFeed', assetId: activeAssetId.toString() })
+    }
   }, [])
-
-  const filteredPosts =
-    postList?.filter(
-      (post) => (activeAssetId ? post.assetId === activeAssetId : true) && (activeFeed === 'personalized' ? post.isPersonalized : true), // Ajuste conforme a lógica do feed
-    ) || []
 
   return (
     <div className="flex pt-14 dark:bg-gray-950 bg-gray-100 overflow-hidden max-h-screen w-full">
@@ -36,8 +31,8 @@ const Home = () => {
           hasFeedPosts={activeAccount !== null}
           activeFeed={activeFeed || 'global'}
           handleChangeFeed={handleChangeFeed}
-          handleChangeAssetId={handleChangeAssetId}
-          activeAssetId={activeAssetId}
+          handleChangeAssetId={handleFilterByAssetId}
+          activeAssetId={activeAssetId || null}
         />
       </div>
 
@@ -45,11 +40,9 @@ const Home = () => {
         <div className=" bg-gray">
           <PostInput />
         </div>
-        {filteredPosts.length > 0 && (
-          <div className="overflow-y-hidden  h-full">
-            <FeedComponent postList={filteredPosts} isLoading={isLoading} handleNewReply={handleNewReply} />
-          </div>
-        )}
+        <div className="overflow-y-hidden  h-full">
+          <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
+        </div>
       </div>
       <div className="w-3/12 hidden md:flex">
         {' '}

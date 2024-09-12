@@ -61,8 +61,7 @@ export const Router = () => {
       ),
       children: [
         { path: '/', element: <Home /> },
-        { path: '/global', element: <Home /> },
-        { path: '/global/:usableAssetId', element: <Home /> },
+        { path: '/feed', element: <Home /> },
         { path: '/profile/:walletAddress', element: <ProfilePage /> },
         { path: '/feed/by/:walletAddress', element: <FeedPage /> },
         { path: '/about', element: <Whitepaper /> },
