@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { createContext, useContext, useState } from 'react'
+import { Post } from '../../services/api/types'
 
-type allAnalyticsType = { topCreators: string[] }
+type allAnalyticsType = { topCreators: string[]; topPosts: Post[] }
 
 type IAnalyticsContext = {
   allAnalytics: allAnalyticsType
@@ -13,20 +14,43 @@ interface IAnalyticsProviderProps {
 }
 
 const AnalyticsContext = createContext<IAnalyticsContext>({
-  allAnalytics: { topCreators: [] },
+  allAnalytics: { topCreators: [], topPosts: [] },
   getAllAnalytics: async () => {},
 })
 
 const AnalyticsProvider = ({ children }: IAnalyticsProviderProps) => {
-  const [allAnalytics, setAllAnalytics] = useState<allAnalyticsType>({ topCreators: [] })
+  const [allAnalytics, setAllAnalytics] = useState<allAnalyticsType>({ topCreators: [], topPosts: [] })
 
   const getAllAnalytics = async () => {
+    const savedPosts: Post[] = JSON.parse(sessionStorage.getItem('postList')!)
+
+    if (!savedPosts) return
+
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/analytics/creators/top-liked-creators`)
+      // Get creators analytics
+      const { data: topCreatorsData } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/analytics/creators/top-liked-creators`)
 
-      console.log('data', data)
+      // Get posts analytics with type assertion for expected structure
+      const { data: topPostsData } = await axios.get<{ postId: string; likesCount: number }[]>(
+        `${import.meta.env.VITE_WECOOP_API}/analytics/posts/top-liked-posts`,
+      )
 
-      setAllAnalytics({ topCreators: data })
+      // Map over the data to extract postIds
+      const topPosts: Post[] = []
+
+      topPostsData.forEach((postAnalytic) => {
+        savedPosts.forEach((post) => {
+          if (post.transaction_id == postAnalytic.postId) {
+            topPosts.push({ ...post, text: post.text })
+          }
+        })
+      })
+
+      console.log('topCreators', topCreatorsData)
+      console.log('topPosts', topPosts)
+
+      // Set analytics data in state
+      setAllAnalytics({ topCreators: topCreatorsData, topPosts })
     } catch (error) {
       console.error('Failed to fetch analytics:', error)
     }

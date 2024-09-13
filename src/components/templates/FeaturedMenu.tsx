@@ -3,6 +3,7 @@ import { useAnalytics } from '../../context/analytics/Analytics'
 import { User as UserInterface } from '../../services/api/types'
 import FeaturedSection from '../featured-section/FeaturedSection'
 import TopCreatorCard from '../featured-section/TopCreatorCard'
+import TopPostCard from '../featured-section/TopPostCard'
 
 interface ProfileMenuProps {
   user: UserInterface
@@ -23,6 +24,16 @@ export const ProfileMenu = () => {
           <div className="flex flex-col gap-2">
             {allAnalytics.topCreators.map((creator) => (
               <TopCreatorCard topCreator={creator as any} />
+            ))}
+          </div>
+        }
+      />
+      <FeaturedSection
+        sectionTitle="Top posts"
+        content={
+          <div className="flex flex-col gap-2">
+            {allAnalytics.topPosts.map((post) => (
+              <TopPostCard post={post} />
             ))}
           </div>
         }
