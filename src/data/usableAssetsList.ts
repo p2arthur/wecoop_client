@@ -20,4 +20,9 @@ export const usableAssetsList = [
     image:
       'https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2024/01/02/d9699190064a41679493a0b5c30d0d83.png?width=200&quality=70',
   },
+  {
+    name: 'AKTA',
+    assetId: 523683256,
+    image: 'https://asa-list.tinyman.org/assets/523683256/icon.png',
+  },
 ]

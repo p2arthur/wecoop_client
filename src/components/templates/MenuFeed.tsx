@@ -1,7 +1,7 @@
+import { useState } from 'react'
 import { RiSearchLine } from 'react-icons/ri'
 import packageJson from '../../../package.json'
 import { AssetId, FeedType, usePosts } from '../../context/Posts/Posts'
-import { useState } from 'react'
 import { usableAssetsList } from '../../data/usableAssetsList'
 
 interface IMenuFeed {
@@ -93,19 +93,22 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
           {usableAssetsList.map((asset) => (
             <div
               onClick={() => handleChangeAssetId(asset.assetId)}
-              className={`w-full flex justify-center  p-3 cursor-pointer ${
+              className={`w-full flex justify-start pl-5  p-3 cursor-pointer ${
                 activeAssetId === asset.assetId ? 'bg-black text-white dark:bg-white dark:text-black' : ''
               }`}
             >
-              <p
-                className={`font-bold flex gap-2 text-xl cursor-pointer ${
+              <div
+                className={`font-bold flex items-end gap-2 text-xl cursor-pointer ${
                   activeAssetId === asset.assetId
                     ? 'border-b-2 border-gray-900 dark:border-black'
                     : 'border-b-2 border-transparent hover:scale-105'
                 }`}
               >
-                {asset.name} <img src={asset.image} alt={asset.name} className="w-6 h-6" />
-              </p>
+                <div className="rounded-full overflow-hidden">
+                  <img src={asset.image} className="w-8 h-8" />
+                </div>{' '}
+                <h3 className="text-xl">{asset.name}</h3>
+              </div>
             </div>
           ))}
         </div>

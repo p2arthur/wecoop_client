@@ -2,7 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
-import { FaArrowRight, FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
+import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
@@ -44,7 +44,7 @@ const PostInput = () => {
   }, [usableAsset])
 
   const handleAssetSelect = (asset: any) => {
-    navigate(`/global/${asset.assetId}`)
+    // navigate(`/global/${asset.assetId}`)
     setSelectorOpen(!selectorOpen)
     setUsableAsset(asset)
   }
@@ -128,12 +128,6 @@ const PostInput = () => {
             className="w-full border-2  align-top text-start break-all whitespace-normal h-32 p-2 resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500"
           />
           <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
-        </div>
-        <div>
-          <div className="flex items-center text-red-600 gap-1">
-            <FaArrowRight />
-            <p className="w-full">Note: All posts and interactions are permanently recorded on the Algorand blockchain.</p>
-          </div>
         </div>
         <div className="grid gap-4  w-full justify-end">
           <div className={'flex gap-4 '}>
