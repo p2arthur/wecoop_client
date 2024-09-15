@@ -25,4 +25,16 @@ export const usableAssetsList = [
     assetId: 523683256,
     image: 'https://asa-list.tinyman.org/assets/523683256/icon.png',
   },
+  {
+    name: 'A200',
+    assetId: 1682662165,
+    image:
+      'https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2024/03/22/ff48d99492a840a7bd54dce69c7847ec.png?width=200&quality=70',
+  },
+  {
+    name: 'TINY',
+    assetId: 2200000000,
+    image:
+      'https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2024/07/29/238ed21b2e2c4ce9a5a11a7cfe4c50aa.png?width=200&quality=70',
+  },
 ]
