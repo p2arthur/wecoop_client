@@ -80,9 +80,6 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
           className={`font-bold text-xl cursor-pointer ${
             openCoinFeed ? 'border-b-2 border-gray-900 dark:border-black' : 'border-b-2 border-transparent hover:scale-105'
           }`}
-          onClick={() => {
-            setOpenCoinFeed(!openCoinFeed)
-          }}
         >
           Coin Feed's 🪙
         </p>
@@ -114,8 +111,8 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
         </div>
       )}
 
-      <div className="fixed bottom-0 p-3">
-        <p className="text-gray-600">Version: {version} </p>
+      <div className="fixed bottom-0 p-3 right-0 w-auto md:left-0 md:right-auto">
+        <p className="text-gray-600">Version: {version}</p>
       </div>
     </div>
   )
