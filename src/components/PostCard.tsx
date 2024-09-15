@@ -51,6 +51,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
   const currentPostUsableAsset = usableAssetsList.find((usableAsset) => post.assetId === usableAsset.assetId)
+  console.log(post, 'current')
   const [currentPostAsset, setCurrentPostAsset] = useState(currentPostUsableAsset)
 
   const generateIdIcon = (creatorAddress: string) => {
@@ -157,6 +158,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     })
   }
 
+  console.log(currentPostUsableAsset?.image, 'currentPostUsableAsset?.image')
+
   return (
     <>
       <div>
@@ -195,9 +198,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
                   <img
                     className="h-8 w-8"
-                    src={`https://asa-list.tinyman.org/assets/${post.assetId}/icon.png`}
-                    alt={`${post.assetId}`}
-                    onError={(e) => (e.currentTarget.src = currentPostUsableAsset?.image!)}
+                    src={currentPostUsableAsset?.image}
+                    alt={`${post.assetId}-icon`}
                   />
                   {variant === 'default' && (
                     <button
