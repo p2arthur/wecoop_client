@@ -11,13 +11,15 @@ export interface InteractionFee {
   creatorFee: number
 }
 
-export const getFeePriceByAsset = async (assetId: number, type: InteractionMultipliers): Promise<number> => {
+export const getFeePriceByAsset = async (assetId: number, decimals: number, type: InteractionMultipliers): Promise<number> => {
   // Define a base price for the asset (for example purposes)
   const basePrice = import.meta.env.VITE_WECOOP_BASE_PRICE
 
   const { data } = await axios.get(`https://free-api.vestige.fi/asset/${assetId}/price`)
 
-  const assetUsdPrice = data['USD']
+  let assetUsdPrice = data['USD']
+
+  if (decimals == 3) assetUsdPrice = assetUsdPrice * 1000
 
   const feePrice = (basePrice / assetUsdPrice) * type
 

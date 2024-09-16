@@ -4,6 +4,7 @@ export interface UsableAssetInterface {
   name: string
   assetId: number
   image: string
+  decimals: number
 }
 
 type IUsableAssetContext = {
