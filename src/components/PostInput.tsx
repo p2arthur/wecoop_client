@@ -17,6 +17,7 @@ import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 import { CoinDropdown } from './CoinDropdown'
 import { PostTypeSwitch } from './PostTypeSwitch'
+import Counter from './Counter'
 
 export interface PostInputOutletContext {
   algod: AlgodClient
@@ -54,6 +55,11 @@ const PostInput = () => {
   const [selectedAsset, setSelectedAsset] = useState(usableAssetsList[0])
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
+
+  // vote states
+
+  const [counter, setCounter] = useState(1)
+  const [prizePool, setPrizePool] = useState(10)
 
   const [placeholder, setPlaceholder] = useState(placeholderSelected.slice(0, 0))
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
@@ -169,9 +175,17 @@ const PostInput = () => {
             maxLength={postType === 'post' ? 300 : 100}
             onChange={handleChange}
             placeholder={postType === 'post' ? placeholder : 'Create your vote'}
-            className="w-full border-2  align-top text-start break-all whitespace-normal h-32 p-2 resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500"
+            className={`w-full border-2  align-top text-start break-all whitespace-normal h-32 ${
+              postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-72'
+            } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
           <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
+          {postType === 'vote' && (
+            <div className={'absolute right-5 top-2 text-center'}>
+              <span>Expires in:</span>
+              <Counter count={counter} onIncrement={() => setCounter(counter + 1)} onDecrement={() => setCounter(counter - 1)} max={5} />
+            </div>
+          )}
         </div>
 
         <div className="grid gap-4  w-full justify-end">
@@ -194,7 +208,19 @@ const PostInput = () => {
             </div>
             <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
           </div>
-          <div className={'flex gap-4 '}>
+          <div className={'flex gap-4 items-center'}>
+            {postType === 'vote' && (
+              <div className={'flex items-center gap-2'}>
+                <span>Prize pool:</span>
+                <input
+                  type={'number'}
+                  className={'w-24 border-black border-2 dark:border-white rounded-sm text-center'}
+                  min={10}
+                  value={prizePool}
+                  onChange={(e) => setPrizePool(e.target.value)}
+                />
+              </div>
+            )}
             <PostTypeSwitch />
             <CoinDropdown
               usableAsset={usableAsset}
