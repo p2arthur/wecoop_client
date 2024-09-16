@@ -48,7 +48,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
   if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
 
   return (
-    <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full">
+    <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full  no-scrollbar">
       {paginatedPosts && paginatedPosts.length > 0 && <VoteCard vote={paginatedPosts[0]} />}
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
