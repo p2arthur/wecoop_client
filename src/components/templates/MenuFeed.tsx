@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { RiSearchLine } from 'react-icons/ri'
 import packageJson from '../../../package.json'
 import { AssetId, FeedType, usePosts } from '../../context/Posts/Posts'
 import { usableAssetsList } from '../../data/usableAssetsList'
@@ -24,12 +23,6 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
 
   return (
     <div className="w-full">
-      <div className="p-3">
-        <div className="flex items-center justify-between p-3 gap-3 border-2 border-black w-full">
-          <RiSearchLine className="text-2xl" />
-          <input type="text" className="w-full bg-gray-100" />
-        </div>
-      </div>
       {hasFeedPosts ? (
         <div
           onClick={() => {

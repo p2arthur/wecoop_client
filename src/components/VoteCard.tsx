@@ -1,5 +1,5 @@
 import { minidenticon } from 'minidenticons'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { usableAssetsList } from '../data/usableAssetsList'
@@ -7,15 +7,18 @@ import { useGetUserInfo } from '../services/api/Users'
 import { PostRequest, ReplyResponse } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
+import ProgressBar from '@ramonak/react-progress-bar'
 import { ShareButton } from './ShareButton'
+import CountUp from 'react-countup'
 
 interface VoteCardPropsInterface {
   vote: PostRequest | ReplyResponse
 }
 
 const VoteCard = ({ vote }: VoteCardPropsInterface) => {
-  console.log(vote, 'vote')
   const { data: userData } = useGetUserInfo(vote.creator_address)
+
+  const [isVoted, setIsVoted] = useState(false)
 
   const currentPostUsableAsset = usableAssetsList.find((usableAsset) => vote.assetId === usableAsset.assetId)
 
@@ -59,7 +62,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
         {vote.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-4 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-white bg-white dark:bg-gray-900"
+            className="border-4 border-yellow-400 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -72,7 +75,6 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                   </h2>
                 </a>
               </div>
-              <h2 className={'font-bold text-2xl'}>Vote</h2>
               <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
                 {vote.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
@@ -85,12 +87,53 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                 <p>{handleTimestamp()}</p>
               </div>
             </div>
+            <p className="tracking-wide break-words w-full">{vote?.text?.length > 0 && handleTextPost(vote.text)}</p>
 
-            <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
-              <p className="tracking-wide break-words w-full">{vote?.text?.length > 0 && handleTextPost(vote.text)}</p>
+            <div className="gap-2 flex justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
+              <div className={'w-1/2'}>
+                <h2 className={'font-bold text-2xl mb-2'}>
+                  Vote - Prize pool: $<CountUp end={20000} duration={5} />
+                </h2>
+                {isVoted ? (
+                  <div className={'w-full relative'} onClick={() => setIsVoted(false)}>
+                    <div className={'flex items-center justify-between'}>
+                      <span className={'flex items-center '}>Yes (69 votes)</span>
+                      <span className={'flex items-center'}>No (69 votes)</span>
+                    </div>
+                    <ProgressBar
+                      className={'w-full '}
+                      height={'30px'}
+                      bgColor={'rgb(22 163 74)'}
+                      animateOnRender={true}
+                      baseBgColor={'rgb(220 38 38)'}
+                      borderRadius={'10px'}
+                      completed={50}
+                    />
+                  </div>
+                ) : (
+                  <div className={'w-full flex justify-left items-center gap-2'}>
+                    <button
+                      className={
+                        'w-1/2 h-10 rounded-md border-2 border-gray-900 bg-green-600 dark:bg-green-600 dark:border-gray-500 dark:hover:text-white hover:text-2xl  '
+                      }
+                      onClick={() => setIsVoted(true)}
+                    >
+                      YES
+                    </button>
+                    <button
+                      className={
+                        'w-1/2 h-10 rounded-md border-2 border-gray-900 bg-red-600  dark:bg-red-600 dark:border-gray-500 dark:hover:text-white hover:text-2xl '
+                      }
+                      onClick={() => setIsVoted(true)}
+                    >
+                      NO
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
-                  <img className="h-8 w-8" src={currentPostUsableAsset?.image} alt={`${vote?.assetId}-icon`} />
+                  <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${vote?.assetId}-icon`} />
                   <button
                     className={
                       'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'
@@ -114,10 +157,6 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                   <p className="text-center">{handleTimestamp()}</p>
                 </div>
               </div>
-            </div>
-            <div className={'w-full flex items-center bg-red'}>
-              <button className={''}>YES</button>
-              <button>NO</button>
             </div>
           </div>
         ) : vote.status === 'loading' ? (

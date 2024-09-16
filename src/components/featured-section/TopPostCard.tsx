@@ -27,7 +27,10 @@ export default function TopPostCard(post: TopPostCardInterface) {
     })
   }
   return (
-    <a href={`/post?id=${post.post.transaction_id}`} className="w-full p-2 border-2 whitespace-normal bg-white">
+    <a
+      href={`/post?id=${post.post.transaction_id}`}
+      className="w-full p-2 border-2 border-black dark:border-none whitespace-normal bg-white dark:bg-gray-900"
+    >
       {handleTextPost(post.post.text)}...
     </a>
   )
