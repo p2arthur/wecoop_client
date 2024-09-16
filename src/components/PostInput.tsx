@@ -3,7 +3,7 @@ import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
@@ -16,7 +16,7 @@ import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFee
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 import { CoinDropdown } from './CoinDropdown'
-import { PostTypeSwitch } from "./PostTypeSwitch";
+import { PostTypeSwitch } from './PostTypeSwitch'
 
 export interface PostInputOutletContext {
   algod: AlgodClient
@@ -113,7 +113,6 @@ const PostInput = () => {
     // Example calculation to ensure platformFee is used as an integer
     const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
 
-    console.log('fee final', finalFeeForTransaction)
     const encodedInputText = encodeURIComponent(inputText)
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
@@ -167,12 +166,12 @@ const PostInput = () => {
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea
-            maxLength={300}
+            maxLength={postType === 'post' ? 300 : 100}
             onChange={handleChange}
-            placeholder={postType === 'post' ? placeholder : 'Create a vote'}
+            placeholder={postType === 'post' ? placeholder : 'Create your vote'}
             className="w-full border-2  align-top text-start break-all whitespace-normal h-32 p-2 resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500"
           />
-          <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
+          <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
         </div>
 
         <div className="grid gap-4  w-full justify-end">
@@ -194,7 +193,6 @@ const PostInput = () => {
               )}
             </div>
             <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
-
           </div>
           <div className={'flex gap-4 '}>
             <PostTypeSwitch />
@@ -206,12 +204,16 @@ const PostInput = () => {
               selectorOpen={selectorOpen}
             />
             {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
-              <Button buttonText="Send your message" full justify={'center'} />
+              <Button buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`} full justify={'center'} />
             ) : (
-              <Button inactive={true} buttonText="Send your message" full justify={'center'} />
+              <Button
+                inactive={true}
+                buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`}
+                full
+                justify={'center'}
+              />
             )}
           </div>
-
         </div>
       </div>
     </form>

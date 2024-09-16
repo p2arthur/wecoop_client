@@ -134,8 +134,6 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     setPostList(data?.filter((post) => post.assetId === assetId) || [])
   }
 
-  console.log(assetId, 'assetid', postList)
-
   const handleRefreshPosts = () => {
     sessionStorage.removeItem('postList')
     refetch().then(() => {

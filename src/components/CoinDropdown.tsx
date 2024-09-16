@@ -3,7 +3,7 @@ import { usableAssetsList } from '../data/usableAssetsList'
 import { UsableAssetInterface } from '../context/UsableAsset/UsableAssetContext'
 import { useOutletContext } from 'react-router-dom'
 import { PostInputOutletContext } from './PostInput'
-import React from "react";
+import React from 'react'
 
 type CoinDropdownProps = {
   usableAsset: UsableAssetInterface
@@ -13,10 +13,9 @@ type CoinDropdownProps = {
   setSelectorOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const CoinDropdown = ({ usableAsset, selectedAsset,setSelectorOpen, handleAssetSelect, selectorOpen }: CoinDropdownProps) => {
+export const CoinDropdown = ({ usableAsset, selectedAsset, setSelectorOpen, handleAssetSelect, selectorOpen }: CoinDropdownProps) => {
   const { userData } = useOutletContext() as PostInputOutletContext
 
-  console.log(usableAsset, 'usa')
   return (
     <div className="flex gap-1">
       <div className="relative">
@@ -47,12 +46,7 @@ export const CoinDropdown = ({ usableAsset, selectedAsset,setSelectorOpen, handl
               >
                 <div className="flex gap-1 items-center">
                   <div className="rounded-full overflow-hidden border-b-4 border-black dark:border-white hover:scale-110">
-                    <img
-                      className="h-6 w-6"
-                      src={asset.image}
-                      alt={asset.name}
-                      onError={(e) => (e.currentTarget.src = asset.image)}
-                    />
+                    <img className="h-6 w-6" src={asset.image} alt={asset.name} onError={(e) => (e.currentTarget.src = asset.image)} />
                   </div>
                   <span className="text-sm">{asset.name}</span>
                 </div>
