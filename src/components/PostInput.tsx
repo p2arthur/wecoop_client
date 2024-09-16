@@ -214,7 +214,7 @@ const PostInput = () => {
                 <span>Prize pool:</span>
                 <input
                   type={'number'}
-                  className={'w-24 border-black border-2 dark:border-white rounded-sm text-center'}
+                  className={'w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
                   min={10}
                   value={prizePool}
                   onChange={(e) => setPrizePool(e.target.value)}
