@@ -3,28 +3,31 @@ import { usableAssetsList } from '../data/usableAssetsList'
 import { UsableAssetInterface } from '../context/UsableAsset/UsableAssetContext'
 import { useOutletContext } from 'react-router-dom'
 import { PostInputOutletContext } from './PostInput'
+import React from 'react'
 
 type CoinDropdownProps = {
   usableAsset: UsableAssetInterface
   handleAssetSelect: (asset: any) => void
   selectedAsset: UsableAssetInterface
   selectorOpen: boolean
+  setSelectorOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const CoinDropdown = ({ usableAsset, selectedAsset, handleAssetSelect, selectorOpen }: CoinDropdownProps) => {
+export const CoinDropdown = ({ usableAsset, selectedAsset, setSelectorOpen, handleAssetSelect, selectorOpen }: CoinDropdownProps) => {
   const { userData } = useOutletContext() as PostInputOutletContext
+
   return (
     <div className="flex gap-1">
       <div className="relative">
         <div
           className="px-2 border-2 border-black dark:border-white border-b-4 cursor-pointer flex items-center gap-8"
-          onClick={() => handleAssetSelect(selectedAsset)}
+          onClick={() => setSelectorOpen(!selectorOpen)}
         >
           <div className="flex gap-2 items-center">
-            <div className="rounded-full overflow-hidden border-b-4 border-black dark:border-white ">
+            <div className="rounded-full overflow-hidden border-b-4 border-black my-0.5 dark:border-white ">
               <img
-                className="h-6 w-6"
-                src={`https://asa-list.tinyman.org/assets/${usableAsset.assetId}/icon.png`}
+                className="w-5 w-5"
+                src={usableAsset.image}
                 alt={usableAsset.name}
                 onError={(e) => (e.currentTarget.src = usableAsset.image)}
               />
@@ -43,12 +46,7 @@ export const CoinDropdown = ({ usableAsset, selectedAsset, handleAssetSelect, se
               >
                 <div className="flex gap-1 items-center">
                   <div className="rounded-full overflow-hidden border-b-4 border-black dark:border-white hover:scale-110">
-                    <img
-                      className="h-6 w-6"
-                      src={`https://asa-list.tinyman.org/assets/${asset.assetId}/icon.png`}
-                      alt={asset.name}
-                      onError={(e) => (e.currentTarget.src = asset.image)}
-                    />
+                    <img className="h-6 w-6" src={asset.image} alt={asset.name} onError={(e) => (e.currentTarget.src = asset.image)} />
                   </div>
                   <span className="text-sm">{asset.name}</span>
                 </div>

@@ -32,15 +32,11 @@ const FollowButton = ({ walletAddress, isFollowing }: FollowButtonProps) => {
         followerUserWalletAddress: activeAccount?.address || '',
       })
 
-      console.log(encodedGroupedTransactions)
-
       const signedTransactions = await signTransactions(encodedGroupedTransactions)
-      console.log('signed transactions', signedTransactions)
       const waitRoundsToConfirm = 10
 
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
       setButtonState('success')
-      console.log(id)
     } catch (error) {
       setButtonState(null)
       console.error(error)
@@ -59,7 +55,6 @@ const FollowButton = ({ walletAddress, isFollowing }: FollowButtonProps) => {
 
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
       setButtonState(null)
-      console.log(id)
     } catch (error) {
       setButtonState(null)
       console.error(error)

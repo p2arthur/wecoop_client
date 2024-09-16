@@ -15,7 +15,7 @@ import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
+import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -163,7 +163,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         {post.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-gray-950 bg-white dark:bg-gray-900"
+            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-white bg-white dark:bg-gray-900"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -193,12 +193,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
-                  <img
-                    className="h-8 w-8"
-                    src={`https://asa-list.tinyman.org/assets/${post.assetId}/icon.png`}
-                    alt={`${post.assetId}`}
-                    onError={(e) => (e.currentTarget.src = currentPostUsableAsset?.image!)}
-                  />
+                  <img className="h-8 w-8" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} />
                   {variant === 'default' && (
                     <button
                       className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"

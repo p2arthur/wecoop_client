@@ -22,7 +22,7 @@ const UsableAssetContext = createContext<IUsableAssetContext>({
 })
 
 const UsableAssetProvider = ({ children }: IUsableAssetProviderProps) => {
-  const [usableAsset, setUsableAsset] = useState<UsableAssetInterface>({ name: 'coop', assetId: 796425061, image: '' })
+  const [usableAsset, setUsableAsset] = useState<UsableAssetInterface>({ name: 'coop', assetId: 796425061, image: '/coins/coop_icon.png' })
 
   const defineUsableAsset = (usableAsset: UsableAssetInterface) => {
     setUsableAsset(usableAsset)

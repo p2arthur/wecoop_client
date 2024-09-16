@@ -39,7 +39,6 @@ export class Reply {
       assetId,
     )
 
-    console.log('selected asset', assetId)
     const postCreatorFee = await transactionService.createTransaction(address, creatorAddress, finalUserFee, `creator-fee:${note}`, assetId)
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]
