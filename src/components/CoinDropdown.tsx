@@ -25,9 +25,9 @@ export const CoinDropdown = ({ usableAsset, selectedAsset,setSelectorOpen, handl
           onClick={() => setSelectorOpen(!selectorOpen)}
         >
           <div className="flex gap-2 items-center">
-            <div className="rounded-full overflow-hidden border-b-4 border-black dark:border-white ">
+            <div className="rounded-full overflow-hidden border-b-4 border-black my-0.5 dark:border-white ">
               <img
-                className="h-6 w-6"
+                className="w-5 w-5"
                 src={usableAsset.image}
                 alt={usableAsset.name}
                 onError={(e) => (e.currentTarget.src = usableAsset.image)}

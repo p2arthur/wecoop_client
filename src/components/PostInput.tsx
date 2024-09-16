@@ -16,22 +16,67 @@ import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFee
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 import { CoinDropdown } from './CoinDropdown'
+import { PostTypeSwitch } from "./PostTypeSwitch";
 
 export interface PostInputOutletContext {
   algod: AlgodClient
   userData: UserInterface
 }
 
+const placeholderPhrases = [
+  'Craft a Coop Coin message on WeCoop, be timeless in Algorand!',
+  'Compose on WeCoop, pay with Coop Coin, live on Algorand!',
+  "Share on WeCoop, Coop Coin ensures it's eternal in Algorand.",
+  'WeCoop message, Coop Coin pays, Algorand bound.',
+  'Craft with Coop Coin on WeCoop, echo in Algorand.',
+  'WeCoop awaits, unlock with Coop Coin, Algorand bound.',
+  "Tell your WeCoop story, use Coop Coin, Algorand's history.",
+  'Create on WeCoop, Coop Coin resonates in Algorand.',
+  'Coop Coin: Key to WeCoop. Start writing, resonate in Algorand!',
+  "Speak up on WeCoop! Coop Coin, part of Algorand's history.",
+  'Compose on WeCoop, Coop Coin echoes in Algorand.',
+  'Let your WeCoop message fly, Coop Coin immortalizes in Algorand.',
+  "WeCoop's wall is yours. Coop Coin opens, your message in Algorand.",
+  'Craft your WeCoop message, pay with Coop Coin, resonate in Algorand.',
+  "Coop Coin is your ink, WeCoop's paper. Start creating, resonate in Algorand.",
+  "WeCoop's arena awaits. Pay with Coop Coin, your message in Algorand forever.",
+  "Create impact on WeCoop, Coop Coin your ticket to Algorand's eternity.",
+  'WeCoop Your platform, your messages. Coop Coin echoes in Algorand.',
+]
+
 const PostInput = () => {
   const { usableAssetId } = useParams<{ usableAssetId: string }>()
   const { signTransactions, sendTransactions, activeAccount } = useWallet()
-  const { handleAddNewPost, handleDeletePost, handleRefreshPosts } = usePosts()
+  const { handleAddNewPost, handleDeletePost, handleRefreshPosts, postType } = usePosts()
   const [openTooltip, setOpenTooltip] = useState(false)
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
   const [selectedAsset, setSelectedAsset] = useState(usableAssetsList[0])
   const [selectorOpen, setSelectorOpen] = useState(false)
-  const navigate = useNavigate()
+  const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
+
+  const [placeholder, setPlaceholder] = useState(placeholderSelected.slice(0, 0))
+  const [placeholderIndex, setPlaceholderIndex] = useState(0)
+
+  useEffect(() => {
+    const intr = setInterval(() => {
+      setPlaceholder((prevPlaceholder) => {
+        const nextChar = placeholderSelected[prevPlaceholder.length]
+
+        return nextChar !== undefined ? prevPlaceholder + nextChar : prevPlaceholder
+      })
+
+      if (placeholderIndex + 1 > placeholderSelected.length) {
+        clearInterval(intr)
+      } else {
+        setPlaceholderIndex((prevIndex) => prevIndex + 1)
+      }
+    }, 50)
+
+    return () => {
+      clearInterval(intr)
+    }
+  }, [placeholderIndex, placeholderSelected])
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
@@ -124,23 +169,13 @@ const PostInput = () => {
           <textarea
             maxLength={300}
             onChange={handleChange}
-            placeholder="Write your post"
+            placeholder={postType === 'post' ? placeholder : 'Create a vote'}
             className="w-full border-2  align-top text-start break-all whitespace-normal h-32 p-2 resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500"
           />
           <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
         </div>
 
         <div className="grid gap-4  w-full justify-end">
-          <div className={'flex gap-4 '}>
-            <CoinDropdown
-              usableAsset={usableAsset}
-              handleAssetSelect={handleAssetSelect}
-              setSelectorOpen={setSelectorOpen}
-              selectedAsset={selectedAsset}
-              selectorOpen={selectorOpen}
-            />
-            <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
-          </div>
           <div className={'flex justify-end items-center gap-4'}>
             <div className={'relative'}>
               <Button icon={<FaCircleInfo />} buttonFunction={() => setOpenTooltip(!openTooltip)} />
@@ -158,12 +193,25 @@ const PostInput = () => {
                 </div>
               )}
             </div>
+            <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
+
+          </div>
+          <div className={'flex gap-4 '}>
+            <PostTypeSwitch />
+            <CoinDropdown
+              usableAsset={usableAsset}
+              handleAssetSelect={handleAssetSelect}
+              setSelectorOpen={setSelectorOpen}
+              selectedAsset={selectedAsset}
+              selectorOpen={selectorOpen}
+            />
             {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
               <Button buttonText="Send your message" full justify={'center'} />
             ) : (
               <Button inactive={true} buttonText="Send your message" full justify={'center'} />
             )}
           </div>
+
         </div>
       </div>
     </form>

@@ -28,6 +28,8 @@ type IPostsContext = {
   activeAssetId?: AssetId | null
   activeFeed?: FeedType
   isLoading: boolean
+  postType: string
+  handleChangePostType: (postType: string) => void
 }
 
 interface IPostsProviderProps {
@@ -45,9 +47,11 @@ const PostsContext = createContext<IPostsContext>({
   handleRefreshPosts: () => undefined,
   handleChangeFeed: () => undefined,
   handleFilterByAssetId: () => undefined,
+  handleChangePostType: () => undefined,
   activeFeed: 'global',
   activeAssetId: null,
   isLoading: false,
+  postType: 'post',
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
@@ -56,6 +60,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   const [activeFeed, setActiveFeed] = useState<FeedType>('global')
   const { activeAccount } = useWallet()
   const [assetId, setAssetId] = useState<AssetId | null>(null)
+  const [postType, setPostType] = useState<string>('post')
 
   const [transactionId, setTransactionId] = useState<string>('')
 
@@ -119,6 +124,10 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       )
     }
   }, [postDataByWalletAddress, assetId, activeFeed])
+
+  const handleChangePostType = (postType: string) => {
+    setPostType(postType)
+  }
 
   const handleFilterByAssetId = (assetId: number) => {
     setAssetId(assetId)
@@ -206,8 +215,10 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       postList,
       isLoading,
       activeFeed,
+      postType,
       activeAssetId: assetId,
       handleNewLike,
+      handleChangePostType,
       handleNewReply,
       handleGetPostByAddress,
       handleGetPostByTransactionId,
@@ -217,7 +228,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       handleChangeFeed,
       handleFilterByAssetId,
     }),
-    [assetId, postList, activeFeed, isLoading],
+    [assetId, postType, postList, activeFeed, isLoading],
   )
 
   return <PostsContext.Provider value={postProviderValues}>{children}</PostsContext.Provider>

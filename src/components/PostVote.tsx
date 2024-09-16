@@ -1,0 +1,263 @@
+import { useQueryClient } from '@tanstack/react-query'
+import { useWallet } from '@txnlab/use-wallet'
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import { minidenticon } from 'minidenticons'
+import { Fragment, useState } from 'react'
+import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { MdTravelExplore } from 'react-icons/md'
+import { useOutletContext } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
+import { usePosts } from '../context/Posts/Posts'
+import { Like } from '../services/Like'
+import { Reply } from '../services/Reply'
+
+import { toast } from 'react-toastify'
+import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
+import { usableAssetsList } from '../data/usableAssetsList'
+import { useGetUserInfo } from '../services/api/Users'
+import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
+import formatDateFromTimestamp from '../utils'
+import { ellipseAddress } from '../utils/ellipseAddress'
+import { getUserCountry } from '../utils/userUtils'
+import { ReplyInput } from './ReplyInput'
+import { ShareButton } from './ShareButton'
+
+interface PostPropsInterface {
+  post: PostRequest | IReply
+  variant?: 'default' | 'reply'
+  handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
+}
+
+interface PostInputPropsInterface {
+  algod: AlgodClient
+  userData: User
+}
+
+const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
+  const queryClient = useQueryClient()
+  const { handleNewLike } = usePosts()
+  const { activeAccount } = useWallet()
+  const { sendTransactions, signTransactions } = useWallet()
+  const { data: userData } = useGetUserInfo(post.creator_address)
+  const { algod } = useOutletContext() as PostInputPropsInterface
+  const replieservice = new Reply(algod)
+  const likeService = new Like(algod)
+  const [isLoadingLike, setIsLoadingLike] = useState(false)
+  const [isLoadingReply, setIsLoadingReply] = useState(false)
+  const [replyText, setReplyText] = useState('')
+  const [openReplyInput, setOpenReplyInput] = useState(false)
+  const [userCountry, setUserContry] = useState('')
+
+  const { usableAsset, setUsableAsset } = useUsableAsset()
+
+  const currentPostUsableAsset = usableAssetsList.find((usableAsset) => post.assetId === usableAsset.assetId)
+  console.log(post, 'current')
+  const [currentPostAsset, setCurrentPostAsset] = useState(currentPostUsableAsset)
+
+  const generateIdIcon = (creatorAddress: string) => {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
+  }
+
+  const handlePostLike = async (event: React.FormEvent) => {
+    try {
+      setIsLoadingLike(true)
+
+      const encodedGroupedTransactions = await likeService.handlePostLike({
+        event,
+        creatorAddress: post.creator_address,
+        address: activeAccount?.address || '',
+        transactionId: post.transaction_id as string,
+      })
+
+      const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      const waitRoundsToConfirm = 4
+
+      await sendTransactions(signedTransactions, waitRoundsToConfirm)
+
+      setIsLoadingLike(false)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
+    }
+  }
+
+  const handlePostReply = async () => {
+    try {
+      setIsLoadingReply(true)
+      const country = await getUserCountry()
+      setUserContry(country)
+
+      const parentReplyId = post.transaction_id as string
+      const encodedGroupedTransactions = await replieservice.handlePostReply({
+        creatorAddress: post.creator_address,
+        address: activeAccount?.address || '',
+        transactionId: post.transaction_id as string,
+        text: encodeURIComponent(replyText),
+        assetId: usableAsset.assetId,
+      })
+      const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      const waitRoundsToConfirm = 4
+
+      const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+
+      const acceptedReply: Post = {
+        creator_address: userData?.address || '',
+        text: encodeURIComponent(replyText),
+        status: 'accepted',
+        transaction_id: id,
+        likes: [],
+        country,
+        nfd: userData?.nfd.name,
+        timestamp: Date.now(),
+        replies: [],
+        isPersonalized: undefined,
+        assetId: usableAsset.assetId,
+      }
+
+      handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+      setReplyText('')
+      setIsLoadingReply(false)
+    } catch (error) {
+      toast('Error sending reply', {
+        position: 'bottom-right',
+        theme: 'dark',
+      })
+      setReplyText('')
+      setIsLoadingReply(false)
+    }
+  }
+
+  const handleTimestamp = () => {
+    const date = post.timestamp! * 1000
+    return formatDateFromTimestamp(date)
+  }
+
+  const handleGoToPostPage = () => {
+    window.location.href = `/post?id=${post.transaction_id}`
+  }
+
+  const handleTextPost = (text: string) => {
+    const decodedText = decodeURIComponent(text)
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g
+
+    const parts = decodedText.split(urlRegex)
+
+    return parts.map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <Fragment key={index}>
+            <a href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">
+              {part}
+            </a>
+          </Fragment>
+        )
+      }
+      return part
+    })
+  }
+
+  console.log(currentPostUsableAsset?.image, 'currentPostUsableAsset?.image')
+
+  return (
+    <>
+      <div>
+        {post.status === 'accepted' ? (
+          <div
+            onClick={handleGoToPostPage}
+            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-gray-950 bg-white dark:bg-gray-900"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-md border-2 border-gray-900 bg-white overflow-hidden border-b-4">
+                  <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt="" />
+                </div>
+                <a href={`/profile/${post.creator_address}`}>
+                  <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
+                    {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)} {<img />}
+                  </h2>
+                </a>
+              </div>
+              <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
+                {post.country ? (
+                  <div className="flex gap-0 flex-col items-center justify-center">
+                    <div className="w-6 rounded-full overflow-hidden">
+                      <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
+                    </div>
+                    <p className="w-full text-center">{post.country}</p>
+                  </div>
+                ) : null}
+                <p>{handleTimestamp()}</p>
+              </div>
+            </div>
+
+            <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
+              <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
+              <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
+                <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
+                  <img
+                    className="h-8 w-8"
+                    src={currentPostUsableAsset?.image}
+                    alt={`${post.assetId}-icon`}
+                  />
+                  <button
+                    className={
+                      'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'
+                    }
+                  >
+                    <a target="_blank" href={`https://allo.info/tx/${post.transaction_id}`}>
+                      <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
+                    </a>
+                  </button>
+                  <ShareButton id={post.transaction_id} />
+                </div>
+                <div className="flex flex-col md:gap-2 md:hidden">
+                  {post.country ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-6 rounded-full overflow-hidden">
+                        <img className="w-full h-full" src={`https://flagsapi.com/${post.country}/flat/64.png`} alt="" />
+                      </div>
+                      <p className="text-center">{post.country}</p>
+                    </div>
+                  ) : null}
+                  <p className="text-center">{handleTimestamp()}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : post.status === 'loading' ? (
+          <div
+            key={post.transaction_id}
+            className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
+          >
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3">
+                <div className="w-10 rounded-full border-2 border-gray-900">
+                  <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
+                </div>
+                <h2 className="font-bold text-xl h-full">{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
+              </div>
+              <p className="w-full" onClick={(e) => e.stopPropagation()}>
+                {handleTextPost(post.text)}
+              </p>
+            </div>
+            <span>
+              <FaSpinner className="w-6 animate-spin" />
+            </span>
+          </div>
+        ) : (
+          <div
+            key={post.text}
+            className="border-2 opacity-40 border-red-900 flex-col p-2   hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
+          >
+            <h2>{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
+            <p className="w-full">{post.text}</p>
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+export default PostCard
