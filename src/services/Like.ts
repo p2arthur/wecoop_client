@@ -24,7 +24,6 @@ export class Like {
     event.preventDefault()
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopLike}${country}:${transactionId}`
-    console.log('addresssss', address)
     const scoopFeeTransaction = await transactionService.createTransaction(address, wecoopWalletAddress, wecoopFee, note)
     const postCreatorFee = await transactionService.createTransaction(
       address,

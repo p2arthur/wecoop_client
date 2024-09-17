@@ -56,13 +56,12 @@ const PostsContext = createContext<IPostsContext>({
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
   const [postList, setPostList] = useState<Post[]>([])
-
-  const [activeFeed, setActiveFeed] = useState<FeedType>('global')
-  const { activeAccount } = useWallet()
   const [assetId, setAssetId] = useState<AssetId | null>(null)
   const [postType, setPostType] = useState<string>('post')
-
   const [transactionId, setTransactionId] = useState<string>('')
+  const [activeFeed, setActiveFeed] = useState<FeedType>('global')
+
+  const { activeAccount } = useWallet()
 
   const { data, isFetching: isLoadingGetAllPosts, refetch } = useGetAllPosts(false)
 
@@ -93,35 +92,37 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   useEffect(() => {
     if (activeFeed === 'global' && data) {
-      setPostList(
-        data
-          .filter((post) => !assetId || post.assetId === assetId)
-          .map((post) => ({
-            ...post,
+      const filteredPosts = data.filter((post) => !assetId || post.assetId === assetId)
+      setPostList((prevPosts) => {
+        // Apenas atualiza se os novos posts são diferentes dos anteriores
+        const updatedList = filteredPosts.map((post) => ({
+          ...post,
+          status: 'accepted',
+          replies: post.replies.map((reply) => ({
+            ...reply,
             status: 'accepted',
-            replies: post.replies.map((reply) => ({
-              ...reply,
-              status: 'accepted',
-            })),
           })),
-      )
+        }))
+        return JSON.stringify(prevPosts) !== JSON.stringify(updatedList) ? updatedList : prevPosts
+      })
     }
   }, [data, assetId, activeFeed])
 
   useEffect(() => {
     if (postDataByWalletAddress && activeFeed === 'personalized') {
-      setPostList(
-        postDataByWalletAddress
-          .filter((post) => !assetId || post.assetId === assetId)
-          .map((post) => ({
-            ...post,
+      const filteredPosts = postDataByWalletAddress.filter((post) => !assetId || post.assetId === assetId)
+      setPostList((prevPosts) => {
+        // Apenas atualiza se os novos posts são diferentes dos anteriores
+        const updatedList = filteredPosts.map((post) => ({
+          ...post,
+          status: 'accepted',
+          replies: post.replies.map((reply) => ({
+            ...reply,
             status: 'accepted',
-            replies: post.replies.map((reply) => ({
-              ...reply,
-              status: 'accepted',
-            })),
           })),
-      )
+        }))
+        return JSON.stringify(prevPosts) !== JSON.stringify(updatedList) ? updatedList : prevPosts
+      })
     }
   }, [postDataByWalletAddress, assetId, activeFeed])
 

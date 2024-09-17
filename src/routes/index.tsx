@@ -5,12 +5,13 @@ import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import NavBar from '../components/NavBar'
 import Whitepaper from '../pages/About'
 import FeedPage from '../pages/FeedPage'
-import Home from '../pages/Home'
+import Feed from '../pages/Feed'
 import PostPage from '../pages/PostPage'
 import ProfilePage from '../pages/ProfilePage'
 import { User } from '../services/User'
 import { User as UserInterface } from '../services/api/types'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
+import { Home } from '../pages/Home'
 
 export const Router = () => {
   const { activeAccount } = useWallet()
@@ -61,7 +62,7 @@ export const Router = () => {
       ),
       children: [
         { path: '/', element: <Home /> },
-        { path: '/feed', element: <Home /> },
+        { path: '/feed', element: <Feed /> },
         { path: '/profile/:walletAddress', element: <ProfilePage /> },
         { path: '/feed/by/:walletAddress', element: <FeedPage /> },
         { path: '/about', element: <Whitepaper /> },
