@@ -5,6 +5,7 @@ interface CounterProps {
   onIncrement: () => void
   onDecrement: () => void
   max?: number
+  min?: number
 }
 
 const Counter: React.FC<CounterProps> = ({ count, onIncrement, onDecrement, max }) => {
@@ -13,7 +14,7 @@ const Counter: React.FC<CounterProps> = ({ count, onIncrement, onDecrement, max 
       <div className="rounded-lg shadow-lg flex items-center space-x-4">
         <button
           onClick={onDecrement}
-          disabled={count <= 0 || false}
+          disabled={count === 1 || false}
           className="bg-black cursor-pointer dark:bg-white dark:text-black text-4xl leading-6 text-white px-1 rounded-sm hover:bg-red-600"
         >
           -

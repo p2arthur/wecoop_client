@@ -202,7 +202,7 @@ const PostInput = () => {
           />
           <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
           {postType === 'vote' && (
-            <div className={'absolute right-5 top-2 text-center'}>
+            <div onClick={(event) => event.preventDefault()} className={'absolute right-5 top-2 text-center'}>
               <span>Expires in:</span>
               <Counter count={counter} onIncrement={() => setCounter(counter + 1)} onDecrement={() => setCounter(counter - 1)} max={5} />
             </div>
