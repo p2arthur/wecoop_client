@@ -45,7 +45,6 @@ const ProfilePage = () => {
   useEffect(() => {
     if (data) {
       const posts = setPostsList(updateRepliesStatus(data))
-      console.log('posts', posts)
     }
   }, [data])
 
@@ -64,18 +63,13 @@ const ProfilePage = () => {
       })),
     }))
 
-    console.log('updated posts', updatedPosts)
-
     return updatedPosts
   }
 
   const getIsFollowing = (): void => {
     if (currentUser?.followTargets.includes(user?.address!)) {
-      console.log(true)
       setIsFollowing(true)
     } else {
-      console.log(currentUser?.followTargets)
-      console.log(false)
       setIsFollowing(false)
     }
   }
@@ -114,7 +108,7 @@ const ProfilePage = () => {
                   <img className="w-32 h-32" src={generateIdIcon(user?.address as string)} alt="profile-photo" />
                 )}
               </div>
-              <div className="flex flex-col justify-between">
+              <div className="flex flex-col ml-5 justify-between">
                 <div className="flex items-center gap-1">
                   <h3 className="text-2xl md:text-4xl font-bold">
                     {user?.nfd?.name !== null ? user?.nfd?.name : ellipseAddress(user?.address)}
@@ -126,7 +120,7 @@ const ProfilePage = () => {
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
                           <div className="flex items-end gap-1">
-                            <ul className="grid grid-cols-3 mt-2 gap-3 gap-y-5">
+                            <ul className="grid grid-rows-2 grid-cols-5 mt-2 gap-3 gap-y-5">
                               {Object.keys(user.balance).map((key) => (
                                 <div className={'flex gap-2 items-end'}>
                                   <div className="w-6 h-6 rounded-full overflow-hidden border-b-4 border-black">

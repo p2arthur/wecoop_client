@@ -27,6 +27,7 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
         <div
           onClick={() => {
             handleChangeFeed('personalized')
+            setOpenCoinFeed(false)
           }}
           className={`w-full flex justify-start  p-3 cursor-pointer ${
             activeFeed === 'personalized' ? 'bg-black text-white dark:bg-white dark:text-black' : ''
@@ -46,6 +47,7 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
       <div
         onClick={() => {
           handleChangeFeed('global')
+          setOpenCoinFeed(false)
         }}
         className={`w-full flex justify-start  p-3 cursor-pointer ${
           activeFeed === 'global' ? 'bg-black text-white dark:bg-white dark:text-black' : ''

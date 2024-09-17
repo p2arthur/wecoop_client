@@ -46,9 +46,6 @@ const AnalyticsProvider = ({ children }: IAnalyticsProviderProps) => {
         })
       })
 
-      console.log('topCreators', topCreatorsData)
-      console.log('topPosts', topPosts)
-
       // Set analytics data in state
       setAllAnalytics({ topCreators: topCreatorsData, topPosts })
     } catch (error) {
