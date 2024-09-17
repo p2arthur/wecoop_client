@@ -9,15 +9,14 @@ import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { NotePrefix } from '../enums/notePrefix'
-import { Transaction } from '../services/Transaction'
 import { User as UserInterface } from '../services/api/types'
 import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 import { CoinDropdown } from './CoinDropdown'
-import { PostTypeSwitch } from './PostTypeSwitch'
 import Counter from './Counter'
+import { PostTypeSwitch } from './PostTypeSwitch'
 
 export interface PostInputOutletContext {
   algod: AlgodClient
@@ -96,6 +95,7 @@ const PostInput = () => {
 
   const handleAssetSelect = (asset: any) => {
     // navigate(`/global/${asset.assetId}`)
+    console.log('change asset', asset)
     setSelectorOpen(!selectorOpen)
     setUsableAsset(asset)
   }
@@ -110,26 +110,47 @@ const PostInput = () => {
 
     const country = await getUserCountry()
 
-    // Calculate the fee price based on the asset
-    const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Post)
-
-    // Split the fee by interaction type
-    const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'post' })
-
-    // Example calculation to ensure platformFee is used as an integer
-    const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
-
     const encodedInputText = encodeURIComponent(inputText)
     const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
+    const encodedNote = new Uint8Array(Buffer.from(note))
+
     try {
-      const transaction = await new Transaction(algod).createTransaction(
-        userData.address,
-        import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-        finalFeeForTransaction,
-        note,
-        usableAsset.assetId,
-      )
+      let transaction: algosdk.Transaction
+
+      // Get suggested transaction parameters from the Algod node
+      const suggestedParams = await algod.getTransactionParams().do()
+
+      console.log('selectedAsset', selectedAsset)
+
+      // Check if it's a payment transaction or an asset transfer transaction
+      if (usableAsset.assetId === 0) {
+        // Payment transaction (Algo transfer)
+        transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+          from: userData.address,
+          to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
+          note: new Uint8Array(Buffer.from(note)), // Encode note
+          suggestedParams: suggestedParams, // Use suggested transaction params,
+          amount: 1,
+        })
+      } else {
+        // Calculate the fee price based on the asset
+        const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Post)
+        // Split the fee by interaction type
+        const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'post' })
+
+        // Example calculation to ensure platformFee is used as an integer
+        const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
+        // Asset transfer transaction (ASA)
+        transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+          from: userData.address,
+          to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
+          amount: finalFeeForTransaction, // Amount of asset to transfer
+          assetIndex: usableAsset.assetId, // ASA (Asset ID)
+          note: new Uint8Array(Buffer.from(note)), // Encode note
+          suggestedParams: suggestedParams, // Use suggested transaction params
+        })
+      }
 
       const signedTransactions = await signTransactions([algosdk.encodeUnsignedTransaction(transaction)])
       const { id } = await sendTransactions(signedTransactions, 4)

@@ -17,12 +17,17 @@ interface IUsableAssetProviderProps {
 }
 
 const UsableAssetContext = createContext<IUsableAssetContext>({
-  usableAsset: { name: 'coop', assetId: 1234, image: '' },
+  usableAsset: { name: 'coop', assetId: 1234, image: '', decimals: 6 },
   setUsableAsset: (usableAsset: UsableAssetInterface) => {},
 })
 
 const UsableAssetProvider = ({ children }: IUsableAssetProviderProps) => {
-  const [usableAsset, setUsableAsset] = useState<UsableAssetInterface>({ name: 'coop', assetId: 796425061, image: '/coins/coop_icon.png' })
+  const [usableAsset, setUsableAsset] = useState<UsableAssetInterface>({
+    name: 'coop',
+    assetId: 796425061,
+    image: '/coins/coop_icon.png',
+    decimals: 6,
+  })
 
   const defineUsableAsset = (usableAsset: UsableAssetInterface) => {
     setUsableAsset(usableAsset)
