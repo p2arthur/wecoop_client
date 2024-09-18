@@ -10,7 +10,7 @@ interface ProfileMenuProps {
 }
 
 export const ProfileMenu = () => {
-  const { allAnalytics, getAllAnalytics } = useAnalytics()
+  const { allAnalytics, getAllAnalytics, isLoadingAnalytics } = useAnalytics()
 
   useEffect(() => {
     getAllAnalytics()
@@ -20,6 +20,7 @@ export const ProfileMenu = () => {
     <div className={'w-full p-4 h-full flex flex-col justify-between'}>
       <FeaturedSection
         sectionTitle="Top creators"
+        isLoadingAnalytics={isLoadingAnalytics}
         content={
           <div className="flex flex-col gap-2">
             {allAnalytics.topCreators.map((creator) => (
@@ -30,6 +31,7 @@ export const ProfileMenu = () => {
       />
       <FeaturedSection
         sectionTitle="Top posts"
+        isLoadingAnalytics={isLoadingAnalytics}
         content={
           <div className="flex flex-col gap-2">
             {allAnalytics.topPosts.map((post) => (
