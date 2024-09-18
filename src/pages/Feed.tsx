@@ -5,14 +5,27 @@ import PostInput from '../components/PostInput'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
 import { MenuFeed } from '../components/templates/MenuFeed'
 import { usePosts } from '../context/Posts/Posts'
+import { useEffect } from 'react'
 
 const Feed = () => {
   const { postList, handleNewReply, isLoading, activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
   const { activeAccount } = useWallet()
   const [params, setParams] = useSearchParams()
 
-  console.log(params, 'params')
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (params.get('activeFeed') === 'coinFeed' && params.get('activeAssetId') !== null) {
+      const assetId = Number(params.get('activeAssetId'))
+      handleFilterByAssetId(assetId)
+    } else if (activeFeed === 'global' && activeAssetId === null) {
+      setParams({ activeFeed: 'global' })
+    } else if (activeFeed === 'personalized' && activeAssetId === null) {
+      setParams({ activeFeed: 'personalized' })
+    } else if (activeFeed === 'coinFeed' && activeAssetId !== null) {
+      setParams({ activeFeed: 'coinFeed', activeAssetId: activeAssetId?.toString() || '' })
+    }
+  }, [activeFeed, activeAssetId])
 
   // Função para atualizar a URL com base no activeFeed e activeAssetId
   const updateUrlParams = (newFeed, newAssetId) => {
@@ -46,11 +59,12 @@ const Feed = () => {
     <div className="flex pt-14 dark:bg-gray-950 bg-gray-100 overflow-hidden max-h-screen w-full">
       <div className="hidden md:flex border-t-0 flex-col w-3/12 items-start justify-between border-2 border-b-0 dark:border-gray-800 border-gray-950">
         <MenuFeed
+          openByParams={params.get('activeFeed') === 'coinFeed' && params.get('activeAssetId') !== null}
           hasFeedPosts={activeAccount !== null}
-          activeFeed={activeFeed || params.get('activeFeed') || 'global'}
+          activeFeed={activeFeed}
           handleChangeFeed={handleFeedChange}
           handleChangeAssetId={handleAssetIdChange}
-          activeAssetId={activeAssetId || params.get('activeAssetId') || null}
+          activeAssetId={activeAssetId}
         />
       </div>
 

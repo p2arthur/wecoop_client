@@ -105,6 +105,8 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
         }))
         return JSON.stringify(prevPosts) !== JSON.stringify(updatedList) ? updatedList : prevPosts
       })
+    } else if (activeFeed === 'coinFeed' && assetId && data) {
+      setPostList(data?.filter((post) => post.assetId === assetId))
     }
   }, [data, assetId, activeFeed])
 
@@ -131,6 +133,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }
 
   const handleFilterByAssetId = (assetId: number) => {
+    setActiveFeed('coinFeed')
     setAssetId(assetId)
     setPostList(data?.filter((post) => post.assetId === assetId) || [])
   }

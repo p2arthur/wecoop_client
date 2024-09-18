@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import packageJson from '../../../package.json'
 import { AssetId, FeedType, usePosts } from '../../context/Posts/Posts'
 import { usableAssetsList } from '../../data/usableAssetsList'
+import { FaShareNodes } from 'react-icons/fa6'
+import { toast } from 'react-toastify'
 
 interface IMenuFeed {
   hasFeedPosts: boolean
@@ -9,6 +11,7 @@ interface IMenuFeed {
   handleChangeFeed: (feed: FeedType) => void
   handleChangeAssetId: (assetId: AssetId | null) => void
   activeAssetId: AssetId | null
+  openByParams: boolean
 }
 
 interface PackageJson {
@@ -17,9 +20,15 @@ interface PackageJson {
 
 const version = (packageJson as PackageJson).version
 
-export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleChangeAssetId, activeAssetId }: IMenuFeed) => {
+export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleChangeAssetId, activeAssetId, openByParams }: IMenuFeed) => {
   const [openCoinFeed, setOpenCoinFeed] = useState<boolean>(false)
   const { isLoading } = usePosts()
+
+  useEffect(() => {
+    if (openByParams) {
+      setOpenCoinFeed(true)
+    }
+  }, [openByParams])
 
   return (
     <div className="w-full">
@@ -85,7 +94,7 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
           {usableAssetsList.map((asset) => (
             <div
               onClick={() => handleChangeAssetId(asset.assetId)}
-              className={`w-full flex justify-start pl-5  p-3 cursor-pointer ${
+              className={`w-full flex justify-between items-center pl-5  p-3 cursor-pointer ${
                 activeAssetId === asset.assetId ? 'bg-black text-white dark:bg-white dark:text-black' : ''
               }`}
             >
@@ -101,6 +110,24 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
                 </div>{' '}
                 <h3 className="text-xl">{asset.name}</h3>
               </div>
+              {activeAssetId === asset.assetId && (
+                <div
+                  className={'p-2'}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const url = window.location.href
+
+                    navigator.clipboard.writeText(url)
+
+                    toast('Community coin feed copied to clipboard', {
+                      position: 'bottom-right',
+                      theme: 'dark',
+                    })
+                  }}
+                >
+                  <FaShareNodes />
+                </div>
+              )}
             </div>
           ))}
         </div>

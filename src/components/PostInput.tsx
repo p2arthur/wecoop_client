@@ -95,7 +95,6 @@ const PostInput = () => {
 
   const handleAssetSelect = (asset: any) => {
     // navigate(`/global/${asset.assetId}`)
-    console.log('change asset', asset)
     setSelectorOpen(!selectorOpen)
     setUsableAsset(asset)
   }
@@ -120,8 +119,6 @@ const PostInput = () => {
 
       // Get suggested transaction parameters from the Algod node
       const suggestedParams = await algod.getTransactionParams().do()
-
-      console.log('selectedAsset', selectedAsset)
 
       // Check if it's a payment transaction or an asset transfer transaction
       if (usableAsset.assetId === 0) {
