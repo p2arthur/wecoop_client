@@ -128,7 +128,7 @@ const PostInput = () => {
           to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
           note: new Uint8Array(Buffer.from(note)), // Encode note
           suggestedParams: suggestedParams, // Use suggested transaction params,
-          amount: 1,
+          amount: 100000,
         })
       } else {
         // Calculate the fee price based on the asset

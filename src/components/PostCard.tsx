@@ -15,7 +15,7 @@ import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
+import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -66,6 +66,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         creatorAddress: post.creator_address,
         address: activeAccount?.address || '',
         transactionId: post.transaction_id as string,
+        token: usableAsset.assetId,
       })
 
       const signedTransactions = await signTransactions(encodedGroupedTransactions)

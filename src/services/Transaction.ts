@@ -21,17 +21,29 @@ export class Transaction {
   async createTransaction(from: string, to: string, amount: number, note: string, token: number = 796425061) {
     const suggestedParams = await this.client.getTransactionParams().do()
 
-    const ptxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
-      from,
-      to,
-      undefined,
-      undefined,
-      amount,
-      new Uint8Array(Buffer.from(note)),
-      token,
-      suggestedParams,
-    )
+    let txn
 
-    return ptxn
+    if (token === 0) {
+      txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+        from,
+        to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
+        note: new Uint8Array(Buffer.from(note)), // Encode note
+        suggestedParams: suggestedParams, // Use suggested transaction params,
+        amount: 100000,
+      })
+    } else {
+      txn = algosdk.makeAssetTransferTxnWithSuggestedParams(
+        from,
+        to,
+        undefined,
+        undefined,
+        amount,
+        new Uint8Array(Buffer.from(note)),
+        token,
+        suggestedParams,
+      )
+    }
+
+    return txn
   }
 }
