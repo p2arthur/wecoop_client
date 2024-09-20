@@ -17,6 +17,8 @@ export class Post {
     likes: [],
     replies: [],
     status: null,
+    isPersonalized: false,
+    assetId: null,
   }
 
   public async setPostData(postDataInput: PostInterface): Promise<PostInterface> {
@@ -31,6 +33,8 @@ export class Post {
       country: allText[2],
       likes: postDataInput.likes,
       replies: postDataInput.replies,
+      isPersonalized: false,
+      assetId: postDataInput.assetId,
     }
     return this.postData
   }

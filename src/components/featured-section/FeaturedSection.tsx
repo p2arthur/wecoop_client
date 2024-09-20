@@ -1,6 +1,8 @@
+import { ReactNode } from 'react'
+
 interface FeaturedSectionProps {
   sectionTitle: string
-  content: any[]
+  content: ReactNode
   isLoadingAnalytics: boolean
 }
 
