@@ -21,7 +21,7 @@ export class Reply {
   public async handlePostReply({ creatorAddress, transactionId, address, text, assetId }: ReplyProps) {
     const transactionService = new Transaction(this.client)
 
-    const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.Post)
+    const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.Reply, InteractionMultipliers.Reply)
 
     const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'reply' })
 
