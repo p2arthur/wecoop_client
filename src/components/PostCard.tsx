@@ -137,7 +137,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   }
 
   const handleTextPost = (text: string) => {
-    const decodedText = decodeURIComponent(text)
+    const decodedText = decodeURIComponent(text.replace(/%0A/g, '\n'))
 
     const urlRegex = /(https?:\/\/[^\s]+)/g
 
@@ -153,7 +153,17 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
           </Fragment>
         )
       }
-      return part
+      // Replace newlines with <br /> tags to display line breaks in the rendered text
+      return (
+        <Fragment key={index}>
+          {part.split('\n').map((line, i) => (
+            <Fragment key={i}>
+              {line}
+              <br />
+            </Fragment>
+          ))}
+        </Fragment>
+      )
     })
   }
 

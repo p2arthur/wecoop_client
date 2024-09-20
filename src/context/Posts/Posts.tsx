@@ -85,13 +85,8 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }, [refetch])
 
   useEffect(() => {
-    if (postList.length > 0) {
-      sessionStorage.setItem('postList', JSON.stringify(postList))
-    }
-  }, [postList])
-
-  useEffect(() => {
     if (activeFeed === 'global' && data) {
+      sessionStorage.setItem('postList', JSON.stringify(data))
       const filteredPosts = data.filter((post) => !assetId || post.assetId === assetId)
       setPostList((prevPosts) => {
         // Apenas atualiza se os novos posts são diferentes dos anteriores
@@ -135,23 +130,45 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   const handleFilterByAssetId = (assetId: number) => {
     setActiveFeed('coinFeed')
     setAssetId(assetId)
-    setPostList(data?.filter((post) => post.assetId === assetId) || [])
+    const localPostList = sessionStorage.getItem('postList')
+    if (localPostList) {
+      setPostList(JSON.parse(localPostList).filter((post) => post.assetId === assetId))
+    } else {
+      setPostList(data?.filter((post) => post.assetId === assetId) || [])
+    }
   }
 
   const handleRefreshPosts = () => {
     sessionStorage.removeItem('postList')
     refetch().then(() => {
       if (data) {
-        setPostList(
-          data.map((post) => ({
-            ...post,
-            status: 'accepted',
-            replies: post.replies.map((reply) => ({
-              ...reply,
-              status: 'accepted',
-            })),
-          })),
-        )
+        if (assetId) {
+          setPostList(
+            data
+              .filter((post) => post.assetId === assetId)
+              .map((post) => ({
+                ...post,
+                status: 'accepted',
+                replies: post.replies.map((reply) => ({
+                  ...reply,
+                  status: 'accepted',
+                })),
+              })),
+          )
+        } else {
+          setPostList(
+            data
+              .filter((post) => post.assetId === assetId)
+              .map((post) => ({
+                ...post,
+                status: 'accepted',
+                replies: post.replies.map((reply) => ({
+                  ...reply,
+                  status: 'accepted',
+                })),
+              })),
+          )
+        }
       }
     })
   }

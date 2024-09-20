@@ -6,12 +6,42 @@ import ThemeSwitcher from '../ThemeSwitcher'
 import { MenuFeed } from '../templates/MenuFeed'
 import { usePosts } from '../../context/Posts/Posts'
 import { useWallet } from '@txnlab/use-wallet'
+import { useSearchParams } from 'react-router-dom'
 
 export default function MobileSidebar() {
   const { isOpen, closeSidebar } = useMobileSidebar()
-  const { handleChangeFeed, activeFeed } = usePosts()
+  const { activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
   const { activeAccount } = useWallet()
+  const [params, setParams] = useSearchParams()
   const { isDarkMode } = useDarkMode()
+
+  // Função para atualizar a URL com base no activeFeed e activeAssetId
+  const updateUrlParams = (newFeed, newAssetId) => {
+    const searchParams = new URLSearchParams()
+
+    if (newFeed) {
+      searchParams.set('activeFeed', newFeed)
+    }
+
+    if (newAssetId) {
+      searchParams.set('activeAssetId', newAssetId)
+    }
+
+    // Atualiza os parâmetros de URL e navega
+    setParams(searchParams)
+  }
+
+  // Atualizar a handleChangeFeed para mudar a URL
+  const handleFeedChange = (newFeed) => {
+    updateUrlParams(newFeed, activeAssetId)
+    handleChangeFeed(newFeed)
+  }
+
+  // Atualizar handleFilterByAssetId para mudar a URL
+  const handleAssetIdChange = (newAssetId) => {
+    updateUrlParams(activeFeed, newAssetId)
+    handleFilterByAssetId(newAssetId)
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -44,7 +74,14 @@ export default function MobileSidebar() {
 
         <ul className="h-full">
           <h1>Feed</h1>
-          <MenuFeed hasFeedPosts={activeAccount !== null} activeFeed={activeFeed || 'global'} handleChangeFeed={handleChangeFeed} />
+          <MenuFeed
+            openByParams={params.get('activeFeed') === 'coinFeed' && params.get('activeAssetId') !== null}
+            hasFeedPosts={activeAccount !== null}
+            activeFeed={activeFeed}
+            handleChangeFeed={handleFeedChange}
+            handleChangeAssetId={handleAssetIdChange}
+            activeAssetId={activeAssetId}
+          />
         </ul>
 
         <div className="flex gap-2">

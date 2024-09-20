@@ -6,7 +6,7 @@ export const PostTypeSwitch = () => {
 
   return (
     <div
-      className={'flex justify-between items-center gap-2'}
+      className={'flex md:justify-between items-center gap-2'}
       onClick={() => {
         handleChangePostType(postType === 'post' ? 'vote' : 'post')
       }}

@@ -106,19 +106,19 @@ const PostInput = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-
     const country = await getUserCountry()
 
-    const encodedInputText = encodeURIComponent(inputText)
-    const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
-
-    const encodedNote = new Uint8Array(Buffer.from(note))
-
     try {
+      const encodedInputText = encodeURIComponent(inputText.replace(/\n/g, '%0A'))
+      const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
+
+      console.log(note)
       let transaction: algosdk.Transaction
 
       // Get suggested transaction parameters from the Algod node
       const suggestedParams = await algod.getTransactionParams().do()
+
+      console.log(usableAsset.assetId, 'usableAsset.assetId')
 
       // Check if it's a payment transaction or an asset transfer transaction
       if (usableAsset.assetId === 0) {
@@ -133,11 +133,15 @@ const PostInput = () => {
       } else {
         // Calculate the fee price based on the asset
         const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Post)
+        console.log(feePrice, 'feePrice')
         // Split the fee by interaction type
         const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'post' })
+        console.log(splitFee, 'splitFee')
 
         // Example calculation to ensure platformFee is used as an integer
         const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
+
+        console.log(finalFeeForTransaction, 'finalFeeForTransaction')
         // Asset transfer transaction (ASA)
         transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
           from: userData.address,
@@ -226,13 +230,13 @@ const PostInput = () => {
             </div>
             <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
           </div>
-          <div className={'flex gap-4 items-center'}>
+          <div className={'flex flex-wrap justify-end gap-4 md:flex gap-2 md:gap-4 md:items-center'}>
             {postType === 'vote' && (
-              <div className={'flex items-center gap-2'}>
-                <span>Prize pool:</span>
+              <div className={'flex items-center md:gap-2'}>
+                <span className={'mr-2 md:mr-0'}>Prize pool:</span>
                 <input
                   type={'number'}
-                  className={'w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
+                  className={'w-20 md:w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
                   min={10}
                   value={prizePool}
                   onChange={(e) => setPrizePool(e.target.value)}
@@ -247,16 +251,18 @@ const PostInput = () => {
               selectedAsset={selectedAsset}
               selectorOpen={selectorOpen}
             />
-            {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
-              <Button buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`} full justify={'center'} />
-            ) : (
-              <Button
-                inactive={true}
-                buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`}
-                full
-                justify={'center'}
-              />
-            )}
+            <div className={'flex '}>
+              {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
+                <Button buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`} full justify={'center'} />
+              ) : (
+                <Button
+                  inactive={true}
+                  buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`}
+                  full
+                  justify={'center'}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

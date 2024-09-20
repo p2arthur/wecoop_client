@@ -12,7 +12,6 @@ import { getIndexerConfigFromViteEnvironment } from './utils/network/getAlgoClie
 import ReactGA from 'react-ga'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import MobileSidebar from './components/interface/MobileSidebar'
 import { MobileSidebarProvider } from './context/Interface/MobileSidebar'
 import { UsableAssetProvider } from './context/UsableAsset/UsableAssetContext'
 import { AnalyticsProvider } from './context/analytics/Analytics'
@@ -56,7 +55,6 @@ export default function App() {
             <WalletProvider value={walletProviders}>
               <QueryClientProvider client={queryClient}>
                 <PostsProvider>
-                  <MobileSidebar />
                   <Router />
                   <ToastContainer toastStyle={{ fontFamily: 'SF Pixelate', fontSize: '16px' }} />
                 </PostsProvider>
