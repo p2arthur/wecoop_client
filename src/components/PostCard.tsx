@@ -15,7 +15,7 @@ import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, PostRequest, Reply as IReply, User } from '../services/api/types'
+import { Post, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -23,7 +23,7 @@ import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
 
 interface PostPropsInterface {
-  post: PostRequest | IReply
+  post: Post | IReply
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
 }
@@ -173,7 +173,9 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         {post.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-2 border-gray-900 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-gray-500 bg-white dark:bg-gray-900"
+            className={`border-2 ${
+              post.isTopPost ? 'border-yellow-500' : 'border-gray-900'
+            } flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-gray-500 bg-white dark:bg-gray-900`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

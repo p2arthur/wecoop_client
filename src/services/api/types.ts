@@ -12,6 +12,7 @@ export interface Post {
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number
+  isTopPost?: boolean
 }
 
 export interface PostRequest {
@@ -43,6 +44,7 @@ export interface Reply {
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number | null
+  isTopPost?: boolean
 }
 
 export interface ReplyResponse {

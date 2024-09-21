@@ -1,8 +1,7 @@
-import { useEffect } from 'react'
-import { useAnalytics } from '../../context/analytics/Analytics'
 import { User as UserInterface } from '../../services/api/types'
 import FeaturedSection from '../featured-section/FeaturedSection'
 import TopCreatorCard from '../featured-section/TopCreatorCard'
+import { useGetTopInteractionsByWallet, useGetTopPostsByLike } from '../../services/api/Analytics'
 import TopPostCard from '../featured-section/TopPostCard'
 
 interface ProfileMenuProps {
@@ -10,36 +9,23 @@ interface ProfileMenuProps {
 }
 
 export const ProfileMenu = () => {
-  const { allAnalytics, getAllAnalytics, isLoadingAnalytics } = useAnalytics()
-
-  useEffect(() => {
-    getAllAnalytics()
-  }, [])
+  const { data, isLoading } = useGetTopInteractionsByWallet()
+  const { data: dataTopPosts, isLoading: isLoadingTopPosts } = useGetTopPostsByLike()
 
   return (
     <div className={'w-full p-4 h-full flex flex-col justify-between'}>
       <FeaturedSection
-        sectionTitle="Top creators"
-        isLoadingAnalytics={isLoadingAnalytics}
-        content={
-          <div className="flex flex-col gap-2">
-            {allAnalytics.topCreators.map((creator) => (
-              <TopCreatorCard topCreator={creator as any} />
-            ))}
-          </div>
-        }
-      />
-      <FeaturedSection
         sectionTitle="Top posts"
-        isLoadingAnalytics={isLoadingAnalytics}
-        content={
-          <div className="flex flex-col gap-2">
-            {allAnalytics.topPosts.map((post) => (
-              <TopPostCard post={post} />
-            ))}
-          </div>
-        }
+        isLoadingAnalytics={isLoadingTopPosts}
+        content={<div className="flex flex-col gap-2">{dataTopPosts?.map((post) => <TopPostCard post={post} />)}</div>}
       />
+
+      <FeaturedSection
+        sectionTitle="Top creators by interactions"
+        isLoadingAnalytics={isLoading}
+        content={<div className="flex flex-col gap-2">{data && data.map((creator) => <TopCreatorCard topCreator={creator} />)}</div>}
+      />
+
       <div className="w-full text-center flex flex-col gap-2">
         <div>
           Made by{' '}
