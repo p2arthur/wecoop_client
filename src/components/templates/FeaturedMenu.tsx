@@ -3,6 +3,7 @@ import { User as UserInterface } from '../../services/api/types'
 import FeaturedSection from '../featured-section/FeaturedSection'
 import TopCreatorCard from '../featured-section/TopCreatorCard'
 import TopPostCard from '../featured-section/TopPostCard'
+import CountUp from 'react-countup'
 
 interface ProfileMenuProps {
   user: UserInterface
@@ -12,18 +13,27 @@ export const ProfileMenu = () => {
   const { data, isLoading } = useGetTopInteractionsByWallet()
   const { data: dataTopPosts, isLoading: isLoadingTopPosts } = useGetTopPostsByLike()
 
+  const isLoadingTotal = isLoading || isLoadingTopPosts
+
   return (
     <div className={'w-full p-4 h-full flex flex-col justify-between'}>
+      {!isLoadingTotal && (
+        <div className={'text-center'}>
+          <h1 className={'text-2xl'}>Total interactions:</h1>
+          <CountUp className={'text-xl bold'} end={data?.totalTransactions || 0} />
+        </div>
+      )}
+      <FeaturedSection
+        sectionTitle="Top creators "
+        isLoadingAnalytics={isLoadingTotal}
+        content={
+          <div className="flex flex-col gap-2">{data && data.topCreators.map((creator) => <TopCreatorCard topCreator={creator} />)}</div>
+        }
+      />
       <FeaturedSection
         sectionTitle="Top posts"
-        isLoadingAnalytics={isLoadingTopPosts}
+        isLoadingAnalytics={isLoadingTotal}
         content={<div className="flex flex-col gap-2">{dataTopPosts?.map((post) => <TopPostCard post={post} />)}</div>}
-      />
-
-      <FeaturedSection
-        sectionTitle="Top creators by interactions"
-        isLoadingAnalytics={isLoading}
-        content={<div className="flex flex-col gap-2">{data && data.map((creator) => <TopCreatorCard topCreator={creator} />)}</div>}
       />
 
       <div className="w-full text-center flex flex-col gap-2">

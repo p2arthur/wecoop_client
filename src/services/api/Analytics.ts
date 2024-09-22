@@ -4,7 +4,10 @@ import { Post } from './types'
 
 const api = import.meta.env.VITE_WECOOP_API
 
-export type ResponseGetTopLikesByWallet = LikesWallets[]
+export type ResponseGetTopLikesByWallet = {
+  topCreators: LikesWallets[]
+  totalTransactions: number
+}
 
 export interface LikesWallets {
   address: string

@@ -175,8 +175,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
           <div
             onClick={handleGoToPostPage}
             className={`${
-              post.isTopPost ? 'border-yellow-400 border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900'
-            } flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-gray-500 bg-white dark:bg-gray-900`}
+              post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900'
+            } flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer bg-white dark:bg-gray-900`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

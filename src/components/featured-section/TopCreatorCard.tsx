@@ -55,7 +55,7 @@ export default function TopCreatorCard({ topCreator }: TopCreatorCardInterface) 
       href={`/profile/${currentCreator.address}`}
       className="bg-white dark:bg-gray-900 border-2 border-black p-2 flex gap-2 hover:scale-101"
     >
-      <div className="w-10 h-10 rounded-full overflow-hidden">
+      <div className="min-w-fit min-h-fit w-10 h-10 rounded-full overflow-hidden">
         <img
           className="bg-gray-100 w-full h-full"
           src={currentCreator.nfd.avatar || generateIdIcon(currentCreator.address)}
