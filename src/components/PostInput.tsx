@@ -116,9 +116,7 @@ const PostInput = () => {
     const allTransactions: Transaction[] = []
 
     for (const asset of usableAssetsList) {
-      console.log('viewing opted in', asset)
       const userOptedIn = await getOptedIn(activeAccount?.address!, asset.assetId, algod)
-      console.log('userOptedin', userOptedIn)
 
       if (asset.assetId === 0) continue
 
