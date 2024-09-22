@@ -16,7 +16,7 @@ export default function FeaturedSection({ sectionTitle, content, isLoadingAnalyt
           <img className={'hidden dark:block'} src={'/images/topcreators_dark.gif'} alt={'top creators loading'} />
         </div>
       ) : (
-        <div className="overflow-y-scroll overflow-x-hidden no-scrollbar h-full p-1">{content}</div>
+        <div className="overflow-y-scroll overflow-x-hidden no-scrollbar h-[270px] p-1">{content}</div>
       )}
     </div>
   )
