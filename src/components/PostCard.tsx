@@ -138,11 +138,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   }
 
   const handleTextPost = (text: string) => {
-    const decodedText = decodeURIComponent(text.replace(/%0A/g, '\n'))
+    // Ensure %0A is replaced with actual newlines (\n)
+    const decodedText = decodeURIComponent(text).replace(/%0A/g, '\n');
 
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-
-    const parts = decodedText.split(urlRegex)
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = decodedText.split(urlRegex);
 
     return parts.map((part, index) => {
       if (urlRegex.test(part)) {
@@ -152,9 +152,10 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
               {part}
             </a>
           </Fragment>
-        )
+        );
       }
-      // Replace newlines with <br /> tags to display line breaks in the rendered text
+
+      // Split the text part by newlines and render them with <br /> for line breaks
       return (
         <Fragment key={index}>
           {part.split('\n').map((line, i) => (
@@ -164,11 +165,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             </Fragment>
           ))}
         </Fragment>
-      )
-    })
-  }
+      );
+    });
+  };
 
-  console.log(post.replies, 'replies')
+
 
   return (
     <>

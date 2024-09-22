@@ -92,3 +92,9 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+
+.break-words {
+  white-space: pre-wrap; /* Ensures line breaks are respected on all platforms */
+  word-wrap: break-word; /* Ensures long words wrap correctly */
+}
