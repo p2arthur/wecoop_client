@@ -12,7 +12,6 @@ const Feed = () => {
   const { postList, handleNewReply, isLoading, activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
   const { activeAccount } = useWallet()
 
-  console.log(postList?.find((post) => post.isTopPost), 'toppost')
   const [params, setParams] = useSearchParams()
 
   useEffect(() => {

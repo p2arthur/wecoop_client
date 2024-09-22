@@ -17,7 +17,6 @@ import { getUserCountry } from '../utils/userUtils'
 import Button from './Button'
 import { CoinDropdown } from './CoinDropdown'
 import Counter from './Counter'
-import { PostTypeSwitch } from './PostTypeSwitch'
 
 //--------------
 import * as algokit from '@algorandfoundation/algokit-utils'
@@ -308,7 +307,6 @@ const PostInput = () => {
                 />
               </div>
             )}
-            <PostTypeSwitch />
             <CoinDropdown
               usableAsset={usableAsset}
               handleAssetSelect={handleAssetSelect}
