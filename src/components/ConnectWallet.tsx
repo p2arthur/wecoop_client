@@ -9,14 +9,14 @@ interface ConnectWalletProps {
   user: UserInterface
 }
 
+export const generateIdIcon = (creatorAddress: string) => {
+  return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
+}
+
 const ConnectWallet = ({ user }: ConnectWalletProps) => {
   const { providers, activeAccount } = useWallet()
 
   const actualProvider = providers?.find((provider) => provider.metadata.id === activeAccount?.providerId)
-
-  const generateIdIcon = (creatorAddress: string) => {
-    return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
-  }
 
   return (
     <div>

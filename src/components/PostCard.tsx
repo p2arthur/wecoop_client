@@ -11,8 +11,11 @@ import { usePosts } from '../context/Posts/Posts'
 import { Like } from '../services/Like'
 import { Reply } from '../services/Reply'
 
+import { toast } from 'react-toastify'
+import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
+import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, PostRequest, User } from '../services/api/types'
+import { Reply as IReply, Post, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -20,7 +23,7 @@ import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
 
 interface PostPropsInterface {
-  post: PostRequest | IReply
+  post: Post | IReply
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
 }
@@ -39,11 +42,16 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const { algod } = useOutletContext() as PostInputPropsInterface
   const replieservice = new Reply(algod)
   const likeService = new Like(algod)
-
   const [isLoadingLike, setIsLoadingLike] = useState(false)
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [openReplyInput, setOpenReplyInput] = useState(false)
+  const [userCountry, setUserContry] = useState('')
+
+  const { usableAsset, setUsableAsset } = useUsableAsset()
+
+  const currentPostUsableAsset = usableAssetsList.find((usableAsset) => post.assetId === usableAsset.assetId)
+  const [currentPostAsset, setCurrentPostAsset] = useState(currentPostUsableAsset)
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -58,6 +66,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         creatorAddress: post.creator_address,
         address: activeAccount?.address || '',
         transactionId: post.transaction_id as string,
+        token: usableAsset.assetId,
       })
 
       const signedTransactions = await signTransactions(encodedGroupedTransactions)
@@ -74,52 +83,49 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   }
 
   const handlePostReply = async () => {
-    setIsLoadingReply(true)
-    const country = await getUserCountry()
+    try {
+      setIsLoadingReply(true)
+      const country = await getUserCountry()
+      setUserContry(country)
 
-    const newReply: Post = {
-      text: encodeURIComponent(replyText),
-      creator_address: userData?.address || '',
-      status: 'loading',
-      country: country,
-      likes: [],
-      timestamp: new Date().getDate(),
-      transaction_id: uuidv4(),
-      replies: [],
+      const parentReplyId = post.transaction_id as string
+      const encodedGroupedTransactions = await replieservice.handlePostReply({
+        creatorAddress: post.creator_address,
+        address: activeAccount?.address || '',
+        transactionId: post.transaction_id as string,
+        text: encodeURIComponent(replyText),
+        assetId: usableAsset.assetId,
+      })
+      const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      const waitRoundsToConfirm = 4
+
+      const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+
+      const acceptedReply: Post = {
+        creator_address: userData?.address || '',
+        text: encodeURIComponent(replyText),
+        status: 'accepted',
+        transaction_id: id,
+        likes: [],
+        country,
+        nfd: userData?.nfd.name,
+        timestamp: Date.now(),
+        replies: [],
+        isPersonalized: undefined,
+        assetId: usableAsset.assetId,
+      }
+
+      handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+      setReplyText('')
+      setIsLoadingReply(false)
+    } catch (error) {
+      toast('Error sending reply', {
+        position: 'bottom-right',
+        theme: 'dark',
+      })
+      setReplyText('')
+      setIsLoadingReply(false)
     }
-
-    const parentReplyId = post.transaction_id as string
-
-    handleNewReply && handleNewReply(newReply, parentReplyId)
-
-    const encodedGroupedTransactions = await replieservice.handlePostReply({
-      creatorAddress: post.creator_address,
-      address: activeAccount?.address || '',
-      transactionId: post.transaction_id as string,
-      text: encodeURIComponent(replyText),
-    })
-    const signedTransactions = await signTransactions(encodedGroupedTransactions)
-    const waitRoundsToConfirm = 4
-
-    const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-
-    const acceptedReply: Post = {
-      creator_address: userData?.address || '',
-      text: encodeURIComponent(replyText),
-      status: 'accepted',
-      transaction_id: id,
-      likes: [],
-      country,
-      nfd: userData?.nfd.name,
-      timestamp: Date.now(),
-      replies: [],
-    }
-
-    handleNewReply && handleNewReply(acceptedReply, parentReplyId)
-
-    setReplyText('')
-    setIsLoadingReply(false)
-    queryClient.invalidateQueries({ queryKey: ['getAllPosts'] })
   }
 
   const handleTimestamp = () => {
@@ -132,7 +138,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   }
 
   const handleTextPost = (text: string) => {
-    const decodedText = decodeURIComponent(text)
+    const decodedText = decodeURIComponent(text.replace(/%0A/g, '\n'))
 
     const urlRegex = /(https?:\/\/[^\s]+)/g
 
@@ -148,9 +154,21 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
           </Fragment>
         )
       }
-      return part
+      // Replace newlines with <br /> tags to display line breaks in the rendered text
+      return (
+        <Fragment key={index}>
+          {part.split('\n').map((line, i) => (
+            <Fragment key={i}>
+              {line}
+              <br />
+            </Fragment>
+          ))}
+        </Fragment>
+      )
     })
   }
+
+  console.log(post.replies, 'replies')
 
   return (
     <>
@@ -158,7 +176,9 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         {post.status === 'accepted' ? (
           <div
             onClick={handleGoToPostPage}
-            className="border-2 overflow-hidden border-gray-900 border-b-4 flex flex-col gap-3 p-4 hover:bg-gray-100  transition-all duration-75 cursor-pointer min-h-[120px] dark:border-gray-950 bg-white dark:bg-gray-950"
+            className={`${
+              post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900 dark:border-gray-300/30'
+            } flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer bg-white dark:bg-gray-900`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -167,7 +187,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
-                    {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)}
+                    {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)} {<img />}
                   </h2>
                 </a>
               </div>
@@ -187,7 +207,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
             <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
-                <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
+                <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
+                  <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} />
                   {variant === 'default' && (
                     <button
                       className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
@@ -200,13 +221,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                     </button>
                   )}
 
-                  <div className={'flex gap-1 items-center '}>
+                  <div className={'flex gap-1 items-center'}>
                     {isLoadingLike ? (
                       <FaSpinner className="animate-spin text-2xl" />
                     ) : (
                       <>
                         <button
-                          className="rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
+                          className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                           onClick={handlePostLike}
                         >
                           <FaRegThumbsUp className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900" />
@@ -243,7 +264,29 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 <div className={'grid gap-4 h-full'} onClick={(e) => e.stopPropagation()}>
                   <p className={'text-lg'}>replies</p>
 
-                  {post?.replies && post?.replies?.length > 0 && post.replies.map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                  {post?.replies &&
+                    post?.replies?.length > 0 &&
+                    post.replies
+                      .sort((a, b) => {
+                        return a.timestamp! - b.timestamp!
+                      })
+                      .map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                  {isLoadingReply && (
+                    <PostCard
+                      post={{
+                        text: `${encodeURIComponent(replyText)}`,
+                        creator_address: userData?.address || '',
+                        status: 'loading',
+                        country: userCountry,
+                        likes: [],
+                        timestamp: new Date().getDate(),
+                        transaction_id: uuidv4(),
+                        replies: [],
+                        assetId: 0,
+                      }}
+                      variant={'reply'}
+                    />
+                  )}
 
                   {!isLoadingReply && (
                     <ReplyInput

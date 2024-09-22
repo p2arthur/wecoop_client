@@ -10,12 +10,13 @@ interface LikeProps {
   creatorAddress: string
   transactionId: string
   address: string
+  token: number
 }
 
 export class Like {
   constructor(private client: AlgodClient) {}
 
-  public async handlePostLike({ event, creatorAddress, transactionId, address }: LikeProps) {
+  public async handlePostLike({ event, creatorAddress, transactionId, address, token }: LikeProps) {
     const transactionService = new Transaction(this.client)
     const wecoopFee = Fees.LikeWecoopFee
     const creatorFee = Fees.LikeUserFee
@@ -24,13 +25,13 @@ export class Like {
     event.preventDefault()
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopLike}${country}:${transactionId}`
-    console.log('addresssss', address)
     const scoopFeeTransaction = await transactionService.createTransaction(address, wecoopWalletAddress, wecoopFee, note)
     const postCreatorFee = await transactionService.createTransaction(
       address,
       creatorAddress,
       creatorFee,
       `WeCoop - ${address} just liked your post`,
+      token,
     )
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]

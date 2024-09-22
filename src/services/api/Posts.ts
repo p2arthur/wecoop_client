@@ -1,26 +1,41 @@
-import {useQuery} from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import {IGetAllPosts, Post} from './types'
+import { IGetAllPosts, Post } from './types'
 
 export const getAllPosts = async () => {
-  const {data} = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
   return data
 }
 
-export const useGetAllPosts = () => useQuery<IGetAllPosts>({queryKey: ['getAllPosts'], queryFn: () => getAllPosts()})
+export const useGetAllPosts = (enabled?: boolean) =>
+  useQuery<IGetAllPosts>({
+    queryKey: ['getAllPosts'],
+    queryFn: () => getAllPosts(),
+    enabled,
+  })
 
+export const getAllPostsByWalletAddress = async (walletAddress: string) => {
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/by/${walletAddress}`)
+  return data
+}
+
+export const useGetAllPostsByWalletAddress = (walletAddress: string, enabled?: boolean) =>
+  useQuery<IGetAllPosts>({
+    queryKey: ['getAllPosts'],
+    queryFn: () => getAllPostsByWalletAddress(walletAddress),
+    enabled,
+  })
 
 const getSinglePost = async (id: string) => {
-  const {data} = await axios.get(`${import.meta.env.VITE_WECOOP_API}/post/${id}`)
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/post/${id}`)
   return data
 }
 
-export const useGetPostByTransactionId = (id: string) =>
-  useQuery<Post>({queryKey: ['getSinglePost', id], queryFn: () => getSinglePost(id)})
-
+export const useGetPostByTransactionId = (id: string, enabled?: boolean) =>
+  useQuery<Post>({ queryKey: ['getSinglePost', id], queryFn: () => getSinglePost(id), enabled })
 
 export const getPostsByAddress = async (address: string) => {
-  const {data} = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/${address}`)
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/${address}`)
   return data
 }
 

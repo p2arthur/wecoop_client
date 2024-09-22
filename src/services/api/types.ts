@@ -1,6 +1,7 @@
 export type IGetAllPosts = PostRequest[]
 
 export interface Post {
+  isPersonalized: unknown
   text: string
   creator_address: string
   transaction_id: string
@@ -9,7 +10,9 @@ export interface Post {
   nfd?: string
   likes: Like[]
   replies: Reply[]
-  status: 'accepted' | 'loading' | 'rejected' | null
+  status: 'accepted' | 'loading' | 'rejected' | string | null
+  assetId: number | null
+  isTopPost?: boolean
 }
 
 export interface PostRequest {
@@ -22,6 +25,8 @@ export interface PostRequest {
   likes: Like[]
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | null
+  assetId: number
+  isPersonalized: boolean
 }
 
 export interface Like {
@@ -38,6 +43,8 @@ export interface Reply {
   likes: Like[]
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | string | null
+  assetId: number | null
+  isTopPost?: boolean
 }
 
 export interface ReplyResponse {
@@ -63,7 +70,7 @@ export interface User {
     name: string
     avatar: string
   }
-  balance: number
+  balance: { [key: string]: number }
   followTargets: string[]
 }
 

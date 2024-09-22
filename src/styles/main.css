@@ -15,6 +15,7 @@
   font-weight: bold;
   font-style: normal;
 }
+
 .dark {
   background-color: #000;
   color: #fff;
@@ -23,10 +24,12 @@
     background-color: #000;
     color: #fff;
   }
+
   button {
     background-color: #000;
     color: #fff;
   }
+
   button:hover {
     color: #000;
   }
@@ -39,11 +42,53 @@
   .switch-theme {
     border-color: #fff;
     background-color: #fff;
+
     .moon {
       background-color: #000;
     }
+
     .sun {
       background-color: #fff;
     }
   }
+}
+
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #000000;
+  border: 2px solid #555555;
+}
+
+
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }

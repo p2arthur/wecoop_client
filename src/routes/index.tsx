@@ -2,16 +2,16 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk, { AlgodTokenHeader } from 'algosdk'
 import { useEffect, useState } from 'react'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
-import Footer from '../components/Footer'
 import NavBar from '../components/NavBar'
 import Whitepaper from '../pages/About'
 import FeedPage from '../pages/FeedPage'
-import Home from '../pages/Home'
+import Feed from '../pages/Feed'
+import PostPage from '../pages/PostPage'
 import ProfilePage from '../pages/ProfilePage'
 import { User } from '../services/User'
 import { User as UserInterface } from '../services/api/types'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
-import PostPage from '../pages/PostPage'
+import { Home } from '../pages/Home'
 
 export const Router = () => {
   const { activeAccount } = useWallet()
@@ -23,7 +23,7 @@ export const Router = () => {
       name: '',
       avatar: '',
     },
-    balance: 0,
+    balance: {},
     followTargets: [],
   })
 
@@ -33,7 +33,7 @@ export const Router = () => {
         address: activeAccount?.address ?? '',
         avatar: '',
         nfd: { name: '', avatar: '' },
-        balance: 0,
+        balance: {},
         followTargets: [],
       })
       const userData = await userServices.setUser(activeAccount?.address || '')
@@ -57,11 +57,12 @@ export const Router = () => {
         <>
           <NavBar user={userData} />
           <Outlet context={{ algod, userData }} />
-          <Footer />
+          {/* <Footer /> */}
         </>
       ),
       children: [
         { path: '/', element: <Home /> },
+        { path: '/feed', element: <Feed /> },
         { path: '/profile/:walletAddress', element: <ProfilePage /> },
         { path: '/feed/by/:walletAddress', element: <FeedPage /> },
         { path: '/about', element: <Whitepaper /> },
