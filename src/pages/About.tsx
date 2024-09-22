@@ -1,5 +1,5 @@
+import { FaDiscord, FaTwitter } from 'react-icons/fa'
 import Footer from '../components/Footer'
-import { ellipseAddress } from '../utils/ellipseAddress'
 
 const Whitepaper = () => (
   <div className="w-full px-4 flex flex-col py-20 dark:bg-gray-950 bg-gray-100">
@@ -9,119 +9,101 @@ const Whitepaper = () => (
     <div className="text-lg leading-7 text-gray-700 max-w-4xl mx-auto">
       <p className="mb-6">
         <strong>Abstract:</strong> WeCoop v1.0 is an innovative, decentralized, and permissionless social media platform, proudly built by
-        Brazilian developers iam_p2 and Felipe. Designed to support users facing political blockages on social networks in Brazil, WeCoop
-        offers a free, open space for expression. Leveraging the Algorand blockchain’s speed, efficiency, and low transaction costs, WeCoop
-        enables seamless social interactions and transactions. With wallet integrations such as Pera Wallet, Defly, and Daffi Wallet, users
-        experience smooth access and engagement. This whitepaper outlines the core features, guiding principles, and economic model behind
-        WeCoop v1.0, along with our vision for its future.
+        Brazilian developers iam_p2 and Felipe. This release introduces exciting features, from expanded coin support to enhanced analytics.
+        Designed to offer an open space for free expression, particularly for users facing political restrictions, WeCoop leverages the
+        Algorand blockchain’s speed and low costs to enable seamless social interactions. With support for $xUSD, $JAWS, $NIKO, $AKTA,
+        $A200, $TINY, and $ORA, WeCoop aims to unite the $ALGO communities. This whitepaper highlights the core features and the economic
+        model driving the platform.
       </p>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">1. Introduction:</h2>
+        <h2 className="text-2xl font-bold mb-2">1. Introduction</h2>
         <p>
-          WeCoop v1.0 is a groundbreaking proof of concept, demonstrating the power of Algorand's blockchain in the social media space.
-          Created by two passionate Brazilian developers committed to freedom of expression, WeCoop offers a new platform for users who have
-          experienced censorship or social media restrictions due to political issues in Brazil. With a fixed supply of 21 million{' '}
-          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
-            CoopCoins
-          </a>
-          , WeCoop delivers a decentralized, user-centric experience that facilitates fast, secure, and affordable transactions. We aim to
-          set a new standard for social media platforms, particularly in environments where open dialogue is needed most.
+          WeCoop v1.0 marks the beginning of an exciting experiment in decentralized social media, offering a safe space for users who have
+          experienced censorship. Created by two Brazilian developers passionate about freedom of expression, WeCoop provides a user-centric
+          experience powered by Algorand's blockchain technology. With a mission to bring together diverse communities, particularly within
+          the $ALGO ecosystem, WeCoop delivers fast, secure, and affordable social interactions.
         </p>
         <p className="mt-4">
-          As a decentralized and permissionless platform, WeCoop empowers users to interact freely, ensuring that no centralized entity
-          controls their ability to communicate.
+          WeCoop is just the start, and we plan to take it to the next level. If you’re interested in helping us grow, don’t hesitate to
+          reach out. You can also support us by donating to <strong>wecoopapp.algo</strong>.
         </p>
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">
-          2.{' '}
-          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
-            CoopCoin
-          </a>{' '}
-          ($COOP):
-        </h2>
+        <h2 className="text-2xl font-bold mb-2">2. Expanded Coin Support and Coin-Specific Feeds</h2>
         <p>
-          Fixed Supply: CoopCoin’s fixed supply of 21 million fosters scarcity and long-term value retention. Distribution: CoopCoin is
-          fairly distributed among users, ensuring a democratic and inclusive system. Anti-Rugpull: Designed to prevent rug pulls, CoopCoin
-          provides a secure and trustworthy digital asset within the Algorand blockchain ecosystem.
+          WeCoop v1.0 now supports seven coins: $xUSD, $JAWS, $NIKO, $AKTA, $A200, $TINY, and $ORA. Each coin has its own dedicated feed,
+          allowing for a more engaged and connected community within each ecosystem.
         </p>
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">3. Platform Mechanics:</h2>
+        <h2 className="text-2xl font-bold mb-2">3. Platform Analytics and Explore Features</h2>
         <p>
-          User Interaction: Users can create posts, likes, and replies, each interaction incurring a 0.1 $COOP fee, ensuring a vibrant and
-          engaging community. Wallet Integration: WeCoop integrates seamlessly with Algorand wallets such as Pera Wallet, Defly, and Daffi
-          Wallet, providing frictionless access for users. Transaction Notes: All posts and interactions are permanently recorded on the
-          Algorand blockchain through transaction notes, ensuring transparency and immutability.
+          We've introduced powerful analytics to help users discover top creators and posts, improving the overall user experience and
+          promoting visibility for quality content.
         </p>
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">4. Economic Model:</h2>
+        <h2 className="text-2xl font-bold mb-2">4. Sharable URLs and Performance Improvements</h2>
         <p>
-          Sustainability: The 0.1 $COOP transaction fee strikes a balance between promoting user engagement and ensuring the platform's
-          sustainability over the long term. Wealth Distribution: Fees are allocated between content creators and the platform wallet,
-          promoting a fair and transparent wealth distribution model that rewards active participation.
+          All platform URLs are now shareable, making it easier to spread content across the web. We've also made performance improvements
+          and bug fixes to provide a smoother experience. In addition, we've added a custom logo and animated loading screens to enhance the
+          platform's design.
         </p>
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">5. Platform Wallet:</h2>
+        <h2 className="text-2xl font-bold mb-2">5. Economic Model and Fee Structure</h2>
+        <p>WeCoop operates on a straightforward fee structure:</p>
+        <ul>
+          <li>
+            <strong>Posts:</strong> 2x multiplier
+          </li>
+          <li>
+            <strong>Replies:</strong> 1.5x multiplier
+          </li>
+          <li>
+            <strong>Likes:</strong> 1x multiplier
+          </li>
+        </ul>
         <p>
-          The platform wallet{' '}
-          <a
-            className="underline text-blue-700"
-            href="https://algoexplorer.io/address/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM"
-          >
-            {ellipseAddress('DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM')}
-          </a>{' '}
-          serves as the repository for transaction fees collected on the platform. Transparency and accountability are foundational to
-          building trust within the community.
+          The base fee for interactions is $0.03. 100% of post fees go to the platform, while 70% of interaction fees are paid directly to
+          content creators, ensuring fair compensation for their contributions.
         </p>
       </section>
 
       <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">6. Platform Power:</h2>
+        <h2 className="text-2xl font-bold mb-2">6. Future Vision: Bringing Communities Together</h2>
         <p>
-          WeCoop v1.0 is powered by{' '}
-          <a className="text-blue-700 underline" href="https://app.tinyman.org/#/swap?asset_in=0&asset_out=796425061">
-            CoopCoin
-          </a>{' '}
-          ($COOP), the cornerstone of our decentralized social media ecosystem. As a community-driven coin, CoopCoin represents our
-          commitment to creating a dynamic, censorship-resistant platform that thrives within the Algorand blockchain. We are focused on
-          growing the WeCoop platform, introducing new features to support and boost communities—initially within the Algorand ecosystem—
-          while fostering real-world impact through decentralized solutions.
-        </p>
-      </section>
-
-      <section className="my-6">
-        <h2 className="text-2xl font-bold mb-2">Future Plans:</h2>
-        <p>
-          As WeCoop continues to evolve, we plan to introduce many new features aimed at empowering communities and expanding the platform’s
-          capabilities. Our vision is to build a space where users can connect and collaborate, beginning with the Algorand community, and
-          gradually expanding to support other coins and blockchain ecosystems. By integrating multiple communities, we aim to create a
-          unified platform where everyone can come together within this tool of freedom.
+          As WeCoop evolves, we will continue adding features that empower diverse communities. Starting with the Algorand ecosystem, our
+          goal is to create a platform that unites various blockchain ecosystems under one roof.
         </p>
         <p className="mt-4">
-          WeCoop is not just about social interaction; it is about building bridges between diverse communities and giving individuals the
-          power to express themselves openly, without fear of censorship. Created by two young developers with a passion for building
-          innovative solutions, WeCoop is designed to make the world a better place by championing freedom of expression through
-          decentralized technology.
+          WeCoop is more than just a social platform—it’s a movement for decentralized freedom of expression. We aim to build bridges across
+          communities and foster open communication without censorship.
         </p>
       </section>
 
       <p className="mt-6">
-        <strong>Conclusion:</strong> WeCoop v1.0 represents more than just a new social media platform—it is a statement of freedom,
-        designed by proud Brazilian developers iam_p2 and Felipe. With its decentralized, permissionless infrastructure, WeCoop provides a
-        secure, open space for individuals to express themselves without centralized control. By integrating Algorand’s cutting-edge
-        blockchain technology, WeCoop sets the stage for the future of social media, where censorship is no longer a barrier. Join us in
-        shaping the future of decentralized social networks, and be part of a movement that brings people together from all over the world
-        through WeCoop v1.0.
+        <strong>Conclusion:</strong> WeCoop v1.0 is a milestone in decentralized social media, empowering users to express themselves freely
+        without fear of censorship. Developed by iam_p2 and Felipe, WeCoop leverages Algorand’s blockchain to build a platform where
+        censorship is no longer a barrier. Join us in shaping the future of decentralized networks. If you'd like to support our mission,
+        consider donating to <strong>wecoopapp.algo</strong> or reach out to help us grow.
       </p>
     </div>
+
+    <div className="flex justify-center mt-8 space-x-4">
+      <a href="https://discord.gg/ZmaYMzwg" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600">
+        <FaDiscord size={30} />
+      </a>
+      <a href="https://x.com/appwecoop" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600">
+        <FaTwitter size={30} />
+      </a>
+    </div>
+
     <Footer />
   </div>
 )

@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
 import { Post } from './types'
 
 const api = import.meta.env.VITE_WECOOP_API
@@ -30,6 +30,8 @@ const getTopPostsByLike = async () => {
     `${import.meta.env.VITE_WECOOP_API}/analytics/posts/top-liked-posts`,
   )
   const savedPosts: Post[] = JSON.parse(sessionStorage.getItem('postList')!)
+
+  console.log('topPosts data', savedPosts)
 
   // Map over the data to extract postIds
   const topPosts: Post[] = []

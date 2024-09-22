@@ -1,9 +1,9 @@
+import CountUp from 'react-countup'
 import { useGetTopInteractionsByWallet, useGetTopPostsByLike } from '../../services/api/Analytics'
 import { User as UserInterface } from '../../services/api/types'
 import FeaturedSection from '../featured-section/FeaturedSection'
 import TopCreatorCard from '../featured-section/TopCreatorCard'
 import TopPostCard from '../featured-section/TopPostCard'
-import CountUp from 'react-countup'
 
 interface ProfileMenuProps {
   user: UserInterface
@@ -12,6 +12,8 @@ interface ProfileMenuProps {
 export const ProfileMenu = () => {
   const { data, isLoading } = useGetTopInteractionsByWallet()
   const { data: dataTopPosts, isLoading: isLoadingTopPosts } = useGetTopPostsByLike()
+
+  console.log('top posts *(!@*#', dataTopPosts)
 
   const isLoadingTotal = isLoading || isLoadingTopPosts
 
@@ -27,13 +29,20 @@ export const ProfileMenu = () => {
         sectionTitle="Top creators "
         isLoadingAnalytics={isLoadingTotal}
         content={
-          <div className="flex flex-col gap-2">{data && data.topCreators.map((creator) => <TopCreatorCard topCreator={creator} />)}</div>
+          <div className="flex flex-col gap-2">{data && data.topCreators?.map((creator) => <TopCreatorCard topCreator={creator} />)}</div>
         }
       />
       <FeaturedSection
         sectionTitle="Top posts"
         isLoadingAnalytics={isLoadingTotal}
-        content={<div className="flex flex-col gap-2">{dataTopPosts?.map((post) => <TopPostCard post={post} />)}</div>}
+        content={
+          <div className="flex flex-col gap-2">
+            {dataTopPosts?.map((post) => {
+              console.log('post', post)
+              return <TopPostCard post={post} />
+            })}
+          </div>
+        }
       />
 
       <div className="w-full text-center flex flex-col gap-2">
