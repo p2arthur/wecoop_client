@@ -4,7 +4,7 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 const Whitepaper = () => (
   <div className="w-full px-4 flex flex-col py-20 dark:bg-gray-950 bg-gray-100">
     <h1 className="text-4xl font-bold mb-4 text-center">WeCoop v1.0 Whitepaper</h1>
-    <p className="text-center italic text-gray-500 mb-8">Developed by iam_p2 and Felipe — Proud Brazilian Developers</p>
+    <p className="text-center italic text-gray-500 mb-8">Developed by iam_p2 / Felipe / D2dods — Proud Brazilian Developers</p>
 
     <div className="text-lg leading-7 text-gray-700 max-w-4xl mx-auto">
       <p className="mb-6">

@@ -2,7 +2,7 @@ import axios from 'axios'
 import { createContext, useContext, useMemo, useState } from 'react'
 import { Post } from '../../services/api/types'
 
-type allAnalyticsType = { topCreators: string[]; topPosts: Post[] }
+type allAnalyticsType = { topPosts: Post[] }
 
 type IAnalyticsContext = {
   allAnalytics: allAnalyticsType
@@ -31,8 +31,6 @@ const AnalyticsProvider = ({ children }: IAnalyticsProviderProps) => {
 
     try {
       setIsLoadingAnalytics(true)
-      // Get creators analytics
-      const { data: topCreatorsData } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/analytics/creators/top-liked-creators`)
 
       // Get posts analytics with type assertion for expected structure
       const { data: topPostsData } = await axios.get<{ postId: string; likesCount: number }[]>(
@@ -51,7 +49,7 @@ const AnalyticsProvider = ({ children }: IAnalyticsProviderProps) => {
       })
 
       // Set analytics data in state
-      setAllAnalytics({ topCreators: topCreatorsData, topPosts })
+      setAllAnalytics({ topPosts })
       setIsLoadingAnalytics(false)
     } catch (error) {
       console.error('Failed to fetch analytics:', error)
