@@ -1,5 +1,5 @@
 import { useWallet } from '@txnlab/use-wallet'
-import algosdk from 'algosdk'
+import algosdk, { Transaction } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { useEffect, useState } from 'react'
 import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
@@ -21,6 +21,8 @@ import { PostTypeSwitch } from './PostTypeSwitch'
 
 //--------------
 import * as algokit from '@algorandfoundation/algokit-utils'
+import { getOptedIn } from '../utils/getOptedIn'
+import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 //----------
 
 export interface PostInputOutletContext {
@@ -61,69 +63,40 @@ const PostInput = () => {
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
   const [appClient, setAppClient] = useState<any>()
 
+  const { usableAsset, setUsableAsset } = useUsableAsset()
+
+  const algodConfig = getAlgodConfigFromViteEnvironment()
+  const algorand = algokit.AlgorandClient.fromConfig({ algodConfig })
+  algorand.setDefaultSigner(signer)
+
   useEffect(() => {
     if (activeAccount) {
-      const wecoopAppClient = createAppClient({ signer, addr: activeAccount.address })
+      const wecoopAppClient = createAppClient(activeAccount.address, signer, algod, 722527606)
       setAppClient(wecoopAppClient)
     }
   }, [activeAccount])
 
   // vote states
 
-  const handleCreateVote = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // const handleCreateVote = async (e: React.FormEvent) => {
+  //   e.preventDefault()
 
-    const appAddress = 'FNFHOHL5G6FH6QAIDBV3ERUCUM3KHKBCRA4NG7JNAA5QATACJJZDRD6BJM'
-    const daoAsset = 721969155
+  //   // makePoll(algorand, appClient, activeAccount?.address!, signer, BigInt(1), 721969155)
 
-    // Fetch the suggested params from the network
-    const suggestedParams = await algod.getTransactionParams().do()
+  //   const boxTestClient = new BoxTestClient(
+  //     {
+  //       resolveBy: 'id',
+  //       id: 722538553,
+  //       sender: { addr: activeAccount?.address!, signer },
+  //     },
+  //     algod,
+  //   )
 
-    // Create the MBR transaction (payment transaction to cover Minimum Balance Requirement)
-    const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: activeAccount?.address!,
-      suggestedParams,
-      to: appAddress,
-      amount: 3_450, // Adjust based on actual MBR
-    })
+  //   const trueClient = await boxTestClient.compose()
 
-    // Create the asset transfer (axfer) transaction
-    const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: activeAccount?.address!,
-      suggestedParams,
-      to: appAddress,
-      amount: 2, // Transfer 2 units of daoAsset
-      assetIndex: Number(daoAsset),
-    })
-
-    // Wrap transactions with signer
-    const mbrTxnWithSigner = {
-      txn: mbrTxn,
-      signer: signer,
-    }
-
-    const axferWithSigner = {
-      txn: axfer,
-      signer: signer,
-    }
-
-    // Proceed with the createPoll contract call
-    const result = await appClient.createPoll(
-      {
-        mbrTxn: mbrTxnWithSigner, // Pass the wrapped mbrTxn
-        axfer: axferWithSigner, // Pass the wrapped axfer
-        question: inputText, // The poll question
-      },
-      {
-        sender: { addr: activeAccount?.address!, signer: signer }, // Signer and account address
-        sendParams: {
-          fee: algokit.microAlgos(3_000), // Define the fee
-        },
-      },
-    )
-
-    console.log('Poll created successfully:', result)
-  }
+  //   const result = await boxTestClient.getBox({ nonce: 0 })
+  //   console.log('result', result)
+  // }
 
   const [counter, setCounter] = useState(1)
   const [prizePool, setPrizePool] = useState(10)
@@ -151,8 +124,6 @@ const PostInput = () => {
     }
   }, [placeholderIndex, placeholderSelected])
 
-  const { usableAsset, setUsableAsset } = useUsableAsset()
-
   useEffect(() => {
     const foundAsset = usableAssetsList.find((asset) => asset.assetId == Number(usableAssetId))
 
@@ -176,15 +147,37 @@ const PostInput = () => {
     event.preventDefault()
     const country = await getUserCountry()
 
+    // Get suggested transaction parameters from the Algod node
+    const suggestedParams = await algod.getTransactionParams().do()
+
+    const allTransactions: Transaction[] = []
+
+    usableAssetsList.forEach(async (asset: any) => {
+      console.log('viewing opted in', asset)
+      const userOptedIn = await getOptedIn(activeAccount?.address!, asset.assetId, algod)
+      console.log('userOptedin', userOptedIn)
+
+      if (asset.assetId == 0) return
+
+      if (!userOptedIn) {
+        const transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+          from: userData.address,
+          to: userData.address,
+          amount: 0, // Amount of asset to transfer
+          assetIndex: asset.assetId,
+          suggestedParams: suggestedParams, // Use suggested transaction params
+        })
+
+        allTransactions.push(transaction)
+      }
+    })
+
     try {
       const encodedInputText = encodeURIComponent(inputText.replace(/\n/g, '%0A'))
       const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
       console.log(note)
       let transaction: algosdk.Transaction
-
-      // Get suggested transaction parameters from the Algod node
-      const suggestedParams = await algod.getTransactionParams().do()
 
       console.log(usableAsset.assetId, 'usableAsset.assetId')
 
@@ -203,7 +196,7 @@ const PostInput = () => {
         const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Post)
         console.log(feePrice, 'feePrice')
         // Split the fee by interaction type
-        const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'post' })
+        const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: 'post' })
         console.log(splitFee, 'splitFee')
 
         // Example calculation to ensure platformFee is used as an integer
@@ -219,9 +212,14 @@ const PostInput = () => {
           note: new Uint8Array(Buffer.from(note)), // Encode note
           suggestedParams: suggestedParams, // Use suggested transaction params
         })
+
+        allTransactions.push(transaction)
       }
 
-      const signedTransactions = await signTransactions([algosdk.encodeUnsignedTransaction(transaction)])
+      algosdk.assignGroupID(allTransactions)
+
+      const encodedTransactions = allTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
+      const signedTransactions = await signTransactions(encodedTransactions)
       const { id } = await sendTransactions(signedTransactions, 4)
 
       handleDeletePost('loading_id')
@@ -258,7 +256,7 @@ const PostInput = () => {
   }
 
   return (
-    <form onSubmit={(e) => (postType == 'post' ? handleSubmit(e) : handleCreateVote(e))}>
+    <form onSubmit={(e) => (postType == 'post' ? handleSubmit(e) : null)}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea

@@ -1,5 +1,6 @@
-import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
-import algosdk, { AlgodTokenHeader } from 'algosdk'
+import * as algokit from '@algorandfoundation/algokit-utils'
+import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopDaoClient } from '../clients/WecoopDaoClient'
 
@@ -9,18 +10,52 @@ const algodPort = getAlgodConfigFromViteEnvironment().port
 
 const algod = new algosdk.Algodv2(algodToken as AlgodTokenHeader, algodServer, algodPort)
 
-export const createAppClient = (account: TransactionSignerAccount) => {
+export const createAppClient = (senderAddress: string, signer: TransactionSigner, algod: AlgodClient, appId: number) => {
   const appClient = new WecoopDaoClient(
     {
-      sender: account,
       resolveBy: 'id',
-      id: 722530832,
+      id: appId,
+      sender: { addr: senderAddress, signer },
     },
-
     algod,
   )
 
-  console.log('WecoopDao Client', appClient)
-
   return appClient
+}
+
+export const makePoll = async (
+  algorand: algokit.AlgorandClient,
+  appClient: WecoopDaoClient,
+  sender: string,
+  signer: TransactionSigner,
+  amount: bigint,
+  assetId: number,
+) => {
+  const { appAddress } = await appClient.appClient.getAppReference()
+
+  const boxMBRPayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: appAddress,
+    amount: 15_700,
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+  })
+  const xferFirstDeposit = await algorand.transactions.assetTransfer({
+    assetId: BigInt(assetId),
+    sender,
+    receiver: appAddress,
+    amount: 1n,
+  })
+
+  try {
+    const result = await appClient.createPoll(
+      {
+        mbrTxn: boxMBRPayment,
+        axfer: xferFirstDeposit,
+        question: 'test question',
+      },
+      { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
+    )
+  } catch (error) {
+    console.error('error creating poll', error)
+  }
 }
