@@ -86,6 +86,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   useEffect(() => {
     if (activeFeed === 'global' && data) {
+      sessionStorage.setItem('postList', JSON.stringify(data))
       const filteredPosts = data.filter((post) => !assetId || post.assetId === assetId)
       setPostList((prevPosts) => {
         // Apenas atualiza se os novos posts são diferentes dos anteriores
@@ -99,7 +100,6 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
         }))
         return JSON.stringify(prevPosts) !== JSON.stringify(updatedList) ? updatedList : prevPosts
       })
-      sessionStorage.setItem('postList', JSON.stringify(postList))
     } else if (activeFeed === 'coinFeed' && assetId && data) {
       setPostList(data?.filter((post) => post.assetId === assetId))
     }
