@@ -7,7 +7,6 @@ import { useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
-import { createAppClient } from '../contracts/app-calls/wecoopDaoMethods'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { NotePrefix } from '../enums/notePrefix'
 import { User as UserInterface } from '../services/api/types'
@@ -19,10 +18,8 @@ import { CoinDropdown } from './CoinDropdown'
 import Counter from './Counter'
 
 //--------------
-import * as algokit from '@algorandfoundation/algokit-utils'
-import { BoxContractClient } from '../contracts/clients/BoxTestClient'
 import { getOptedIn } from '../utils/getOptedIn'
-import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
+
 //----------
 
 export interface PostInputOutletContext {
@@ -61,40 +58,8 @@ const PostInput = () => {
   const [selectedAsset, setSelectedAsset] = useState(usableAssetsList[0])
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
-  const [appClient, setAppClient] = useState<any>()
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
-
-  const algodConfig = getAlgodConfigFromViteEnvironment()
-  const algorand = algokit.AlgorandClient.fromConfig({ algodConfig })
-  algorand.setDefaultSigner(signer)
-
-  useEffect(() => {
-    if (activeAccount) {
-      const wecoopAppClient = createAppClient(activeAccount.address, signer, algod, 722527606)
-      setAppClient(wecoopAppClient)
-    }
-  }, [activeAccount])
-
-  // vote states
-
-  const handleCreateVote = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // makePoll(algorand, appClient, activeAccount?.address!, signer, BigInt(1), 721969155)
-
-    const boxTestClient = new BoxContractClient(
-      {
-        resolveBy: 'id',
-        id: 722549441,
-        sender: { addr: activeAccount?.address!, signer },
-      },
-      algod,
-    )
-
-    const result = await boxTestClient.createBox({ nonce: 1 })
-    console.log('result', result)
-  }
 
   const [counter, setCounter] = useState(1)
   const [prizePool, setPrizePool] = useState(10)
@@ -254,7 +219,7 @@ const PostInput = () => {
   }
 
   return (
-    <form onSubmit={(e) => (postType == 'post' ? handleSubmit(e) : handleCreateVote(e))}>
+    <form onSubmit={handleSubmit}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea
@@ -298,13 +263,13 @@ const PostInput = () => {
             {postType === 'vote' && (
               <div className={'flex items-center md:gap-2'}>
                 <span className={'mr-2 md:mr-0'}>Prize pool:</span>
-                <input
+                {/*<input
                   type={'number'}
                   className={'w-20 md:w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
                   min={10}
                   value={prizePool}
                   onChange={(e) => setPrizePool(e.target.value)}
-                />
+                />*/}
               </div>
             )}
             <CoinDropdown

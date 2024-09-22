@@ -2,7 +2,6 @@ import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
 import { FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
-import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
 import { PostRequest, ReplyResponse } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
@@ -19,8 +18,6 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
   const { data: userData } = useGetUserInfo(vote.creator_address)
 
   const [isVoted, setIsVoted] = useState(false)
-
-  const currentPostUsableAsset = usableAssetsList.find((usableAsset) => vote.assetId === usableAsset.assetId)
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -133,7 +130,6 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
               </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
-                  <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${vote?.assetId}-icon`} />
                   <button
                     className={
                       'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'

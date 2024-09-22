@@ -16,7 +16,7 @@ export default function MobileSidebar() {
   const { isDarkMode } = useDarkMode()
 
   // Função para atualizar a URL com base no activeFeed e activeAssetId
-  const updateUrlParams = (newFeed, newAssetId) => {
+  const updateUrlParams = (newFeed: string, newAssetId: number) => {
     const searchParams = new URLSearchParams()
 
     if (newFeed) {
@@ -24,7 +24,7 @@ export default function MobileSidebar() {
     }
 
     if (newAssetId) {
-      searchParams.set('activeAssetId', newAssetId)
+      searchParams.set('activeAssetId', newAssetId.toString())
     }
 
     // Atualiza os parâmetros de URL e navega
@@ -32,15 +32,19 @@ export default function MobileSidebar() {
   }
 
   // Atualizar a handleChangeFeed para mudar a URL
-  const handleFeedChange = (newFeed) => {
-    updateUrlParams(newFeed, activeAssetId)
-    handleChangeFeed(newFeed)
+  const handleFeedChange = (newFeed: string) => {
+    if (activeAssetId) {
+      updateUrlParams(newFeed, activeAssetId)
+      handleChangeFeed(newFeed)
+    }
   }
 
   // Atualizar handleFilterByAssetId para mudar a URL
-  const handleAssetIdChange = (newAssetId) => {
-    updateUrlParams(activeFeed, newAssetId)
-    handleFilterByAssetId(newAssetId)
+  const handleAssetIdChange = (newAssetId: number | null) => {
+    if (activeFeed) {
+      updateUrlParams(activeFeed, newAssetId || 0)
+      handleFilterByAssetId(newAssetId)
+    }
   }
 
   useEffect(() => {
@@ -77,10 +81,10 @@ export default function MobileSidebar() {
           <MenuFeed
             openByParams={params.get('activeFeed') === 'coinFeed' && params.get('activeAssetId') !== null}
             hasFeedPosts={activeAccount !== null}
-            activeFeed={activeFeed}
+            activeFeed={activeFeed || ''}
             handleChangeFeed={handleFeedChange}
             handleChangeAssetId={handleAssetIdChange}
-            activeAssetId={activeAssetId}
+            activeAssetId={activeAssetId || 0}
           />
         </ul>
 

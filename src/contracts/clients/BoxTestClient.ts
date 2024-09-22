@@ -11,7 +11,6 @@ import type {
   AppCallTransactionResultOfType,
   AppCompilationResult,
   AppReference,
-  AppState,
   CoreAppCallArgs,
   RawAppCallArgs,
   TealTemplateParams,
@@ -23,15 +22,16 @@ import type {
   AppDetails,
   ApplicationClient,
 } from '@algorandfoundation/algokit-utils/types/app-client'
-import type { AppSpec } from '@algorandfoundation/algokit-utils/types/app-spec'
+import type {AppSpec} from '@algorandfoundation/algokit-utils/types/app-spec'
 import type {
-  SendTransactionResult,
-  TransactionToSign,
   SendTransactionFrom,
   SendTransactionParams,
+  SendTransactionResult,
+  TransactionToSign,
 } from '@algorandfoundation/algokit-utils/types/transaction'
-import type { ABIResult, TransactionWithSigner } from 'algosdk'
-import { Algodv2, OnApplicationComplete, Transaction, AtomicTransactionComposer, modelsv2 } from 'algosdk'
+import type {ABIResult, TransactionWithSigner} from 'algosdk'
+import {Algodv2, AtomicTransactionComposer, modelsv2, OnApplicationComplete, Transaction} from 'algosdk'
+
 export const APP_SPEC: AppSpec = {
   hints: {
     'createBox(uint64)void': {
@@ -210,10 +210,7 @@ export type AppClientComposeCallCoreParams = Omit<AppClientCallCoreParams, 'send
     'skipSending' | 'atc' | 'skipWaiting' | 'maxRoundsToWaitForConfirmation' | 'populateAppCallResources'
   >
 }
-export type AppClientComposeExecuteParams = Pick<
-  SendTransactionParams,
-  'skipWaiting' | 'maxRoundsToWaitForConfirmation' | 'populateAppCallResources' | 'suppressLog'
->
+export type AppClientComposeExecuteParams = Pick<SendTransactionParams, 'skipWaiting' | 'maxRoundsToWaitForConfirmation' | 'suppressLog'>
 
 /**
  * Defines the types of available calls and state of the BoxContract smart contract.
@@ -368,6 +365,7 @@ export abstract class BoxContractCallFactory {
       ...params,
     }
   }
+
   /**
    * Constructs a no op call for the doMath(uint64,uint64,string)uint64 ABI method
    *
@@ -384,11 +382,12 @@ export abstract class BoxContractCallFactory {
       ...params,
     }
   }
+
   /**
    * Constructs a no op call for the hello(string)string ABI method
    *
    * A demonstration method used in the AlgoKit fullstack template.
-Greets the user by name.
+   Greets the user by name.
    *
    * @param args Any args for the contract call
    * @param params Any additional parameters for the call
@@ -435,24 +434,27 @@ export class BoxContractClient {
   }
 
   /**
-   * Checks for decode errors on the AppCallTransactionResult and maps the return value to the specified generic type
-   *
-   * @param result The AppCallTransactionResult to be mapped
-   * @param returnValueFormatter An optional delegate to format the return value if required
-   * @returns The smart contract response with an updated return value
+   * Gets available create methods
    */
-  protected mapReturnValue<TReturn, TResult extends AppCallTransactionResult = AppCallTransactionResult>(
-    result: AppCallTransactionResult,
-    returnValueFormatter?: (value: any) => TReturn,
-  ): AppCallTransactionResultOfType<TReturn> & TResult {
-    if (result.return?.decodeError) {
-      throw result.return.decodeError
+  public get create() {
+    const $this = this
+    return {
+      /**
+       * Creates a new instance of the BoxContract smart contract using the createApplication()void ABI method.
+       *
+       * @param args The arguments for the smart contract call
+       * @param params Any additional parameters for the call
+       * @returns The create result
+       */
+      async createApplication(
+        args: MethodArgs<'createApplication()void'>,
+        params: AppClientCallCoreParams & AppClientCompilationParams & OnCompleteNoOp = {},
+      ) {
+        return $this.mapReturnValue<MethodReturn<'createApplication()void'>, AppCreateCallTransactionResult>(
+          await $this.appClient.create(BoxContractCallFactory.create.createApplication(args, params)),
+        )
+      },
     }
-    const returnValue =
-      result.return?.returnValue !== undefined && returnValueFormatter !== undefined
-        ? returnValueFormatter(result.return.returnValue)
-        : (result.return?.returnValue as TReturn | undefined)
-    return { ...result, return: returnValue } as AppCallTransactionResultOfType<TReturn> & TResult
   }
 
   /**
@@ -482,30 +484,6 @@ export class BoxContractClient {
       createArgs,
       createOnCompleteAction: createArgs?.onCompleteAction,
     })
-  }
-
-  /**
-   * Gets available create methods
-   */
-  public get create() {
-    const $this = this
-    return {
-      /**
-       * Creates a new instance of the BoxContract smart contract using the createApplication()void ABI method.
-       *
-       * @param args The arguments for the smart contract call
-       * @param params Any additional parameters for the call
-       * @returns The create result
-       */
-      async createApplication(
-        args: MethodArgs<'createApplication()void'>,
-        params: AppClientCallCoreParams & AppClientCompilationParams & OnCompleteNoOp = {},
-      ) {
-        return $this.mapReturnValue<MethodReturn<'createApplication()void'>, AppCreateCallTransactionResult>(
-          await $this.appClient.create(BoxContractCallFactory.create.createApplication(args, params)),
-        )
-      },
-    }
   }
 
   /**
@@ -546,7 +524,7 @@ export class BoxContractClient {
    * Calls the hello(string)string ABI method.
    *
    * A demonstration method used in the AlgoKit fullstack template.
-Greets the user by name.
+   Greets the user by name.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
@@ -621,7 +599,29 @@ Greets the user by name.
       },
     } as unknown as BoxContractComposer
   }
+
+  /**
+   * Checks for decode errors on the AppCallTransactionResult and maps the return value to the specified generic type
+   *
+   * @param result The AppCallTransactionResult to be mapped
+   * @param returnValueFormatter An optional delegate to format the return value if required
+   * @returns The smart contract response with an updated return value
+   */
+  protected mapReturnValue<TReturn, TResult extends AppCallTransactionResult = AppCallTransactionResult>(
+    result: AppCallTransactionResult,
+    returnValueFormatter?: (value: any) => TReturn,
+  ): AppCallTransactionResultOfType<TReturn> & TResult {
+    if (result.return?.decodeError) {
+      throw result.return.decodeError
+    }
+    const returnValue =
+      result.return?.returnValue !== undefined && returnValueFormatter !== undefined
+        ? returnValueFormatter(result.return.returnValue)
+        : (result.return?.returnValue as TReturn | undefined)
+    return { ...result, return: returnValue } as AppCallTransactionResultOfType<TReturn> & TResult
+  }
 }
+
 export type BoxContractComposer<TReturns extends [...any[]] = []> = {
   /**
    * Calls the createBox(uint64)void ABI method.
@@ -653,7 +653,7 @@ export type BoxContractComposer<TReturns extends [...any[]] = []> = {
    * Calls the hello(string)string ABI method.
    *
    * A demonstration method used in the AlgoKit fullstack template.
-Greets the user by name.
+   Greets the user by name.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call

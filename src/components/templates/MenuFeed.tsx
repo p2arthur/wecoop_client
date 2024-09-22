@@ -7,9 +7,9 @@ import { toast } from 'react-toastify'
 
 interface IMenuFeed {
   hasFeedPosts: boolean
-  activeFeed: FeedType
+  activeFeed: FeedType | string
   handleChangeFeed: (feed: FeedType) => void
-  handleChangeAssetId: (assetId: AssetId | null) => void
+  handleChangeAssetId: (assetId: AssetId | number | null) => void
   activeAssetId: AssetId | null
   openByParams: boolean
 }

@@ -15,13 +15,13 @@ interface IAnalyticsProviderProps {
 }
 
 const AnalyticsContext = createContext<IAnalyticsContext>({
-  allAnalytics: { topCreators: [], topPosts: [] },
+  allAnalytics: { topPosts: [] },
   getAllAnalytics: async () => {},
   isLoadingAnalytics: false,
 })
 
 const AnalyticsProvider = ({ children }: IAnalyticsProviderProps) => {
-  const [allAnalytics, setAllAnalytics] = useState<allAnalyticsType>({ topCreators: [], topPosts: [] })
+  const [allAnalytics, setAllAnalytics] = useState<allAnalyticsType>({ topPosts: [] })
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState<boolean>(false)
 
   const getAllAnalytics = async () => {

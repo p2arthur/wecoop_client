@@ -24,7 +24,7 @@ export const createAppClient = (senderAddress: string, signer: TransactionSigner
 }
 
 export const makePoll = async (
-  algorand: algokit.AlgorandClient,
+  algorand: any,
   appClient: WecoopDaoClient,
   sender: string,
   signer: TransactionSigner,

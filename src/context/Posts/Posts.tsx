@@ -24,7 +24,7 @@ type IPostsContext = {
   handleGetPostByTransactionId(transactionId: string): Post | undefined
   handleFilterByAssetId(assetId: number | null): void
   handleRefreshPosts(): void
-  handleChangeFeed(feed: FeedType): void
+  handleChangeFeed(feed: FeedType | string): void
   activeAssetId?: AssetId | null
   activeFeed?: FeedType
   isLoading: boolean
@@ -132,7 +132,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     setAssetId(assetId)
     const localPostList = sessionStorage.getItem('postList')
     if (localPostList) {
-      setPostList(JSON.parse(localPostList).filter((post) => post.assetId === assetId))
+      setPostList(JSON.parse(localPostList).filter((post: any) => post.assetId === assetId))
     } else {
       setPostList(data?.filter((post) => post.assetId === assetId) || [])
     }

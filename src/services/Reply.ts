@@ -23,7 +23,7 @@ export class Reply {
 
     const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.Reply, InteractionMultipliers.Reply)
 
-    const splitFee = splitFeeByInteractionType({ totalFee: feePrice, type: 'reply' })
+    const splitFee = splitFeeByInteractionType({ totalFee: feePrice || 0.1, type: 'reply' })
 
     const finalPlatformFee = Math.floor(splitFee.platformFee * 1000 * 1000)
     const finalUserFee = Math.floor(splitFee.creatorFee * 1000 * 1000)

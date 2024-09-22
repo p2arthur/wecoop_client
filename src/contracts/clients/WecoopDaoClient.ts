@@ -23,15 +23,16 @@ import type {
   AppDetails,
   ApplicationClient,
 } from '@algorandfoundation/algokit-utils/types/app-client'
-import type { AppSpec } from '@algorandfoundation/algokit-utils/types/app-spec'
+import type {AppSpec} from '@algorandfoundation/algokit-utils/types/app-spec'
 import type {
   SendTransactionFrom,
   SendTransactionParams,
   SendTransactionResult,
   TransactionToSign,
 } from '@algorandfoundation/algokit-utils/types/transaction'
-import type { ABIResult, TransactionWithSigner } from 'algosdk'
-import { Algodv2, AtomicTransactionComposer, modelsv2, OnApplicationComplete, Transaction } from 'algosdk'
+import type {ABIResult, TransactionWithSigner} from 'algosdk'
+import {Algodv2, AtomicTransactionComposer, modelsv2, OnApplicationComplete, Transaction} from 'algosdk'
+
 export const APP_SPEC: AppSpec = {
   hints: {
     'createApplication()void': {
@@ -278,10 +279,7 @@ export type AppClientComposeCallCoreParams = Omit<AppClientCallCoreParams, 'send
     'skipSending' | 'atc' | 'skipWaiting' | 'maxRoundsToWaitForConfirmation' | 'populateAppCallResources'
   >
 }
-export type AppClientComposeExecuteParams = Pick<
-  SendTransactionParams,
-  'skipWaiting' | 'maxRoundsToWaitForConfirmation' | 'populateAppCallResources' | 'suppressLog'
->
+export type AppClientComposeExecuteParams = Pick<SendTransactionParams, 'skipWaiting' | 'maxRoundsToWaitForConfirmation' | 'suppressLog'>
 
 /**
  * Defines the types of available calls and state of the WecoopDao smart contract.
@@ -470,6 +468,7 @@ export abstract class WecoopDaoCallFactory {
       ...params,
     }
   }
+
   /**
    * Constructs a no op call for the createPoll(pay,axfer,string)(address,uint64,string,uint64,uint64,uint64) ABI method
    *
@@ -487,6 +486,7 @@ export abstract class WecoopDaoCallFactory {
       ...params,
     }
   }
+
   /**
    * Constructs a no op call for the makeVote((uint64),axfer,pay,bool)void ABI method
    *
@@ -501,6 +501,7 @@ export abstract class WecoopDaoCallFactory {
       ...params,
     }
   }
+
   /**
    * Constructs a no op call for the withdrawPollShare((uint64))void ABI method
    *
@@ -515,6 +516,7 @@ export abstract class WecoopDaoCallFactory {
       ...params,
     }
   }
+
   /**
    * Constructs a no op call for the getPollByPollId((uint64))(address,uint64,string,uint64,uint64,uint64) ABI method
    *
@@ -532,6 +534,7 @@ export abstract class WecoopDaoCallFactory {
       ...params,
     }
   }
+
   /**
    * Constructs a no op call for the getVoteByVoteId((uint64,(uint64)))(bool,address) ABI method
    *
@@ -583,24 +586,69 @@ export class WecoopDaoClient {
   }
 
   /**
-   * Checks for decode errors on the AppCallTransactionResult and maps the return value to the specified generic type
-   *
-   * @param result The AppCallTransactionResult to be mapped
-   * @param returnValueFormatter An optional delegate to format the return value if required
-   * @returns The smart contract response with an updated return value
+   * Gets available create methods
    */
-  protected mapReturnValue<TReturn, TResult extends AppCallTransactionResult = AppCallTransactionResult>(
-    result: AppCallTransactionResult,
-    returnValueFormatter?: (value: any) => TReturn,
-  ): AppCallTransactionResultOfType<TReturn> & TResult {
-    if (result.return?.decodeError) {
-      throw result.return.decodeError
+  public get create() {
+    const $this = this
+    return {
+      /**
+       * Creates a new instance of the WecoopDao smart contract using the createApplication()void ABI method.
+       *
+       * @param args The arguments for the smart contract call
+       * @param params Any additional parameters for the call
+       * @returns The create result
+       */
+      async createApplication(
+        args: MethodArgs<'createApplication()void'>,
+        params: AppClientCallCoreParams & AppClientCompilationParams & OnCompleteNoOp = {},
+      ) {
+        return $this.mapReturnValue<MethodReturn<'createApplication()void'>, AppCreateCallTransactionResult>(
+          await $this.appClient.create(WecoopDaoCallFactory.create.createApplication(args, params)),
+        )
+      },
     }
-    const returnValue =
-      result.return?.returnValue !== undefined && returnValueFormatter !== undefined
-        ? returnValueFormatter(result.return.returnValue)
-        : (result.return?.returnValue as TReturn | undefined)
-    return { ...result, return: returnValue } as AppCallTransactionResultOfType<TReturn> & TResult
+  }
+
+  /**
+   * Extracts a binary state value out of an AppState dictionary
+   *
+   * @param state The state dictionary containing the state value
+   * @param key The key of the state value
+   * @returns A BinaryState instance containing the state value, or undefined if the key was not found
+   */
+  private static getBinaryState(state: AppState, key: string): BinaryState | undefined {
+    const value = state[key]
+    if (!value) return undefined
+    if (!('valueRaw' in value)) throw new Error(`Failed to parse state value for ${key}; received an int when expected a byte array`)
+    return {
+      asString(): string {
+        return value.value
+      },
+      asByteArray(): Uint8Array {
+        return value.valueRaw
+      },
+    }
+  }
+
+  /**
+   * Extracts a integer state value out of an AppState dictionary
+   *
+   * @param state The state dictionary containing the state value
+   * @param key The key of the state value
+   * @returns An IntegerState instance containing the state value, or undefined if the key was not found
+   */
+  private static getIntegerState(state: AppState, key: string): IntegerState | undefined {
+    const value = state[key]
+    if (!value) return undefined
+    if ('valueRaw' in value) throw new Error(`Failed to parse state value for ${key}; received a byte array when expected a number`)
+    return {
+      asBigInt() {
+        return typeof value.value === 'bigint' ? value.value : BigInt(value.value)
+      },
+      asNumber(): number {
+        return typeof value.value === 'bigint' ? Number(value.value) : value.value
+      },
+    }
   }
 
   /**
@@ -630,30 +678,6 @@ export class WecoopDaoClient {
       createArgs,
       createOnCompleteAction: createArgs?.onCompleteAction,
     })
-  }
-
-  /**
-   * Gets available create methods
-   */
-  public get create() {
-    const $this = this
-    return {
-      /**
-       * Creates a new instance of the WecoopDao smart contract using the createApplication()void ABI method.
-       *
-       * @param args The arguments for the smart contract call
-       * @param params Any additional parameters for the call
-       * @returns The create result
-       */
-      async createApplication(
-        args: MethodArgs<'createApplication()void'>,
-        params: AppClientCallCoreParams & AppClientCompilationParams & OnCompleteNoOp = {},
-      ) {
-        return $this.mapReturnValue<MethodReturn<'createApplication()void'>, AppCreateCallTransactionResult>(
-          await $this.appClient.create(WecoopDaoCallFactory.create.createApplication(args, params)),
-        )
-      },
-    }
   }
 
   /**
@@ -739,48 +763,6 @@ export class WecoopDaoClient {
     params: AppClientCallCoreParams & CoreAppCallArgs = {},
   ) {
     return this.call(WecoopDaoCallFactory.getVoteByVoteId(args, params))
-  }
-
-  /**
-   * Extracts a binary state value out of an AppState dictionary
-   *
-   * @param state The state dictionary containing the state value
-   * @param key The key of the state value
-   * @returns A BinaryState instance containing the state value, or undefined if the key was not found
-   */
-  private static getBinaryState(state: AppState, key: string): BinaryState | undefined {
-    const value = state[key]
-    if (!value) return undefined
-    if (!('valueRaw' in value)) throw new Error(`Failed to parse state value for ${key}; received an int when expected a byte array`)
-    return {
-      asString(): string {
-        return value.value
-      },
-      asByteArray(): Uint8Array {
-        return value.valueRaw
-      },
-    }
-  }
-
-  /**
-   * Extracts a integer state value out of an AppState dictionary
-   *
-   * @param state The state dictionary containing the state value
-   * @param key The key of the state value
-   * @returns An IntegerState instance containing the state value, or undefined if the key was not found
-   */
-  private static getIntegerState(state: AppState, key: string): IntegerState | undefined {
-    const value = state[key]
-    if (!value) return undefined
-    if ('valueRaw' in value) throw new Error(`Failed to parse state value for ${key}; received a byte array when expected a number`)
-    return {
-      asBigInt() {
-        return typeof value.value === 'bigint' ? value.value : BigInt(value.value)
-      },
-      asNumber(): number {
-        return typeof value.value === 'bigint' ? Number(value.value) : value.value
-      },
-    }
   }
 
   /**
@@ -893,7 +875,29 @@ export class WecoopDaoClient {
       },
     } as unknown as WecoopDaoComposer
   }
+
+  /**
+   * Checks for decode errors on the AppCallTransactionResult and maps the return value to the specified generic type
+   *
+   * @param result The AppCallTransactionResult to be mapped
+   * @param returnValueFormatter An optional delegate to format the return value if required
+   * @returns The smart contract response with an updated return value
+   */
+  protected mapReturnValue<TReturn, TResult extends AppCallTransactionResult = AppCallTransactionResult>(
+    result: AppCallTransactionResult,
+    returnValueFormatter?: (value: any) => TReturn,
+  ): AppCallTransactionResultOfType<TReturn> & TResult {
+    if (result.return?.decodeError) {
+      throw result.return.decodeError
+    }
+    const returnValue =
+      result.return?.returnValue !== undefined && returnValueFormatter !== undefined
+        ? returnValueFormatter(result.return.returnValue)
+        : (result.return?.returnValue as TReturn | undefined)
+    return { ...result, return: returnValue } as AppCallTransactionResultOfType<TReturn> & TResult
+  }
 }
+
 export type WecoopDaoComposer<TReturns extends [...any[]] = []> = {
   /**
    * Calls the optinToAsset(pay,uint64)void ABI method.
