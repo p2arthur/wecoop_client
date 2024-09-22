@@ -6,12 +6,8 @@ import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
-<<<<<<< HEAD
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
-=======
-import { AssetId } from '../enums/assetId'
->>>>>>> 40a86120f82287a21fe7f28571270d0f70f889b6
 import { NotePrefix } from '../enums/notePrefix'
 import { User as UserInterface } from '../services/api/types'
 import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
