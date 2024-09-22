@@ -168,6 +168,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     })
   }
 
+  console.log(post.replies, 'replies')
+
   return (
     <>
       <div>
