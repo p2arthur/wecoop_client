@@ -25,31 +25,26 @@ import type {
 } from '@algorandfoundation/algokit-utils/types/app-client'
 import type { AppSpec } from '@algorandfoundation/algokit-utils/types/app-spec'
 import type {
-  SendTransactionFrom,
-  SendTransactionParams,
   SendTransactionResult,
   TransactionToSign,
+  SendTransactionFrom,
+  SendTransactionParams,
 } from '@algorandfoundation/algokit-utils/types/transaction'
 import type { ABIResult, TransactionWithSigner } from 'algosdk'
-import { Algodv2, AtomicTransactionComposer, modelsv2, OnApplicationComplete, Transaction } from 'algosdk'
+import { Algodv2, OnApplicationComplete, Transaction, AtomicTransactionComposer, modelsv2 } from 'algosdk'
 export const APP_SPEC: AppSpec = {
   hints: {
+    'createBox(uint64)void': {
+      call_config: {
+        no_op: 'CALL',
+      },
+    },
     'doMath(uint64,uint64,string)uint64': {
       call_config: {
         no_op: 'CALL',
       },
     },
     'hello(string)string': {
-      call_config: {
-        no_op: 'CALL',
-      },
-    },
-    'createBox(string,uint64)void': {
-      call_config: {
-        no_op: 'CALL',
-      },
-    },
-    'getBox(uint64)(string)': {
       call_config: {
         no_op: 'CALL',
       },
@@ -73,19 +68,14 @@ export const APP_SPEC: AppSpec = {
       reserved: {},
     },
     global: {
-      declared: {
-        boxCount: {
-          type: 'uint64',
-          key: 'boxCount',
-        },
-      },
+      declared: {},
       reserved: {},
     },
   },
   state: {
     global: {
       num_byte_slices: 0,
-      num_uints: 1,
+      num_uints: 0,
     },
     local: {
       num_byte_slices: 0,
@@ -94,13 +84,25 @@ export const APP_SPEC: AppSpec = {
   },
   source: {
     approval:
-      'I3ByYWdtYSB2ZXJzaW9uIDEwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjEwMi4wCi8vIGh0dHBzOi8vZ2l0aHViLmNvbS9hbGdvcmFuZGZvdW5kYXRpb24vVEVBTFNjcmlwdAoKLy8gVGhpcyBjb250cmFjdCBpcyBjb21wbGlhbnQgd2l0aCBhbmQvb3IgaW1wbGVtZW50cyB0aGUgZm9sbG93aW5nIEFSQ3M6IFsgQVJDNCBdCgovLyBUaGUgZm9sbG93aW5nIHRlbiBsaW5lcyBvZiBURUFMIGhhbmRsZSBpbml0aWFsIHByb2dyYW0gZmxvdwovLyBUaGlzIHBhdHRlcm4gaXMgdXNlZCB0byBtYWtlIGl0IGVhc3kgZm9yIGFueW9uZSB0byBwYXJzZSB0aGUgc3RhcnQgb2YgdGhlIHByb2dyYW0gYW5kIGRldGVybWluZSBpZiBhIHNwZWNpZmljIGFjdGlvbiBpcyBhbGxvd2VkCi8vIEhlcmUsIGFjdGlvbiByZWZlcnMgdG8gdGhlIE9uQ29tcGxldGUgaW4gY29tYmluYXRpb24gd2l0aCB3aGV0aGVyIHRoZSBhcHAgaXMgYmVpbmcgY3JlYXRlZCBvciBjYWxsZWQKLy8gRXZlcnkgcG9zc2libGUgYWN0aW9uIGZvciB0aGlzIGNvbnRyYWN0IGlzIHJlcHJlc2VudGVkIGluIHRoZSBzd2l0Y2ggc3RhdGVtZW50Ci8vIElmIHRoZSBhY3Rpb24gaXMgbm90IGltcGxlbWVudGVkIGluIHRoZSBjb250cmFjdCwgaXRzIHJlc3BlY3RpdmUgYnJhbmNoIHdpbGwgYmUgIipOT1RfSU1QTEVNRU5URUQiIHdoaWNoIGp1c3QgY29udGFpbnMgImVyciIKdHhuIEFwcGxpY2F0aW9uSUQKIQppbnQgNgoqCnR4biBPbkNvbXBsZXRpb24KKwpzd2l0Y2ggKmNhbGxfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKmNyZWF0ZV9Ob09wICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRAoKKk5PVF9JTVBMRU1FTlRFRDoKCS8vIFRoZSByZXF1ZXN0ZWQgYWN0aW9uIGlzIG5vdCBpbXBsZW1lbnRlZCBpbiB0aGlzIGNvbnRyYWN0LiBBcmUgeW91IHVzaW5nIHRoZSBjb3JyZWN0IE9uQ29tcGxldGU/IERpZCB5b3Ugc2V0IHlvdXIgYXBwIElEPwoJZXJyCgovLyBnZXRTdW0oYTogdWludDY0LCBiOiB1aW50NjQpOiB1aW50NjQKLy8KLy8gQ2FsY3VsYXRlcyB0aGUgc3VtIG9mIHR3byBudW1iZXJzCi8vCi8vIEBwYXJhbSBhCi8vIEBwYXJhbSBiCi8vIEByZXR1cm5zIFRoZSBzdW0gb2YgYSBhbmQgYgpnZXRTdW06Cglwcm90byAyIDEKCgkvLyBjb250cmFjdHMvQm94VGVzdC5hbGdvLnRzOjE4CgkvLyByZXR1cm4gYSArIGI7CglmcmFtZV9kaWcgLTEgLy8gYTogdWludDY0CglmcmFtZV9kaWcgLTIgLy8gYjogdWludDY0CgkrCglyZXRzdWIKCi8vIGdldERpZmZlcmVuY2UoYTogdWludDY0LCBiOiB1aW50NjQpOiB1aW50NjQKLy8KLy8gQ2FsY3VsYXRlcyB0aGUgZGlmZmVyZW5jZSBiZXR3ZWVuIHR3byBudW1iZXJzCi8vCi8vIEBwYXJhbSBhCi8vIEBwYXJhbSBiCi8vIEByZXR1cm5zIFRoZSBkaWZmZXJlbmNlIGJldHdlZW4gYSBhbmQgYi4KZ2V0RGlmZmVyZW5jZToKCXByb3RvIDIgMQoKCS8vIGNvbnRyYWN0cy9Cb3hUZXN0LmFsZ28udHM6MjkKCS8vIHJldHVybiBhID49IGIgPyBhIC0gYiA6IGIgLSBhOwoJZnJhbWVfZGlnIC0xIC8vIGE6IHVpbnQ2NAoJZnJhbWVfZGlnIC0yIC8vIGI6IHVpbnQ2NAoJPj0KCWJ6ICp0ZXJuYXJ5MF9mYWxzZQoJZnJhbWVfZGlnIC0xIC8vIGE6IHVpbnQ2NAoJZnJhbWVfZGlnIC0yIC8vIGI6IHVpbnQ2NAoJLQoJYiAqdGVybmFyeTBfZW5kCgoqdGVybmFyeTBfZmFsc2U6CglmcmFtZV9kaWcgLTIgLy8gYjogdWludDY0CglmcmFtZV9kaWcgLTEgLy8gYTogdWludDY0CgktCgoqdGVybmFyeTBfZW5kOgoJcmV0c3ViCgovLyBkb01hdGgodWludDY0LHVpbnQ2NCxzdHJpbmcpdWludDY0CiphYmlfcm91dGVfZG9NYXRoOgoJLy8gVGhlIEFCSSByZXR1cm4gcHJlZml4CglieXRlIDB4MTUxZjdjNzUKCgkvLyBvcGVyYXRpb246IHN0cmluZwoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMwoJZXh0cmFjdCAyIDAKCgkvLyBiOiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDIKCWJ0b2kKCgkvLyBhOiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWJ0b2kKCgkvLyBleGVjdXRlIGRvTWF0aCh1aW50NjQsdWludDY0LHN0cmluZyl1aW50NjQKCWNhbGxzdWIgZG9NYXRoCglpdG9iCgljb25jYXQKCWxvZwoJaW50IDEKCXJldHVybgoKLy8gZG9NYXRoKGE6IHVpbnQ2NCwgYjogdWludDY0LCBvcGVyYXRpb246IHN0cmluZyk6IHVpbnQ2NAovLwovLyBBIG1ldGhvZCB0aGF0IHRha2VzIHR3byBudW1iZXJzIGFuZCBkb2VzIGVpdGhlciBhZGRpdGlvbiBvciBzdWJ0cmFjdGlvbgovLwovLyBAcGFyYW0gYSBUaGUgZmlyc3QgdWludDY0Ci8vIEBwYXJhbSBiIFRoZSBzZWNvbmQgdWludDY0Ci8vIEBwYXJhbSBvcGVyYXRpb24gVGhlIG9wZXJhdGlvbiB0byBwZXJmb3JtLiBDYW4gYmUgZWl0aGVyICdzdW0nIG9yICdkaWZmZXJlbmNlJwovLwovLyBAcmV0dXJucyBUaGUgcmVzdWx0IG9mIHRoZSBvcGVyYXRpb24KZG9NYXRoOgoJcHJvdG8gMyAxCgoJLy8gUHVzaCBlbXB0eSBieXRlcyBhZnRlciB0aGUgZnJhbWUgcG9pbnRlciB0byByZXNlcnZlIHNwYWNlIGZvciBsb2NhbCB2YXJpYWJsZXMKCWJ5dGUgMHgKCgkvLyAqaWYwX2NvbmRpdGlvbgoJLy8gY29udHJhY3RzL0JveFRlc3QuYWxnby50czo0NAoJLy8gb3BlcmF0aW9uID09PSAnc3VtJwoJZnJhbWVfZGlnIC0zIC8vIG9wZXJhdGlvbjogc3RyaW5nCglieXRlIDB4NzM3NTZkIC8vICJzdW0iCgk9PQoJYnogKmlmMF9lbHNlaWYxX2NvbmRpdGlvbgoKCS8vICppZjBfY29uc2VxdWVudAoJLy8gY29udHJhY3RzL0JveFRlc3QuYWxnby50czo0NQoJLy8gcmVzdWx0ID0gdGhpcy5nZXRTdW0oYSwgYikKCWZyYW1lX2RpZyAtMiAvLyBiOiB1aW50NjQKCWZyYW1lX2RpZyAtMSAvLyBhOiB1aW50NjQKCWNhbGxzdWIgZ2V0U3VtCglmcmFtZV9idXJ5IDAgLy8gcmVzdWx0OiB1aW50NjQKCWIgKmlmMF9lbmQKCippZjBfZWxzZWlmMV9jb25kaXRpb246CgkvLyBjb250cmFjdHMvQm94VGVzdC5hbGdvLnRzOjQ2CgkvLyBvcGVyYXRpb24gPT09ICdkaWZmZXJlbmNlJwoJZnJhbWVfZGlnIC0zIC8vIG9wZXJhdGlvbjogc3RyaW5nCglieXRlIDB4NjQ2OTY2NjY2NTcyNjU2ZTYzNjUgLy8gImRpZmZlcmVuY2UiCgk9PQoJYnogKmlmMF9lbHNlCgoJLy8gKmlmMF9lbHNlaWYxX2NvbnNlcXVlbnQKCS8vIGNvbnRyYWN0cy9Cb3hUZXN0LmFsZ28udHM6NDcKCS8vIHJlc3VsdCA9IHRoaXMuZ2V0RGlmZmVyZW5jZShhLCBiKQoJZnJhbWVfZGlnIC0yIC8vIGI6IHVpbnQ2NAoJZnJhbWVfZGlnIC0xIC8vIGE6IHVpbnQ2NAoJY2FsbHN1YiBnZXREaWZmZXJlbmNlCglmcmFtZV9idXJ5IDAgLy8gcmVzdWx0OiB1aW50NjQKCWIgKmlmMF9lbmQKCippZjBfZWxzZToKCS8vIEludmFsaWQgb3BlcmF0aW9uCgllcnIKCippZjBfZW5kOgoJLy8gY29udHJhY3RzL0JveFRlc3QuYWxnby50czo1MAoJLy8gcmV0dXJuIHJlc3VsdDsKCWZyYW1lX2RpZyAwIC8vIHJlc3VsdDogdWludDY0CgoJLy8gc2V0IHRoZSBzdWJyb3V0aW5lIHJldHVybiB2YWx1ZQoJZnJhbWVfYnVyeSAwCglyZXRzdWIKCi8vIGhlbGxvKHN0cmluZylzdHJpbmcKKmFiaV9yb3V0ZV9oZWxsbzoKCS8vIFRoZSBBQkkgcmV0dXJuIHByZWZpeAoJYnl0ZSAweDE1MWY3Yzc1CgoJLy8gbmFtZTogc3RyaW5nCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglleHRyYWN0IDIgMAoKCS8vIGV4ZWN1dGUgaGVsbG8oc3RyaW5nKXN0cmluZwoJY2FsbHN1YiBoZWxsbwoJZHVwCglsZW4KCWl0b2IKCWV4dHJhY3QgNiAyCglzd2FwCgljb25jYXQKCWNvbmNhdAoJbG9nCglpbnQgMQoJcmV0dXJuCgovLyBoZWxsbyhuYW1lOiBzdHJpbmcpOiBzdHJpbmcKLy8KLy8gQSBkZW1vbnN0cmF0aW9uIG1ldGhvZCB1c2VkIGluIHRoZSBBbGdvS2l0IGZ1bGxzdGFjayB0ZW1wbGF0ZS4KLy8gR3JlZXRzIHRoZSB1c2VyIGJ5IG5hbWUuCi8vCi8vIEBwYXJhbSBuYW1lIFRoZSBuYW1lIG9mIHRoZSB1c2VyIHRvIGdyZWV0LgovLyBAcmV0dXJucyBBIGdyZWV0aW5nIG1lc3NhZ2UgdG8gdGhlIHVzZXIuCmhlbGxvOgoJcHJvdG8gMSAxCgoJLy8gY29udHJhY3RzL0JveFRlc3QuYWxnby50czo2MQoJLy8gcmV0dXJuICdIZWxsbywgJyArIG5hbWU7CglieXRlIDB4NDg2NTZjNmM2ZjJjMjAgLy8gIkhlbGxvLCAiCglmcmFtZV9kaWcgLTEgLy8gbmFtZTogc3RyaW5nCgljb25jYXQKCXJldHN1YgoKLy8gY3JlYXRlQm94KHN0cmluZyx1aW50NjQpdm9pZAoqYWJpX3JvdXRlX2NyZWF0ZUJveDoKCS8vIG5vbmNlOiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDIKCWJ0b2kKCgkvLyBuYW1lOiBzdHJpbmcKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWV4dHJhY3QgMiAwCgoJLy8gZXhlY3V0ZSBjcmVhdGVCb3goc3RyaW5nLHVpbnQ2NCl2b2lkCgljYWxsc3ViIGNyZWF0ZUJveAoJaW50IDEKCXJldHVybgoKLy8gY3JlYXRlQm94KG5hbWU6IHN0cmluZywgbm9uY2U6IHVpbnQ2NCk6IHZvaWQKY3JlYXRlQm94OgoJcHJvdG8gMiAwCgoJLy8gUHVzaCBlbXB0eSBieXRlcyBhZnRlciB0aGUgZnJhbWUgcG9pbnRlciB0byByZXNlcnZlIHNwYWNlIGZvciBsb2NhbCB2YXJpYWJsZXMKCWJ5dGUgMHgKCWR1cAoKCS8vIGNvbnRyYWN0cy9Cb3hUZXN0LmFsZ28udHM6NjUKCS8vIGN1cnJlbnROb25jZSA9IHRoaXMuYm94Q291bnQudmFsdWUKCWJ5dGUgMHg2MjZmNzg0MzZmNzU2ZTc0IC8vICJib3hDb3VudCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9idXJ5IDAgLy8gY3VycmVudE5vbmNlOiB1aW50NjQKCgkvLyBjb250cmFjdHMvQm94VGVzdC5hbGdvLnRzOjY3CgkvLyBuZXdOb25jZSA9IGN1cnJlbnROb25jZSArIDEKCWZyYW1lX2RpZyAwIC8vIGN1cnJlbnROb25jZTogdWludDY0CglpbnQgMQoJKwoJZnJhbWVfYnVyeSAxIC8vIG5ld05vbmNlOiB1aW50NjQKCgkvLyBjb250cmFjdHMvQm94VGVzdC5hbGdvLnRzOjY5CgkvLyB0aGlzLmJveCh7IG5vbmNlOiBub25jZSB9KS5jcmVhdGUoMzAwKQoJZnJhbWVfZGlnIC0yIC8vIG5vbmNlOiB1aW50NjQKCWl0b2IKCWludCAzMDAKCWJveF9jcmVhdGUKCXBvcAoJcmV0c3ViCgovLyBnZXRCb3godWludDY0KShzdHJpbmcpCiphYmlfcm91dGVfZ2V0Qm94OgoJLy8gVGhlIEFCSSByZXR1cm4gcHJlZml4CglieXRlIDB4MTUxZjdjNzUKCgkvLyBub25jZTogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglidG9pCgoJLy8gZXhlY3V0ZSBnZXRCb3godWludDY0KShzdHJpbmcpCgljYWxsc3ViIGdldEJveAoJY29uY2F0Cglsb2cKCWludCAxCglyZXR1cm4KCi8vIGdldEJveChub25jZTogdWludDY0KTogQm94SW5mbwpnZXRCb3g6Cglwcm90byAxIDEKCgkvLyBjb250cmFjdHMvQm94VGVzdC5hbGdvLnRzOjczCgkvLyByZXR1cm4gdGhpcy5ib3goeyBub25jZTogbm9uY2UgfSkudmFsdWU7CglmcmFtZV9kaWcgLTEgLy8gbm9uY2U6IHVpbnQ2NAoJaXRvYgoJYm94X2dldAoKCS8vIGJveCB2YWx1ZSBkb2VzIG5vdCBleGlzdDogdGhpcy5ib3goeyBub25jZTogbm9uY2UgfSkudmFsdWUKCWFzc2VydAoJcmV0c3ViCgoqYWJpX3JvdXRlX2NyZWF0ZUFwcGxpY2F0aW9uOgoJaW50IDEKCXJldHVybgoKKmNyZWF0ZV9Ob09wOgoJbWV0aG9kICJjcmVhdGVBcHBsaWNhdGlvbigpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfY3JlYXRlQXBwbGljYXRpb24KCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY3JlYXRlIE5vT3AKCWVycgoKKmNhbGxfTm9PcDoKCW1ldGhvZCAiZG9NYXRoKHVpbnQ2NCx1aW50NjQsc3RyaW5nKXVpbnQ2NCIKCW1ldGhvZCAiaGVsbG8oc3RyaW5nKXN0cmluZyIKCW1ldGhvZCAiY3JlYXRlQm94KHN0cmluZyx1aW50NjQpdm9pZCIKCW1ldGhvZCAiZ2V0Qm94KHVpbnQ2NCkoc3RyaW5nKSIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfZG9NYXRoICphYmlfcm91dGVfaGVsbG8gKmFiaV9yb3V0ZV9jcmVhdGVCb3ggKmFiaV9yb3V0ZV9nZXRCb3gKCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY2FsbCBOb09wCgllcnI=',
+      'I3ByYWdtYSB2ZXJzaW9uIDEwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjEwMi4wCi8vIGh0dHBzOi8vZ2l0aHViLmNvbS9hbGdvcmFuZGZvdW5kYXRpb24vVEVBTFNjcmlwdAoKLy8gVGhpcyBjb250cmFjdCBpcyBjb21wbGlhbnQgd2l0aCBhbmQvb3IgaW1wbGVtZW50cyB0aGUgZm9sbG93aW5nIEFSQ3M6IFsgQVJDNCBdCgovLyBUaGUgZm9sbG93aW5nIHRlbiBsaW5lcyBvZiBURUFMIGhhbmRsZSBpbml0aWFsIHByb2dyYW0gZmxvdwovLyBUaGlzIHBhdHRlcm4gaXMgdXNlZCB0byBtYWtlIGl0IGVhc3kgZm9yIGFueW9uZSB0byBwYXJzZSB0aGUgc3RhcnQgb2YgdGhlIHByb2dyYW0gYW5kIGRldGVybWluZSBpZiBhIHNwZWNpZmljIGFjdGlvbiBpcyBhbGxvd2VkCi8vIEhlcmUsIGFjdGlvbiByZWZlcnMgdG8gdGhlIE9uQ29tcGxldGUgaW4gY29tYmluYXRpb24gd2l0aCB3aGV0aGVyIHRoZSBhcHAgaXMgYmVpbmcgY3JlYXRlZCBvciBjYWxsZWQKLy8gRXZlcnkgcG9zc2libGUgYWN0aW9uIGZvciB0aGlzIGNvbnRyYWN0IGlzIHJlcHJlc2VudGVkIGluIHRoZSBzd2l0Y2ggc3RhdGVtZW50Ci8vIElmIHRoZSBhY3Rpb24gaXMgbm90IGltcGxlbWVudGVkIGluIHRoZSBjb250cmFjdCwgaXRzIHJlc3BlY3RpdmUgYnJhbmNoIHdpbGwgYmUgIipOT1RfSU1QTEVNRU5URUQiIHdoaWNoIGp1c3QgY29udGFpbnMgImVyciIKdHhuIEFwcGxpY2F0aW9uSUQKIQppbnQgNgoqCnR4biBPbkNvbXBsZXRpb24KKwpzd2l0Y2ggKmNhbGxfTm9PcCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKmNyZWF0ZV9Ob09wICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRAoKKk5PVF9JTVBMRU1FTlRFRDoKCS8vIFRoZSByZXF1ZXN0ZWQgYWN0aW9uIGlzIG5vdCBpbXBsZW1lbnRlZCBpbiB0aGlzIGNvbnRyYWN0LiBBcmUgeW91IHVzaW5nIHRoZSBjb3JyZWN0IE9uQ29tcGxldGU/IERpZCB5b3Ugc2V0IHlvdXIgYXBwIElEPwoJZXJyCgovLyBjcmVhdGVCb3godWludDY0KXZvaWQKKmFiaV9yb3V0ZV9jcmVhdGVCb3g6CgkvLyBub25jZTogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglidG9pCgoJLy8gZXhlY3V0ZSBjcmVhdGVCb3godWludDY0KXZvaWQKCWNhbGxzdWIgY3JlYXRlQm94CglpbnQgMQoJcmV0dXJuCgovLyBjcmVhdGVCb3gobm9uY2U6IHVpbnQ2NCk6IHZvaWQKY3JlYXRlQm94OgoJcHJvdG8gMSAwCgoJLy8gY29udHJhY3RzL0JveENvbnRyYWN0LmFsZ28udHM6OQoJLy8gdGhpcy5ib3goeyBub25jZTogbm9uY2UsIGFkZHJlc3M6IHRoaXMudHhuLnNlbmRlciB9KS52YWx1ZSA9ICdzb21ldGhpbmcnCglieXRlIDB4NjI2Zjc4NWYgLy8gImJveF8iCgl0eG4gU2VuZGVyCglmcmFtZV9kaWcgLTEgLy8gbm9uY2U6IHVpbnQ2NAoJaXRvYgoJY29uY2F0Cgljb25jYXQKCWR1cAoJYm94X2RlbAoJcG9wCglieXRlIDB4MDAwOTczNmY2ZDY1NzQ2ODY5NmU2NwoJYm94X3B1dAoJcmV0c3ViCgovLyBnZXRTdW0oYTogdWludDY0LCBiOiB1aW50NjQpOiB1aW50NjQKLy8KLy8gQ2FsY3VsYXRlcyB0aGUgc3VtIG9mIHR3byBudW1iZXJzCi8vCi8vIEBwYXJhbSBhCi8vIEBwYXJhbSBiCi8vIEByZXR1cm5zIFRoZSBzdW0gb2YgYSBhbmQgYgpnZXRTdW06Cglwcm90byAyIDEKCgkvLyBjb250cmFjdHMvQm94Q29udHJhY3QuYWxnby50czoyMAoJLy8gcmV0dXJuIGEgKyBiOwoJZnJhbWVfZGlnIC0xIC8vIGE6IHVpbnQ2NAoJZnJhbWVfZGlnIC0yIC8vIGI6IHVpbnQ2NAoJKwoJcmV0c3ViCgovLyBnZXREaWZmZXJlbmNlKGE6IHVpbnQ2NCwgYjogdWludDY0KTogdWludDY0Ci8vCi8vIENhbGN1bGF0ZXMgdGhlIGRpZmZlcmVuY2UgYmV0d2VlbiB0d28gbnVtYmVycwovLwovLyBAcGFyYW0gYQovLyBAcGFyYW0gYgovLyBAcmV0dXJucyBUaGUgZGlmZmVyZW5jZSBiZXR3ZWVuIGEgYW5kIGIuCmdldERpZmZlcmVuY2U6Cglwcm90byAyIDEKCgkvLyBjb250cmFjdHMvQm94Q29udHJhY3QuYWxnby50czozMQoJLy8gcmV0dXJuIGEgPj0gYiA/IGEgLSBiIDogYiAtIGE7CglmcmFtZV9kaWcgLTEgLy8gYTogdWludDY0CglmcmFtZV9kaWcgLTIgLy8gYjogdWludDY0Cgk+PQoJYnogKnRlcm5hcnkwX2ZhbHNlCglmcmFtZV9kaWcgLTEgLy8gYTogdWludDY0CglmcmFtZV9kaWcgLTIgLy8gYjogdWludDY0CgktCgliICp0ZXJuYXJ5MF9lbmQKCip0ZXJuYXJ5MF9mYWxzZToKCWZyYW1lX2RpZyAtMiAvLyBiOiB1aW50NjQKCWZyYW1lX2RpZyAtMSAvLyBhOiB1aW50NjQKCS0KCip0ZXJuYXJ5MF9lbmQ6CglyZXRzdWIKCi8vIGRvTWF0aCh1aW50NjQsdWludDY0LHN0cmluZyl1aW50NjQKKmFiaV9yb3V0ZV9kb01hdGg6CgkvLyBUaGUgQUJJIHJldHVybiBwcmVmaXgKCWJ5dGUgMHgxNTFmN2M3NQoKCS8vIG9wZXJhdGlvbjogc3RyaW5nCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAzCglleHRyYWN0IDIgMAoKCS8vIGI6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMgoJYnRvaQoKCS8vIGE6IHVpbnQ2NAoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJYnRvaQoKCS8vIGV4ZWN1dGUgZG9NYXRoKHVpbnQ2NCx1aW50NjQsc3RyaW5nKXVpbnQ2NAoJY2FsbHN1YiBkb01hdGgKCWl0b2IKCWNvbmNhdAoJbG9nCglpbnQgMQoJcmV0dXJuCgovLyBkb01hdGgoYTogdWludDY0LCBiOiB1aW50NjQsIG9wZXJhdGlvbjogc3RyaW5nKTogdWludDY0Ci8vCi8vIEEgbWV0aG9kIHRoYXQgdGFrZXMgdHdvIG51bWJlcnMgYW5kIGRvZXMgZWl0aGVyIGFkZGl0aW9uIG9yIHN1YnRyYWN0aW9uCi8vCi8vIEBwYXJhbSBhIFRoZSBmaXJzdCB1aW50NjQKLy8gQHBhcmFtIGIgVGhlIHNlY29uZCB1aW50NjQKLy8gQHBhcmFtIG9wZXJhdGlvbiBUaGUgb3BlcmF0aW9uIHRvIHBlcmZvcm0uIENhbiBiZSBlaXRoZXIgJ3N1bScgb3IgJ2RpZmZlcmVuY2UnCi8vCi8vIEByZXR1cm5zIFRoZSByZXN1bHQgb2YgdGhlIG9wZXJhdGlvbgpkb01hdGg6Cglwcm90byAzIDEKCgkvLyBQdXNoIGVtcHR5IGJ5dGVzIGFmdGVyIHRoZSBmcmFtZSBwb2ludGVyIHRvIHJlc2VydmUgc3BhY2UgZm9yIGxvY2FsIHZhcmlhYmxlcwoJYnl0ZSAweAoKCS8vICppZjBfY29uZGl0aW9uCgkvLyBjb250cmFjdHMvQm94Q29udHJhY3QuYWxnby50czo0NgoJLy8gb3BlcmF0aW9uID09PSAnc3VtJwoJZnJhbWVfZGlnIC0zIC8vIG9wZXJhdGlvbjogc3RyaW5nCglieXRlIDB4NzM3NTZkIC8vICJzdW0iCgk9PQoJYnogKmlmMF9lbHNlaWYxX2NvbmRpdGlvbgoKCS8vICppZjBfY29uc2VxdWVudAoJLy8gY29udHJhY3RzL0JveENvbnRyYWN0LmFsZ28udHM6NDcKCS8vIHJlc3VsdCA9IHRoaXMuZ2V0U3VtKGEsIGIpCglmcmFtZV9kaWcgLTIgLy8gYjogdWludDY0CglmcmFtZV9kaWcgLTEgLy8gYTogdWludDY0CgljYWxsc3ViIGdldFN1bQoJZnJhbWVfYnVyeSAwIC8vIHJlc3VsdDogdWludDY0CgliICppZjBfZW5kCgoqaWYwX2Vsc2VpZjFfY29uZGl0aW9uOgoJLy8gY29udHJhY3RzL0JveENvbnRyYWN0LmFsZ28udHM6NDgKCS8vIG9wZXJhdGlvbiA9PT0gJ2RpZmZlcmVuY2UnCglmcmFtZV9kaWcgLTMgLy8gb3BlcmF0aW9uOiBzdHJpbmcKCWJ5dGUgMHg2NDY5NjY2NjY1NzI2NTZlNjM2NSAvLyAiZGlmZmVyZW5jZSIKCT09CglieiAqaWYwX2Vsc2UKCgkvLyAqaWYwX2Vsc2VpZjFfY29uc2VxdWVudAoJLy8gY29udHJhY3RzL0JveENvbnRyYWN0LmFsZ28udHM6NDkKCS8vIHJlc3VsdCA9IHRoaXMuZ2V0RGlmZmVyZW5jZShhLCBiKQoJZnJhbWVfZGlnIC0yIC8vIGI6IHVpbnQ2NAoJZnJhbWVfZGlnIC0xIC8vIGE6IHVpbnQ2NAoJY2FsbHN1YiBnZXREaWZmZXJlbmNlCglmcmFtZV9idXJ5IDAgLy8gcmVzdWx0OiB1aW50NjQKCWIgKmlmMF9lbmQKCippZjBfZWxzZToKCS8vIEludmFsaWQgb3BlcmF0aW9uCgllcnIKCippZjBfZW5kOgoJLy8gY29udHJhY3RzL0JveENvbnRyYWN0LmFsZ28udHM6NTIKCS8vIHJldHVybiByZXN1bHQ7CglmcmFtZV9kaWcgMCAvLyByZXN1bHQ6IHVpbnQ2NAoKCS8vIHNldCB0aGUgc3Vicm91dGluZSByZXR1cm4gdmFsdWUKCWZyYW1lX2J1cnkgMAoJcmV0c3ViCgovLyBoZWxsbyhzdHJpbmcpc3RyaW5nCiphYmlfcm91dGVfaGVsbG86CgkvLyBUaGUgQUJJIHJldHVybiBwcmVmaXgKCWJ5dGUgMHgxNTFmN2M3NQoKCS8vIG5hbWU6IHN0cmluZwoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQoJZXh0cmFjdCAyIDAKCgkvLyBleGVjdXRlIGhlbGxvKHN0cmluZylzdHJpbmcKCWNhbGxzdWIgaGVsbG8KCWR1cAoJbGVuCglpdG9iCglleHRyYWN0IDYgMgoJc3dhcAoJY29uY2F0Cgljb25jYXQKCWxvZwoJaW50IDEKCXJldHVybgoKLy8gaGVsbG8obmFtZTogc3RyaW5nKTogc3RyaW5nCi8vCi8vIEEgZGVtb25zdHJhdGlvbiBtZXRob2QgdXNlZCBpbiB0aGUgQWxnb0tpdCBmdWxsc3RhY2sgdGVtcGxhdGUuCi8vIEdyZWV0cyB0aGUgdXNlciBieSBuYW1lLgovLwovLyBAcGFyYW0gbmFtZSBUaGUgbmFtZSBvZiB0aGUgdXNlciB0byBncmVldC4KLy8gQHJldHVybnMgQSBncmVldGluZyBtZXNzYWdlIHRvIHRoZSB1c2VyLgpoZWxsbzoKCXByb3RvIDEgMQoKCS8vIGNvbnRyYWN0cy9Cb3hDb250cmFjdC5hbGdvLnRzOjYzCgkvLyByZXR1cm4gJ0hlbGxvLCAnICsgbmFtZTsKCWJ5dGUgMHg0ODY1NmM2YzZmMmMyMCAvLyAiSGVsbG8sICIKCWZyYW1lX2RpZyAtMSAvLyBuYW1lOiBzdHJpbmcKCWNvbmNhdAoJcmV0c3ViCgoqYWJpX3JvdXRlX2NyZWF0ZUFwcGxpY2F0aW9uOgoJaW50IDEKCXJldHVybgoKKmNyZWF0ZV9Ob09wOgoJbWV0aG9kICJjcmVhdGVBcHBsaWNhdGlvbigpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfY3JlYXRlQXBwbGljYXRpb24KCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY3JlYXRlIE5vT3AKCWVycgoKKmNhbGxfTm9PcDoKCW1ldGhvZCAiY3JlYXRlQm94KHVpbnQ2NCl2b2lkIgoJbWV0aG9kICJkb01hdGgodWludDY0LHVpbnQ2NCxzdHJpbmcpdWludDY0IgoJbWV0aG9kICJoZWxsbyhzdHJpbmcpc3RyaW5nIgoJdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAoJbWF0Y2ggKmFiaV9yb3V0ZV9jcmVhdGVCb3ggKmFiaV9yb3V0ZV9kb01hdGggKmFiaV9yb3V0ZV9oZWxsbwoKCS8vIHRoaXMgY29udHJhY3QgZG9lcyBub3QgaW1wbGVtZW50IHRoZSBnaXZlbiBBQkkgbWV0aG9kIGZvciBjYWxsIE5vT3AKCWVycg==',
     clear: 'I3ByYWdtYSB2ZXJzaW9uIDEw',
   },
   contract: {
-    name: 'BoxTest',
+    name: 'BoxContract',
     desc: '',
     methods: [
+      {
+        name: 'createBox',
+        args: [
+          {
+            name: 'nonce',
+            type: 'uint64',
+          },
+        ],
+        returns: {
+          type: 'void',
+        },
+      },
       {
         name: 'doMath',
         desc: 'A method that takes two numbers and does either addition or subtraction',
@@ -139,34 +141,6 @@ export const APP_SPEC: AppSpec = {
         returns: {
           type: 'string',
           desc: 'A greeting message to the user.',
-        },
-      },
-      {
-        name: 'createBox',
-        args: [
-          {
-            name: 'name',
-            type: 'string',
-          },
-          {
-            name: 'nonce',
-            type: 'uint64',
-          },
-        ],
-        returns: {
-          type: 'void',
-        },
-      },
-      {
-        name: 'getBox',
-        args: [
-          {
-            name: 'nonce',
-            type: 'uint64',
-          },
-        ],
-        returns: {
-          type: '(string)',
         },
       },
       {
@@ -242,36 +216,46 @@ export type AppClientComposeExecuteParams = Pick<
 >
 
 /**
- * Defines the types of available calls and state of the BoxTest smart contract.
+ * Defines the types of available calls and state of the BoxContract smart contract.
  */
-export type BoxTest = {
+export type BoxContract = {
   /**
    * Maps method signatures / names to their argument and return types.
    */
   methods: Record<
-    'doMath(uint64,uint64,string)uint64' | 'doMath',
+    'createBox(uint64)void' | 'createBox',
     {
       argsObj: {
-        /**
-         * The first uint64
-         */
-        a: bigint | number
-        /**
-         * The second uint64
-         */
-        b: bigint | number
-        /**
-         * The operation to perform. Can be either 'sum' or 'difference'
-         */
-        operation: string
+        nonce: bigint | number
       }
-      argsTuple: [a: bigint | number, b: bigint | number, operation: string]
-      /**
-       * The result of the operation
-       */
-      returns: bigint
+      argsTuple: [nonce: bigint | number]
+      returns: void
     }
   > &
+    Record<
+      'doMath(uint64,uint64,string)uint64' | 'doMath',
+      {
+        argsObj: {
+          /**
+           * The first uint64
+           */
+          a: bigint | number
+          /**
+           * The second uint64
+           */
+          b: bigint | number
+          /**
+           * The operation to perform. Can be either 'sum' or 'difference'
+           */
+          operation: string
+        }
+        argsTuple: [a: bigint | number, b: bigint | number, operation: string]
+        /**
+         * The result of the operation
+         */
+        returns: bigint
+      }
+    > &
     Record<
       'hello(string)string' | 'hello',
       {
@@ -289,27 +273,6 @@ export type BoxTest = {
       }
     > &
     Record<
-      'createBox(string,uint64)void' | 'createBox',
-      {
-        argsObj: {
-          name: string
-          nonce: bigint | number
-        }
-        argsTuple: [name: string, nonce: bigint | number]
-        returns: void
-      }
-    > &
-    Record<
-      'getBox(uint64)(string)' | 'getBox',
-      {
-        argsObj: {
-          nonce: bigint | number
-        }
-        argsTuple: [nonce: bigint | number]
-        returns: [string]
-      }
-    > &
-    Record<
       'createApplication()void' | 'createApplication',
       {
         argsObj: {}
@@ -317,23 +280,15 @@ export type BoxTest = {
         returns: void
       }
     >
-  /**
-   * Defines the shape of the global and local state of the application.
-   */
-  state: {
-    global: {
-      boxCount?: IntegerState
-    }
-  }
 }
 /**
  * Defines the possible abi call signatures
  */
-export type BoxTestSig = keyof BoxTest['methods']
+export type BoxContractSig = keyof BoxContract['methods']
 /**
  * Defines an object containing all relevant parameters for a single call to the contract. Where TSignature is undefined, a bare call is made
  */
-export type TypedCallParams<TSignature extends BoxTestSig | undefined> = {
+export type TypedCallParams<TSignature extends BoxContractSig | undefined> = {
   method: TSignature
   methodArgs: TSignature extends undefined ? undefined : Array<ABIAppCallArg | undefined>
 } & AppClientCallCoreParams &
@@ -343,44 +298,44 @@ export type TypedCallParams<TSignature extends BoxTestSig | undefined> = {
  */
 export type BareCallArgs = Omit<RawAppCallArgs, keyof CoreAppCallArgs>
 /**
- * Maps a method signature from the BoxTest smart contract to the method's arguments in either tuple of struct form
+ * Maps a method signature from the BoxContract smart contract to the method's arguments in either tuple of struct form
  */
-export type MethodArgs<TSignature extends BoxTestSig> = BoxTest['methods'][TSignature]['argsObj' | 'argsTuple']
+export type MethodArgs<TSignature extends BoxContractSig> = BoxContract['methods'][TSignature]['argsObj' | 'argsTuple']
 /**
- * Maps a method signature from the BoxTest smart contract to the method's return type
+ * Maps a method signature from the BoxContract smart contract to the method's return type
  */
-export type MethodReturn<TSignature extends BoxTestSig> = BoxTest['methods'][TSignature]['returns']
+export type MethodReturn<TSignature extends BoxContractSig> = BoxContract['methods'][TSignature]['returns']
 
 /**
  * A factory for available 'create' calls
  */
-export type BoxTestCreateCalls = (typeof BoxTestCallFactory)['create']
+export type BoxContractCreateCalls = (typeof BoxContractCallFactory)['create']
 /**
  * Defines supported create methods for this smart contract
  */
-export type BoxTestCreateCallParams = TypedCallParams<'createApplication()void'> & OnCompleteNoOp
+export type BoxContractCreateCallParams = TypedCallParams<'createApplication()void'> & OnCompleteNoOp
 /**
  * Defines arguments required for the deploy method.
  */
-export type BoxTestDeployArgs = {
+export type BoxContractDeployArgs = {
   deployTimeParams?: TealTemplateParams
   /**
    * A delegate which takes a create call factory and returns the create call params for this smart contract
    */
-  createCall?: (callFactory: BoxTestCreateCalls) => BoxTestCreateCallParams
+  createCall?: (callFactory: BoxContractCreateCalls) => BoxContractCreateCallParams
 }
 
 /**
  * Exposes methods for constructing all available smart contract calls
  */
-export abstract class BoxTestCallFactory {
+export abstract class BoxContractCallFactory {
   /**
    * Gets available create call factories
    */
   static get create() {
     return {
       /**
-       * Constructs a create call for the BoxTest smart contract using the createApplication()void ABI method
+       * Constructs a create call for the BoxContract smart contract using the createApplication()void ABI method
        *
        * @param args Any args for the contract call
        * @param params Any additional parameters for the call
@@ -399,6 +354,20 @@ export abstract class BoxTestCallFactory {
     }
   }
 
+  /**
+   * Constructs a no op call for the createBox(uint64)void ABI method
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static createBox(args: MethodArgs<'createBox(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'createBox(uint64)void' as const,
+      methodArgs: Array.isArray(args) ? args : [args.nonce],
+      ...params,
+    }
+  }
   /**
    * Constructs a no op call for the doMath(uint64,uint64,string)uint64 ABI method
    *
@@ -432,40 +401,12 @@ Greets the user by name.
       ...params,
     }
   }
-  /**
-   * Constructs a no op call for the createBox(string,uint64)void ABI method
-   *
-   * @param args Any args for the contract call
-   * @param params Any additional parameters for the call
-   * @returns A TypedCallParams object for the call
-   */
-  static createBox(args: MethodArgs<'createBox(string,uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
-    return {
-      method: 'createBox(string,uint64)void' as const,
-      methodArgs: Array.isArray(args) ? args : [args.name, args.nonce],
-      ...params,
-    }
-  }
-  /**
-   * Constructs a no op call for the getBox(uint64)(string) ABI method
-   *
-   * @param args Any args for the contract call
-   * @param params Any additional parameters for the call
-   * @returns A TypedCallParams object for the call
-   */
-  static getBox(args: MethodArgs<'getBox(uint64)(string)'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
-    return {
-      method: 'getBox(uint64)(string)' as const,
-      methodArgs: Array.isArray(args) ? args : [args.nonce],
-      ...params,
-    }
-  }
 }
 
 /**
- * A client to make calls to the BoxTest smart contract
+ * A client to make calls to the BoxContract smart contract
  */
-export class BoxTestClient {
+export class BoxContractClient {
   /**
    * The underlying `ApplicationClient` for when you want to have more flexibility
    */
@@ -474,7 +415,7 @@ export class BoxTestClient {
   private readonly sender: SendTransactionFrom | undefined
 
   /**
-   * Creates a new instance of `BoxTestClient`
+   * Creates a new instance of `BoxContractClient`
    *
    * @param appDetails appDetails The details to identify the app to deploy
    * @param algod An algod client instance
@@ -521,7 +462,7 @@ export class BoxTestClient {
    * @param returnValueFormatter An optional delegate which when provided will be used to map non-undefined return values to the target type
    * @returns The result of the smart contract call
    */
-  public async call<TSignature extends keyof BoxTest['methods']>(
+  public async call<TSignature extends keyof BoxContract['methods']>(
     typedCallParams: TypedCallParams<TSignature>,
     returnValueFormatter?: (value: any) => MethodReturn<TSignature>,
   ) {
@@ -529,13 +470,13 @@ export class BoxTestClient {
   }
 
   /**
-   * Idempotently deploys the BoxTest smart contract.
+   * Idempotently deploys the BoxContract smart contract.
    *
    * @param params The arguments for the contract calls and any additional parameters for the call
    * @returns The deployment result
    */
-  public deploy(params: BoxTestDeployArgs & AppClientDeployCoreParams = {}): ReturnType<ApplicationClient['deploy']> {
-    const createArgs = params.createCall?.(BoxTestCallFactory.create)
+  public deploy(params: BoxContractDeployArgs & AppClientDeployCoreParams = {}): ReturnType<ApplicationClient['deploy']> {
+    const createArgs = params.createCall?.(BoxContractCallFactory.create)
     return this.appClient.deploy({
       ...params,
       createArgs,
@@ -550,7 +491,7 @@ export class BoxTestClient {
     const $this = this
     return {
       /**
-       * Creates a new instance of the BoxTest smart contract using the createApplication()void ABI method.
+       * Creates a new instance of the BoxContract smart contract using the createApplication()void ABI method.
        *
        * @param args The arguments for the smart contract call
        * @param params Any additional parameters for the call
@@ -561,20 +502,31 @@ export class BoxTestClient {
         params: AppClientCallCoreParams & AppClientCompilationParams & OnCompleteNoOp = {},
       ) {
         return $this.mapReturnValue<MethodReturn<'createApplication()void'>, AppCreateCallTransactionResult>(
-          await $this.appClient.create(BoxTestCallFactory.create.createApplication(args, params)),
+          await $this.appClient.create(BoxContractCallFactory.create.createApplication(args, params)),
         )
       },
     }
   }
 
   /**
-   * Makes a clear_state call to an existing instance of the BoxTest smart contract.
+   * Makes a clear_state call to an existing instance of the BoxContract smart contract.
    *
    * @param args The arguments for the bare call
    * @returns The clear_state result
    */
   public clearState(args: BareCallArgs & AppClientCallCoreParams & CoreAppCallArgs = {}) {
     return this.appClient.clearState(args)
+  }
+
+  /**
+   * Calls the createBox(uint64)void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public createBox(args: MethodArgs<'createBox(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(BoxContractCallFactory.createBox(args, params))
   }
 
   /**
@@ -587,7 +539,7 @@ export class BoxTestClient {
    * @returns The result of the call: The result of the operation
    */
   public doMath(args: MethodArgs<'doMath(uint64,uint64,string)uint64'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
-    return this.call(BoxTestCallFactory.doMath(args, params))
+    return this.call(BoxContractCallFactory.doMath(args, params))
   }
 
   /**
@@ -601,91 +553,22 @@ Greets the user by name.
    * @returns The result of the call: A greeting message to the user.
    */
   public hello(args: MethodArgs<'hello(string)string'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
-    return this.call(BoxTestCallFactory.hello(args, params))
+    return this.call(BoxContractCallFactory.hello(args, params))
   }
 
-  /**
-   * Calls the createBox(string,uint64)void ABI method.
-   *
-   * @param args The arguments for the contract call
-   * @param params Any additional parameters for the call
-   * @returns The result of the call
-   */
-  public createBox(args: MethodArgs<'createBox(string,uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
-    return this.call(BoxTestCallFactory.createBox(args, params))
-  }
-
-  /**
-   * Calls the getBox(uint64)(string) ABI method.
-   *
-   * @param args The arguments for the contract call
-   * @param params Any additional parameters for the call
-   * @returns The result of the call
-   */
-  public getBox(args: MethodArgs<'getBox(uint64)(string)'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
-    return this.call(BoxTestCallFactory.getBox(args, params))
-  }
-
-  /**
-   * Extracts a binary state value out of an AppState dictionary
-   *
-   * @param state The state dictionary containing the state value
-   * @param key The key of the state value
-   * @returns A BinaryState instance containing the state value, or undefined if the key was not found
-   */
-  private static getBinaryState(state: AppState, key: string): BinaryState | undefined {
-    const value = state[key]
-    if (!value) return undefined
-    if (!('valueRaw' in value)) throw new Error(`Failed to parse state value for ${key}; received an int when expected a byte array`)
-    return {
-      asString(): string {
-        return value.value
-      },
-      asByteArray(): Uint8Array {
-        return value.valueRaw
-      },
-    }
-  }
-
-  /**
-   * Extracts a integer state value out of an AppState dictionary
-   *
-   * @param state The state dictionary containing the state value
-   * @param key The key of the state value
-   * @returns An IntegerState instance containing the state value, or undefined if the key was not found
-   */
-  private static getIntegerState(state: AppState, key: string): IntegerState | undefined {
-    const value = state[key]
-    if (!value) return undefined
-    if ('valueRaw' in value) throw new Error(`Failed to parse state value for ${key}; received a byte array when expected a number`)
-    return {
-      asBigInt() {
-        return typeof value.value === 'bigint' ? value.value : BigInt(value.value)
-      },
-      asNumber(): number {
-        return typeof value.value === 'bigint' ? Number(value.value) : value.value
-      },
-    }
-  }
-
-  /**
-   * Returns the smart contract's global state wrapped in a strongly typed accessor with options to format the stored value
-   */
-  public async getGlobalState(): Promise<BoxTest['state']['global']> {
-    const state = await this.appClient.getGlobalState()
-    return {
-      get boxCount() {
-        return BoxTestClient.getIntegerState(state, 'boxCount')
-      },
-    }
-  }
-
-  public compose(): BoxTestComposer {
+  public compose(): BoxContractComposer {
     const client = this
     const atc = new AtomicTransactionComposer()
     let promiseChain: Promise<unknown> = Promise.resolve()
     const resultMappers: Array<undefined | ((x: any) => any)> = []
     return {
+      createBox(args: MethodArgs<'createBox(uint64)void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() =>
+          client.createBox(args, { ...params, sendParams: { ...params?.sendParams, skipSending: true, atc } }),
+        )
+        resultMappers.push(undefined)
+        return this
+      },
       doMath(args: MethodArgs<'doMath(uint64,uint64,string)uint64'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
         promiseChain = promiseChain.then(() =>
           client.doMath(args, { ...params, sendParams: { ...params?.sendParams, skipSending: true, atc } }),
@@ -696,20 +579,6 @@ Greets the user by name.
       hello(args: MethodArgs<'hello(string)string'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
         promiseChain = promiseChain.then(() =>
           client.hello(args, { ...params, sendParams: { ...params?.sendParams, skipSending: true, atc } }),
-        )
-        resultMappers.push(undefined)
-        return this
-      },
-      createBox(args: MethodArgs<'createBox(string,uint64)void'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
-        promiseChain = promiseChain.then(() =>
-          client.createBox(args, { ...params, sendParams: { ...params?.sendParams, skipSending: true, atc } }),
-        )
-        resultMappers.push(undefined)
-        return this
-      },
-      getBox(args: MethodArgs<'getBox(uint64)(string)'>, params?: AppClientComposeCallCoreParams & CoreAppCallArgs) {
-        promiseChain = promiseChain.then(() =>
-          client.getBox(args, { ...params, sendParams: { ...params?.sendParams, skipSending: true, atc } }),
         )
         resultMappers.push(undefined)
         return this
@@ -750,10 +619,22 @@ Greets the user by name.
           returns: result.returns?.map((val, i) => (resultMappers[i] !== undefined ? resultMappers[i]!(val.returnValue) : val.returnValue)),
         }
       },
-    } as unknown as BoxTestComposer
+    } as unknown as BoxContractComposer
   }
 }
-export type BoxTestComposer<TReturns extends [...any[]] = []> = {
+export type BoxContractComposer<TReturns extends [...any[]] = []> = {
+  /**
+   * Calls the createBox(uint64)void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  createBox(
+    args: MethodArgs<'createBox(uint64)void'>,
+    params?: AppClientComposeCallCoreParams & CoreAppCallArgs,
+  ): BoxContractComposer<[...TReturns, MethodReturn<'createBox(uint64)void'>]>
+
   /**
    * Calls the doMath(uint64,uint64,string)uint64 ABI method.
    *
@@ -766,7 +647,7 @@ export type BoxTestComposer<TReturns extends [...any[]] = []> = {
   doMath(
     args: MethodArgs<'doMath(uint64,uint64,string)uint64'>,
     params?: AppClientComposeCallCoreParams & CoreAppCallArgs,
-  ): BoxTestComposer<[...TReturns, MethodReturn<'doMath(uint64,uint64,string)uint64'>]>
+  ): BoxContractComposer<[...TReturns, MethodReturn<'doMath(uint64,uint64,string)uint64'>]>
 
   /**
    * Calls the hello(string)string ABI method.
@@ -781,39 +662,15 @@ Greets the user by name.
   hello(
     args: MethodArgs<'hello(string)string'>,
     params?: AppClientComposeCallCoreParams & CoreAppCallArgs,
-  ): BoxTestComposer<[...TReturns, MethodReturn<'hello(string)string'>]>
+  ): BoxContractComposer<[...TReturns, MethodReturn<'hello(string)string'>]>
 
   /**
-   * Calls the createBox(string,uint64)void ABI method.
-   *
-   * @param args The arguments for the contract call
-   * @param params Any additional parameters for the call
-   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
-   */
-  createBox(
-    args: MethodArgs<'createBox(string,uint64)void'>,
-    params?: AppClientComposeCallCoreParams & CoreAppCallArgs,
-  ): BoxTestComposer<[...TReturns, MethodReturn<'createBox(string,uint64)void'>]>
-
-  /**
-   * Calls the getBox(uint64)(string) ABI method.
-   *
-   * @param args The arguments for the contract call
-   * @param params Any additional parameters for the call
-   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
-   */
-  getBox(
-    args: MethodArgs<'getBox(uint64)(string)'>,
-    params?: AppClientComposeCallCoreParams & CoreAppCallArgs,
-  ): BoxTestComposer<[...TReturns, MethodReturn<'getBox(uint64)(string)'>]>
-
-  /**
-   * Makes a clear_state call to an existing instance of the BoxTest smart contract.
+   * Makes a clear_state call to an existing instance of the BoxContract smart contract.
    *
    * @param args The arguments for the bare call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
    */
-  clearState(args?: BareCallArgs & AppClientComposeCallCoreParams & CoreAppCallArgs): BoxTestComposer<[...TReturns, undefined]>
+  clearState(args?: BareCallArgs & AppClientComposeCallCoreParams & CoreAppCallArgs): BoxContractComposer<[...TReturns, undefined]>
 
   /**
    * Adds a transaction to the composer
@@ -824,7 +681,7 @@ Greets the user by name.
   addTransaction(
     txn: TransactionWithSigner | TransactionToSign | Transaction | Promise<SendTransactionResult>,
     defaultSender?: SendTransactionFrom,
-  ): BoxTestComposer<TReturns>
+  ): BoxContractComposer<TReturns>
   /**
    * Returns the underlying AtomicTransactionComposer instance
    */
@@ -832,19 +689,19 @@ Greets the user by name.
   /**
    * Simulates the transaction group and returns the result
    */
-  simulate(options?: SimulateOptions): Promise<BoxTestComposerSimulateResult<TReturns>>
+  simulate(options?: SimulateOptions): Promise<BoxContractComposerSimulateResult<TReturns>>
   /**
    * Executes the transaction group and returns the results
    */
-  execute(sendParams?: AppClientComposeExecuteParams): Promise<BoxTestComposerResults<TReturns>>
+  execute(sendParams?: AppClientComposeExecuteParams): Promise<BoxContractComposerResults<TReturns>>
 }
 export type SimulateOptions = Omit<ConstructorParameters<typeof modelsv2.SimulateRequest>[0], 'txnGroups'>
-export type BoxTestComposerSimulateResult<TReturns extends [...any[]]> = {
+export type BoxContractComposerSimulateResult<TReturns extends [...any[]]> = {
   returns: TReturns
   methodResults: ABIResult[]
   simulateResponse: modelsv2.SimulateResponse
 }
-export type BoxTestComposerResults<TReturns extends [...any[]]> = {
+export type BoxContractComposerResults<TReturns extends [...any[]]> = {
   returns: TReturns
   groupId: string
   txIds: string[]

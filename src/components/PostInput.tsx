@@ -21,6 +21,7 @@ import { PostTypeSwitch } from './PostTypeSwitch'
 
 //--------------
 import * as algokit from '@algorandfoundation/algokit-utils'
+import { BoxContractClient } from '../contracts/clients/BoxTestClient'
 import { getOptedIn } from '../utils/getOptedIn'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 //----------
@@ -78,25 +79,23 @@ const PostInput = () => {
 
   // vote states
 
-  // const handleCreateVote = async (e: React.FormEvent) => {
-  //   e.preventDefault()
+  const handleCreateVote = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-  //   // makePoll(algorand, appClient, activeAccount?.address!, signer, BigInt(1), 721969155)
+    // makePoll(algorand, appClient, activeAccount?.address!, signer, BigInt(1), 721969155)
 
-  //   const boxTestClient = new BoxTestClient(
-  //     {
-  //       resolveBy: 'id',
-  //       id: 722538553,
-  //       sender: { addr: activeAccount?.address!, signer },
-  //     },
-  //     algod,
-  //   )
+    const boxTestClient = new BoxContractClient(
+      {
+        resolveBy: 'id',
+        id: 722549441,
+        sender: { addr: activeAccount?.address!, signer },
+      },
+      algod,
+    )
 
-  //   const trueClient = await boxTestClient.compose()
-
-  //   const result = await boxTestClient.getBox({ nonce: 0 })
-  //   console.log('result', result)
-  // }
+    const result = await boxTestClient.createBox({ nonce: 1 })
+    console.log('result', result)
+  }
 
   const [counter, setCounter] = useState(1)
   const [prizePool, setPrizePool] = useState(10)
@@ -152,12 +151,12 @@ const PostInput = () => {
 
     const allTransactions: Transaction[] = []
 
-    usableAssetsList.forEach(async (asset: any) => {
+    for (const asset of usableAssetsList) {
       console.log('viewing opted in', asset)
       const userOptedIn = await getOptedIn(activeAccount?.address!, asset.assetId, algod)
       console.log('userOptedin', userOptedIn)
 
-      if (asset.assetId == 0) return
+      if (asset.assetId === 0) continue
 
       if (!userOptedIn) {
         const transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -170,7 +169,7 @@ const PostInput = () => {
 
         allTransactions.push(transaction)
       }
-    })
+    }
 
     try {
       const encodedInputText = encodeURIComponent(inputText.replace(/\n/g, '%0A'))
@@ -256,7 +255,7 @@ const PostInput = () => {
   }
 
   return (
-    <form onSubmit={(e) => (postType == 'post' ? handleSubmit(e) : null)}>
+    <form onSubmit={(e) => (postType == 'post' ? handleSubmit(e) : handleCreateVote(e))}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea
