@@ -1,4 +1,3 @@
-import React from 'react'
 import { usePosts } from '../context/Posts/Posts'
 
 export const PostTypeSwitch = () => {
@@ -13,6 +12,7 @@ export const PostTypeSwitch = () => {
     >
       <span className={`text-sm ${postType === 'post' && 'font-bold'}`}>post</span>
       <button
+        type="button"
         onClick={() => {
           handleChangePostType(postType === 'post' ? 'vote' : 'post')
         }}

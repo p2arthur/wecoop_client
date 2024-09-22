@@ -7,6 +7,7 @@ import { useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
+import { createAppClient } from '../contracts/app-calls/wecoopDaoMethods'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { NotePrefix } from '../enums/notePrefix'
 import { User as UserInterface } from '../services/api/types'
@@ -17,6 +18,10 @@ import Button from './Button'
 import { CoinDropdown } from './CoinDropdown'
 import Counter from './Counter'
 import { PostTypeSwitch } from './PostTypeSwitch'
+
+//--------------
+import * as algokit from '@algorandfoundation/algokit-utils'
+//----------
 
 export interface PostInputOutletContext {
   algod: AlgodClient
@@ -46,7 +51,7 @@ const placeholderPhrases = [
 
 const PostInput = () => {
   const { usableAssetId } = useParams<{ usableAssetId: string }>()
-  const { signTransactions, sendTransactions, activeAccount } = useWallet()
+  const { signTransactions, sendTransactions, activeAccount, signer } = useWallet()
   const { handleAddNewPost, handleDeletePost, handleRefreshPosts, postType } = usePosts()
   const [openTooltip, setOpenTooltip] = useState(false)
   const { algod, userData } = useOutletContext() as PostInputOutletContext
@@ -54,8 +59,71 @@ const PostInput = () => {
   const [selectedAsset, setSelectedAsset] = useState(usableAssetsList[0])
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
+  const [appClient, setAppClient] = useState<any>()
+
+  useEffect(() => {
+    if (activeAccount) {
+      const wecoopAppClient = createAppClient({ signer, addr: activeAccount.address })
+      setAppClient(wecoopAppClient)
+    }
+  }, [activeAccount])
 
   // vote states
+
+  const handleCreateVote = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const appAddress = 'FNFHOHL5G6FH6QAIDBV3ERUCUM3KHKBCRA4NG7JNAA5QATACJJZDRD6BJM'
+    const daoAsset = 721969155
+
+    // Fetch the suggested params from the network
+    const suggestedParams = await algod.getTransactionParams().do()
+
+    // Create the MBR transaction (payment transaction to cover Minimum Balance Requirement)
+    const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: activeAccount?.address!,
+      suggestedParams,
+      to: appAddress,
+      amount: 3_450, // Adjust based on actual MBR
+    })
+
+    // Create the asset transfer (axfer) transaction
+    const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: activeAccount?.address!,
+      suggestedParams,
+      to: appAddress,
+      amount: 2, // Transfer 2 units of daoAsset
+      assetIndex: Number(daoAsset),
+    })
+
+    // Wrap transactions with signer
+    const mbrTxnWithSigner = {
+      txn: mbrTxn,
+      signer: signer,
+    }
+
+    const axferWithSigner = {
+      txn: axfer,
+      signer: signer,
+    }
+
+    // Proceed with the createPoll contract call
+    const result = await appClient.createPoll(
+      {
+        mbrTxn: mbrTxnWithSigner, // Pass the wrapped mbrTxn
+        axfer: axferWithSigner, // Pass the wrapped axfer
+        question: inputText, // The poll question
+      },
+      {
+        sender: { addr: activeAccount?.address!, signer: signer }, // Signer and account address
+        sendParams: {
+          fee: algokit.microAlgos(3_000), // Define the fee
+        },
+      },
+    )
+
+    console.log('Poll created successfully:', result)
+  }
 
   const [counter, setCounter] = useState(1)
   const [prizePool, setPrizePool] = useState(10)
@@ -190,7 +258,7 @@ const PostInput = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => (postType == 'post' ? handleSubmit(e) : handleCreateVote(e))}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea
