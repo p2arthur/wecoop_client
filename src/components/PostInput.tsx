@@ -142,6 +142,19 @@ const PostInput = () => {
 
       console.log(usableAsset.assetId, 'usableAsset.assetId')
 
+      handleAddNewPost({
+        creator_address: userData.address,
+        text: inputText,
+        status: 'loading',
+        transaction_id: 'loading_id',
+        country,
+        timestamp: new Date().getDate(),
+        replies: [],
+        likes: [],
+        isPersonalized: {},
+        assetId: usableAsset.assetId,
+      })
+
       // Check if it's a payment transaction or an asset transfer transaction
       if (usableAsset.assetId === 0) {
         // Payment transaction (Algo transfer)
@@ -196,6 +209,7 @@ const PostInput = () => {
         isPersonalized: {},
         assetId: usableAsset.assetId,
       })
+      setInputText('')
     } catch (error) {
       console.error(error)
       setTimeout(() => {
