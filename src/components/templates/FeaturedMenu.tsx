@@ -37,8 +37,8 @@ export const ProfileMenu = () => {
       />
 
       <div className="w-full text-center flex flex-col gap-2">
+        <h1>Made by </h1>
         <div>
-          Made by{' '}
           <a className="underline text-blue-700 hover:text-blue-500" target="_blank" href="https://twitter.com/iam_p2">
             @iam_p2
           </a>{' '}
