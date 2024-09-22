@@ -15,7 +15,7 @@ import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, Reply as IReply, User } from '../services/api/types'
+import { Reply as IReply, Post, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -177,7 +177,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
           <div
             onClick={handleGoToPostPage}
             className={`${
-              post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900'
+              post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900 dark:border-gray-300/30'
             } flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer bg-white dark:bg-gray-900`}
           >
             <div className="flex items-center justify-between">
