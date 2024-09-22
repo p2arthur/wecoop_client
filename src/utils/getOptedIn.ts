@@ -5,7 +5,6 @@ export const getOptedIn = async (walletAddress: string, assetId: number, algod: 
     // Fetch account information
     const accountInfo = await algod.accountInformation(walletAddress).do()
 
-    console.log('accountInfo', accountInfo)
 
     // Check if assetId exists in the account's assets
     const optedIn = accountInfo.assets.some((asset: any) => asset['asset-id'] === assetId)
