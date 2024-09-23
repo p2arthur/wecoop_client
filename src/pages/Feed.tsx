@@ -73,7 +73,7 @@ const Feed = () => {
         />
       </div>
 
-      <div className="p-2 border-2 w-full border-gray-950 dark:border-gray-800 flex flex-col gap-5 h-screen">
+      <div className="p-2 border-2 max-w-[60%] w-full border-gray-950 dark:border-gray-800 flex flex-col gap-5 h-screen">
         <div className=" bg-gray">
           <PostInput />
         </div>
