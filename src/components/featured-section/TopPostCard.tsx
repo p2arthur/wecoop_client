@@ -4,7 +4,7 @@ import { usableAssetsList } from '../../data/usableAssetsList'
 import { handleTextPost } from '../PostCard'
 
 interface TopPostCardInterface {
-  post: { id: string; text: string; likesCount: number; repliesCount: number; assetId: number }
+  post: { id: string; text: string; likesCount: number; repliesCount: number; assetId: number | null }
 }
 
 export default function TopPostCard({ post }: TopPostCardInterface) {
