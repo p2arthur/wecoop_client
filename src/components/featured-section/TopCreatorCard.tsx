@@ -3,12 +3,11 @@ import { getUserInfo } from '../../services/api/Users'
 import { User } from '../../services/api/types'
 import { ellipseAddress } from '../../utils/ellipseAddress'
 import { generateIdIcon } from '../ConnectWallet'
-import { LikesWallets } from '../../services/api/Analytics'
 import { FaExchangeAlt } from 'react-icons/fa'
 import CountUp from 'react-countup'
 
 interface TopCreatorCardInterface {
-  topCreator: LikesWallets
+  topCreator: { creator_address: string; interactions: number }
 }
 
 export default function TopCreatorCard({ topCreator }: TopCreatorCardInterface) {
@@ -26,7 +25,7 @@ export default function TopCreatorCard({ topCreator }: TopCreatorCardInterface) 
 
   const appendCreatorData = async () => {
     setIsLoadingUser(true)
-    const user = await getUserInfo(topCreator.address)
+    const user = await getUserInfo(topCreator.creator_address)
 
     setCurrentCreator(user)
     setIsLoadingUser(false)
@@ -65,7 +64,7 @@ export default function TopCreatorCard({ topCreator }: TopCreatorCardInterface) 
       <div className="flex flex-col">
         <h3 className="font-bold">{currentCreator.nfd.name || ellipseAddress(currentCreator.address) || 'loading ...'}</h3>
         <div className="flex items-center gap-2">
-          <CountUp end={topCreator.count} />
+          <CountUp end={topCreator.interactions} />
           <FaExchangeAlt />
         </div>
       </div>

@@ -2,10 +2,9 @@ import { Fragment } from 'react'
 import { FaMessage } from 'react-icons/fa6'
 import { MdThumbUp } from 'react-icons/md'
 import { usableAssetsList } from '../../data/usableAssetsList'
-import { Post } from '../../services/api/types'
 
 interface TopPostCardInterface {
-  post: Post
+  post: { id: string; text: string; likesCount: number; repliesCount: number; assetId: number }
 }
 
 export default function TopPostCard({ post }: TopPostCardInterface) {
@@ -33,17 +32,17 @@ export default function TopPostCard({ post }: TopPostCardInterface) {
   }
   return (
     <a
-      href={`/post?id=${post.transaction_id}`}
+      href={`/post?id=${post.id}`}
       className="w-full flex flex-col p-2 border-2 border-black dark:border-none whitespace-normal bg-white dark:bg-gray-900"
     >
       <div>{handleTextPost(post.text)}...</div>
       <div className="flex w-full h-7 justify-between items-center py-1">
         <div className="flex gap-2">
           <span className="flex gap-1 items-baseline">
-            <p>{post.likes.length}</p> <MdThumbUp />
+            <p>{post.likesCount}</p> <MdThumbUp />
           </span>
           <span className="flex gap-1 items-baseline">
-            <p>{post.replies.length}</p>
+            <p>{post.repliesCount}</p>
             <FaMessage />
           </span>
         </div>

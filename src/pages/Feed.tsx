@@ -5,7 +5,7 @@ import PostInput from '../components/PostInput'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
 import { MenuFeed } from '../components/templates/MenuFeed'
 import { usePosts } from '../context/Posts/Posts'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import MobileSidebar from '../components/interface/MobileSidebar'
 import { useGetLastPosts } from '../services/api/Posts'
 
@@ -16,6 +16,20 @@ const Feed = () => {
   const { activeAccount } = useWallet()
 
   const [params, setParams] = useSearchParams()
+
+  const [finalPostList, setFinalPostList] = useState(postList || dataLastPosts)
+
+  useEffect(() => {
+    if (!isLoading && postList) {
+      setFinalPostList(postList)
+    }
+  }, [isLoading, postList])
+
+  useEffect(() => {
+    if (!isLoadingLastPosts && dataLastPosts && isLoading) {
+      setFinalPostList(dataLastPosts)
+    }
+  }, [isLoadingLastPosts, dataLastPosts, isLoading])
 
   useEffect(() => {
     if (params.get('activeFeed') === 'coinFeed' && params.get('activeAssetId') !== null) {
@@ -30,7 +44,6 @@ const Feed = () => {
     }
   }, [activeFeed, activeAssetId])
 
-  // Função para atualizar a URL com base no activeFeed e activeAssetId
   const updateUrlParams = (newFeed: string, newAssetId: number) => {
     const searchParams = new URLSearchParams()
 
@@ -42,11 +55,9 @@ const Feed = () => {
       searchParams.set('activeAssetId', newAssetId.toString())
     }
 
-    // Atualiza os parâmetros de URL e navega
     setParams(searchParams)
   }
 
-  // Atualizar a handleChangeFeed para mudar a URL
   const handleFeedChange = (newFeed: string) => {
     if (activeAssetId) {
       updateUrlParams(newFeed, activeAssetId)
@@ -54,7 +65,6 @@ const Feed = () => {
     }
   }
 
-  // Atualizar handleFilterByAssetId para mudar a URL
   const handleAssetIdChange = (newAssetId: number | null) => {
     if (activeFeed) {
       updateUrlParams(activeFeed, newAssetId || 0)
@@ -81,11 +91,10 @@ const Feed = () => {
           <PostInput />
         </div>
         <div className="overflow-y-hidden  h-full">
-          <FeedComponent postList={isLoading ? dataLastPosts : postList} isLoading={isLoadingLastPosts} handleNewReply={handleNewReply} />
+          <FeedComponent postList={finalPostList} isLoading={isLoading || isLoadingLastPosts} handleNewReply={handleNewReply} />
         </div>
       </div>
       <div className="w-3/12 hidden md:flex">
-        {' '}
         <ProfileMenu />
       </div>
     </div>
