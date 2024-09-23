@@ -2,6 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetAllPosts, useGetAllPostsByWalletAddress, useGetPostByTransactionId } from '../../services/api/Posts'
 import { Like, Post } from '../../services/api/types'
+import { useQueryClient } from '@tanstack/react-query'
 
 export enum AssetId {
   coopCoin = 796425061,
@@ -55,6 +56,7 @@ const PostsContext = createContext<IPostsContext>({
 })
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
+  const queryClient = useQueryClient()
   const [postList, setPostList] = useState<Post[]>([])
   const [assetId, setAssetId] = useState<AssetId | null>(null)
   const [postType, setPostType] = useState<string>('post')
@@ -140,6 +142,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   const handleRefreshPosts = () => {
     sessionStorage.removeItem('postList')
+    queryClient.refetchQueries({ queryKey: ['getLastPosts'] })
     refetch().then(() => {
       if (data) {
         if (assetId) {

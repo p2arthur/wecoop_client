@@ -30,7 +30,6 @@ const Feed = () => {
     }
   }, [activeFeed, activeAssetId])
 
-  // Função para atualizar a URL com base no activeFeed e activeAssetId
   const updateUrlParams = (newFeed: string, newAssetId: number) => {
     const searchParams = new URLSearchParams()
 
@@ -42,11 +41,9 @@ const Feed = () => {
       searchParams.set('activeAssetId', newAssetId.toString())
     }
 
-    // Atualiza os parâmetros de URL e navega
     setParams(searchParams)
   }
 
-  // Atualizar a handleChangeFeed para mudar a URL
   const handleFeedChange = (newFeed: string) => {
     if (activeAssetId) {
       updateUrlParams(newFeed, activeAssetId)
@@ -54,7 +51,6 @@ const Feed = () => {
     }
   }
 
-  // Atualizar handleFilterByAssetId para mudar a URL
   const handleAssetIdChange = (newAssetId: number | null) => {
     if (activeFeed) {
       updateUrlParams(activeFeed, newAssetId || 0)
@@ -85,8 +81,7 @@ const Feed = () => {
         </div>
       </div>
       <div className="w-3/12 hidden md:flex">
-        {' '}
-        <ProfileMenu />
+        <ProfileMenu activeAssetId={activeAssetId} />
       </div>
     </div>
   )

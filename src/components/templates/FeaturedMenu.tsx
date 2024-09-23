@@ -1,35 +1,33 @@
 import CountUp from 'react-countup'
-import { useGetTopInteractionsByWallet, useGetTopPostsByLike } from '../../services/api/Analytics'
-import { User as UserInterface } from '../../services/api/types'
 import FeaturedSection from '../featured-section/FeaturedSection'
 import TopCreatorCard from '../featured-section/TopCreatorCard'
 import TopPostCard from '../featured-section/TopPostCard'
+import { usePosts } from '../../context/Posts/Posts'
+import useLeaderboard from '../../hooks/useLeaderboard'
 
 interface ProfileMenuProps {
-  user: UserInterface
+  activeAssetId: number | null | undefined
 }
 
-export const ProfileMenu = () => {
-  const { data, isLoading } = useGetTopInteractionsByWallet()
-  const { data: dataTopPosts, isLoading: isLoadingTopPosts } = useGetTopPostsByLike()
+export const ProfileMenu = ({ activeAssetId }: ProfileMenuProps) => {
+  const { postList, isLoading } = usePosts()
+  const { topPosts, topUsers, totalInteractions } = useLeaderboard(postList, activeAssetId)
 
-  console.log('top posts *(!@*#', dataTopPosts)
-
-  const isLoadingTotal = isLoading || isLoadingTopPosts
+  const isLoadingTotal = isLoading
 
   return (
     <div className={'w-full p-4 h-full flex flex-col justify-between'}>
       {!isLoadingTotal && (
         <div className={'text-center'}>
           <h1 className={'text-2xl'}>Total interactions:</h1>
-          <CountUp className={'text-xl bold'} end={data?.totalTransactions || 0} />
+          <CountUp className={'text-xl bold'} end={totalInteractions || 0} />
         </div>
       )}
       <FeaturedSection
         sectionTitle="Top creators "
         isLoadingAnalytics={isLoadingTotal}
         content={
-          <div className="flex flex-col gap-2">{data && data.topCreators?.map((creator) => <TopCreatorCard topCreator={creator} />)}</div>
+          <div className="flex flex-col gap-2">{topUsers && topUsers.map((creator) => <TopCreatorCard topCreator={creator} />)}</div>
         }
       />
       <FeaturedSection
@@ -37,8 +35,7 @@ export const ProfileMenu = () => {
         isLoadingAnalytics={isLoadingTotal}
         content={
           <div className="flex flex-col gap-2">
-            {dataTopPosts?.map((post) => {
-              console.log('post', post)
+            {topPosts?.map((post) => {
               return <TopPostCard post={post} />
             })}
           </div>
