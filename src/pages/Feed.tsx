@@ -7,9 +7,12 @@ import { MenuFeed } from '../components/templates/MenuFeed'
 import { usePosts } from '../context/Posts/Posts'
 import { useEffect } from 'react'
 import MobileSidebar from '../components/interface/MobileSidebar'
+import { useGetLastPosts } from '../services/api/Posts'
 
 const Feed = () => {
   const { postList, handleNewReply, isLoading, activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
+
+  const { data: dataLastPosts, isLoading: isLoadingLastPosts } = useGetLastPosts()
   const { activeAccount } = useWallet()
 
   const [params, setParams] = useSearchParams()
@@ -78,7 +81,7 @@ const Feed = () => {
           <PostInput />
         </div>
         <div className="overflow-y-hidden  h-full">
-          <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
+          <FeedComponent postList={isLoading ? dataLastPosts : postList} isLoading={isLoadingLastPosts} handleNewReply={handleNewReply} />
         </div>
       </div>
       <div className="w-3/12 hidden md:flex">
