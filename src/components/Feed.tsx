@@ -4,7 +4,7 @@ import LoaderSpinner from './LoaderSpinner'
 import PostCard from './PostCard'
 
 interface FeedPropsInterface {
-  postList: Post[] | null
+  postList: Post[] | null | undefined
   isLoading: boolean
   handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
 }

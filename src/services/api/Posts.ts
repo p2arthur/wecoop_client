@@ -14,6 +14,18 @@ export const useGetAllPosts = (enabled?: boolean) =>
     enabled,
   })
 
+export const getLastPosts = async () => {
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global-last-posts`)
+  return data
+}
+
+export const useGetLastPosts = (enabled?: boolean) =>
+  useQuery<IGetAllPosts>({
+    queryKey: ['getLastPosts'],
+    queryFn: () => getLastPosts(),
+    enabled,
+  })
+
 export const getAllPostsByWalletAddress = async (walletAddress: string) => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/by/${walletAddress}`)
   return data
