@@ -136,8 +136,6 @@ const PostInput = () => {
     try {
       const encodedInputText = encodeURIComponent(inputText.replace(/\n/g, '%0A'))
       const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
-
-      console.log(note)
       let transaction: algosdk.Transaction
 
       console.log(usableAsset.assetId, 'usableAsset.assetId')
