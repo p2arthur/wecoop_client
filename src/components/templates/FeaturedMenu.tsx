@@ -1,5 +1,4 @@
 import CountUp from 'react-countup'
-import { User as UserInterface } from '../../services/api/types'
 import FeaturedSection from '../featured-section/FeaturedSection'
 import TopCreatorCard from '../featured-section/TopCreatorCard'
 import TopPostCard from '../featured-section/TopPostCard'
@@ -7,12 +6,12 @@ import { usePosts } from '../../context/Posts/Posts'
 import useLeaderboard from '../../hooks/useLeaderboard'
 
 interface ProfileMenuProps {
-  user: UserInterface
+  activeAssetId: number | null | undefined
 }
 
-export const ProfileMenu = () => {
+export const ProfileMenu = ({ activeAssetId }: ProfileMenuProps) => {
   const { postList, isLoading } = usePosts()
-  const { topPosts, topUsers, totalInteractions } = useLeaderboard(postList)
+  const { topPosts, topUsers, totalInteractions } = useLeaderboard(postList, activeAssetId)
 
   const isLoadingTotal = isLoading
 
