@@ -19,31 +19,32 @@ export const createAppClient = (senderAddress: string, signer: TransactionSigner
     },
     algod,
   )
-
+  algokit.Config.configure({ populateAppCallResources: true })
   return appClient
 }
 
 export const makePoll = async (
-  algorand: any,
   appClient: WecoopDaoClient,
   sender: string,
   signer: TransactionSigner,
   amount: bigint,
   assetId: number,
+  pollQuestion: string,
 ) => {
   const { appAddress } = await appClient.appClient.getAppReference()
 
   const boxMBRPayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: sender,
     to: appAddress,
-    amount: 15_700,
+    amount: 3_450,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
-  const xferFirstDeposit = await algorand.transactions.assetTransfer({
-    assetId: BigInt(assetId),
-    sender,
-    receiver: appAddress,
-    amount: 1n,
+  const xferFirstDeposit = await algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: appAddress,
+    amount: 3_450,
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+    assetIndex: assetId,
   })
 
   try {
@@ -51,7 +52,7 @@ export const makePoll = async (
       {
         mbrTxn: boxMBRPayment,
         axfer: xferFirstDeposit,
-        question: 'test question',
+        question: pollQuestion,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
     )

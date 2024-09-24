@@ -18,6 +18,7 @@ import { CoinDropdown } from './CoinDropdown'
 import Counter from './Counter'
 
 //--------------
+import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { getOptedIn } from '../utils/getOptedIn'
 
 //----------
@@ -106,6 +107,20 @@ const PostInput = () => {
     setInputText(text)
   }
 
+  const handleCreateVote = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const wecoopDaoAppId = 722730088
+    const daoAssetId = 721969155
+    const daoAssetAmount = 1
+    const pollQuestion = inputText
+
+    const appClient = createAppClient(activeAccount?.address!, signer, algod, wecoopDaoAppId)
+
+    const result = makePoll(appClient, activeAccount?.address!, signer, BigInt(daoAssetAmount), daoAssetId, pollQuestion)
+
+    console.log('result', result)
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     const country = await getUserCountry()
@@ -116,7 +131,9 @@ const PostInput = () => {
     const allTransactions: Transaction[] = []
 
     for (const asset of usableAssetsList) {
+      console.log('viewing opted in', asset)
       const userOptedIn = await getOptedIn(activeAccount?.address!, asset.assetId, algod)
+      console.log('userOptedin', userOptedIn)
 
       if (asset.assetId === 0) continue
 
@@ -136,22 +153,11 @@ const PostInput = () => {
     try {
       const encodedInputText = encodeURIComponent(inputText.replace(/\n/g, '%0A'))
       const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
+
+      console.log(note)
       let transaction: algosdk.Transaction
 
       console.log(usableAsset.assetId, 'usableAsset.assetId')
-
-      handleAddNewPost({
-        creator_address: userData.address,
-        text: inputText,
-        status: 'loading',
-        transaction_id: 'loading_id',
-        country,
-        timestamp: new Date().getDate(),
-        replies: [],
-        likes: [],
-        isPersonalized: {},
-        assetId: usableAsset.assetId,
-      })
 
       // Check if it's a payment transaction or an asset transfer transaction
       if (usableAsset.assetId === 0) {
@@ -207,7 +213,6 @@ const PostInput = () => {
         isPersonalized: {},
         assetId: usableAsset.assetId,
       })
-      setInputText('')
     } catch (error) {
       console.error(error)
       setTimeout(() => {
@@ -240,6 +245,7 @@ const PostInput = () => {
               postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-72'
             } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
+          <button onClick={(event) => handleCreateVote(event)}>create vote</button>
           <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
           {postType === 'vote' && (
             <div onClick={(event) => event.preventDefault()} className={'absolute right-5 top-2 text-center'}>
