@@ -19,6 +19,7 @@ export class Post {
     status: null,
     isPersonalized: false,
     assetId: null,
+    type: null,
   }
 
   public async setPostData(postDataInput: PostInterface): Promise<PostInterface> {
@@ -35,6 +36,7 @@ export class Post {
       replies: postDataInput.replies,
       isPersonalized: false,
       assetId: postDataInput.assetId,
+      type: null,
     }
     return this.postData
   }

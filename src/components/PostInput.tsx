@@ -18,7 +18,7 @@ import { CoinDropdown } from './CoinDropdown'
 import Counter from './Counter'
 
 //--------------
-import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
+import { createAppClient, getAllPolls, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { getOptedIn } from '../utils/getOptedIn'
 
 //----------
@@ -107,6 +107,15 @@ const PostInput = () => {
     setInputText(text)
   }
 
+  const handleGetAllPolls = async (event: React.FormEvent) => {
+    const wecoopDaoAppId = 722730088
+    const daoAssetId = 721969155
+    const daoAssetAmount = 1
+    const pollQuestion = inputText
+
+    getAllPolls(wecoopDaoAppId, activeAccount?.address!, signer)
+  }
+
   const handleCreateVote = async (event: React.FormEvent) => {
     event.preventDefault()
     const wecoopDaoAppId = 722730088
@@ -116,9 +125,12 @@ const PostInput = () => {
 
     const appClient = createAppClient(activeAccount?.address!, signer, algod, wecoopDaoAppId)
 
-    const result = makePoll(appClient, activeAccount?.address!, signer, BigInt(daoAssetAmount), daoAssetId, pollQuestion)
+    const result = await makePoll(appClient, activeAccount?.address!, signer, BigInt(daoAssetAmount), daoAssetId, pollQuestion)
+
+    const allPolls = await getAllPolls(wecoopDaoAppId, activeAccount?.address!, signer)
 
     console.log('result', result)
+    console.log('allPolls', allPolls)
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -245,7 +257,8 @@ const PostInput = () => {
               postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-72'
             } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
-          <button onClick={(event) => handleCreateVote(event)}>create vote</button>
+          <button onClick={(event) => handleCreateVote(event)}>create poll</button>
+          <button onClick={(event) => handleGetAllPolls(event)}>Get all polls</button>
           <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
           {postType === 'vote' && (
             <div onClick={(event) => event.preventDefault()} className={'absolute right-5 top-2 text-center'}>

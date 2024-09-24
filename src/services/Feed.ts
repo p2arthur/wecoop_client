@@ -77,6 +77,7 @@ export class Feed {
               country: '',
               isPersonalized: false,
               assetId: 0,
+              type: null,
             }
 
             const post = await this.postServices.setPostData(postData)

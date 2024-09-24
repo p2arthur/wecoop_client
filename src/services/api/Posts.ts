@@ -16,6 +16,7 @@ export const useGetAllPosts = (enabled?: boolean) =>
 
 export const getLastPosts = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global-last-posts`)
+
   return data
 }
 

@@ -13,6 +13,7 @@ export interface Post {
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number | null
   isTopPost?: boolean
+  type: null | 'poll'
 }
 
 export interface PostRequest {
@@ -27,6 +28,7 @@ export interface PostRequest {
   status: 'accepted' | 'loading' | 'rejected' | null
   assetId: number
   isPersonalized: boolean
+  type: null | 'poll'
 }
 
 export interface Like {
