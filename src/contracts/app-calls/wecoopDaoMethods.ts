@@ -1,6 +1,7 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import algosdk, { AlgodTokenHeader, decodeUint64, encodeAddress, TransactionSigner } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import { getRoundTimestamp } from '../../utils/getRoundTime'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopDaoClient } from '../clients/WecoopDaoClient'
 
@@ -42,7 +43,7 @@ export const makePoll = async (
   const xferFirstDeposit = await algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: appAddress,
-    amount: 3_45000,
+    amount: 120_000,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
     assetIndex: assetId,
   })
@@ -61,16 +62,7 @@ export const makePoll = async (
   }
 }
 
-export const getAllPolls = async (appId: number, senderAddress: string, signer: TransactionSigner) => {
-  const appClient = new WecoopDaoClient(
-    {
-      resolveBy: 'id',
-      id: appId,
-      sender: { addr: senderAddress, signer },
-    },
-    algod,
-  )
-
+export const getAllPolls = async (appId: number) => {
   // Get all boxes for the application
   const boxesResponse = await algod.getApplicationBoxes(appId).do()
   const allPolls: any[] = []
@@ -83,7 +75,7 @@ export const getAllPolls = async (appId: number, senderAddress: string, signer: 
     let offset = 0
 
     try {
-      // Decode the box name
+      // Decode the box name (starts with 'poll_' prefix, followed by pollId as uint64)
       const prefixBytes = boxNameBytes.slice(offset, offset + 5)
       const prefix = decoder.decode(prefixBytes) // 'poll_'
       offset += 5
@@ -95,6 +87,9 @@ export const getAllPolls = async (appId: number, senderAddress: string, signer: 
 
       // Get the box content (Uint8Array)
       const boxContentResponse = await algod.getApplicationBoxByName(appId, boxNameBytes).do()
+
+      console.log('box content response', boxContentResponse)
+
       const contentBytes = boxContentResponse.value // Uint8Array of the box content
       offset = 0 // Reset offset for contentBytes
 
@@ -123,9 +118,24 @@ export const getAllPolls = async (appId: number, senderAddress: string, signer: 
       const deposited = decodeUint64(depositedBytes, 'bigint')
       offset += 8
 
+      // Decode the timestamp (8 bytes as uint64)
+      const timestampBytes = contentBytes.slice(offset, offset + 8)
+      const timestamp = decodeUint64(timestampBytes, 'bigint')
+      offset += 8
+
+      // At this point, make sure the offset is aligned correctly for the question
+      console.log('Offset after timestamp:', offset)
+
       // Decode the question (remaining bytes)
-      const questionBytes = contentBytes.slice(offset)
+      const questionBytes = contentBytes.slice(offset + 4) // SKIP FIRST BYTE (assuming it’s a metadata byte)
+      console.log('Raw question bytes:', questionBytes) // Log the raw bytes for the question
       const question = decoder.decode(questionBytes).trim()
+
+      const timestampNumber = Number(timestamp)
+
+      const trueTimestamp = await getRoundTimestamp(algod, timestampNumber)
+
+      console.log('trueTimestamp', trueTimestamp)
 
       // Construct the poll object
       const poll = {
@@ -135,6 +145,7 @@ export const getAllPolls = async (appId: number, senderAddress: string, signer: 
         totalVotes: totalVotes.toString(),
         yesVotes: yesVotes.toString(),
         deposited: deposited.toString(),
+        timestamp: trueTimestamp,
         question: question,
       }
 

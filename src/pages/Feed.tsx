@@ -24,8 +24,11 @@ const Feed = () => {
   const [pollsList, setPollsList] = useState<Post[]>()
 
   const handleGetAllPolls = async () => {
-    const wecoopDaoAppId = 722730088
-    const data = await getAllPolls(wecoopDaoAppId, activeAccount?.address!, signer)
+    const wecoopDaoAppId = 723107049
+
+    const data = await getAllPolls(wecoopDaoAppId)
+
+    console.log('polls', data)
 
     const pollPosts: Post[] = data.map((poll) => {
       return {
@@ -35,12 +38,13 @@ const Feed = () => {
         isTopPost: true,
         creator_address: poll.creatorAddress,
         transaction_id: '0',
-        timestamp: 999999999,
+        timestamp: poll.timestamp,
         country: 'BR',
         likes: [],
         replies: [],
         status: 'accepted',
         assetId: poll.selectedAsset,
+        prize: poll.deposited,
       }
     })
 

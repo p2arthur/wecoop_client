@@ -1,14 +1,14 @@
+import ProgressBar from '@ramonak/react-progress-bar'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
+import CountUp from 'react-countup'
 import { FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { useGetUserInfo } from '../services/api/Users'
 import { PostRequest, ReplyResponse } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
-import ProgressBar from '@ramonak/react-progress-bar'
 import { ShareButton } from './ShareButton'
-import CountUp from 'react-countup'
 
 interface VoteCardPropsInterface {
   vote: PostRequest | ReplyResponse
@@ -16,6 +16,8 @@ interface VoteCardPropsInterface {
 
 const VoteCard = ({ vote }: VoteCardPropsInterface) => {
   const { data: userData } = useGetUserInfo(vote.creator_address)
+
+  console.log('vote card', vote)
 
   const [isVoted, setIsVoted] = useState(false)
 
@@ -89,7 +91,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
             <div className="gap-2 flex justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
               <div className={'w-1/2'}>
                 <h2 className={'font-bold text-2xl mb-2'}>
-                  Vote - Prize pool: $<CountUp end={20000} duration={5} />
+                  Vote - Prize pool: $<CountUp end={vote.prize} duration={5} />
                 </h2>
                 {isVoted ? (
                   <div className={'w-full relative'} onClick={() => setIsVoted(false)}>

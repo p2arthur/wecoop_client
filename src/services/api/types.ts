@@ -14,6 +14,7 @@ export interface Post {
   assetId: number | null
   isTopPost?: boolean
   type: null | 'poll'
+  prize?: number
 }
 
 export interface PostRequest {
@@ -29,6 +30,7 @@ export interface PostRequest {
   assetId: number
   isPersonalized: boolean
   type: null | 'poll'
+  prize?: number
 }
 
 export interface Like {

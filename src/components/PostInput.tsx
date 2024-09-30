@@ -108,7 +108,7 @@ const PostInput = () => {
   }
 
   const handleGetAllPolls = async (event: React.FormEvent) => {
-    const wecoopDaoAppId = 722730088
+    const wecoopDaoAppId = 723107049
     const daoAssetId = 721969155
     const daoAssetAmount = 1
     const pollQuestion = inputText
@@ -118,7 +118,7 @@ const PostInput = () => {
 
   const handleCreateVote = async (event: React.FormEvent) => {
     event.preventDefault()
-    const wecoopDaoAppId = 722730088
+    const wecoopDaoAppId = 723107049
     const daoAssetId = 721969155
     const daoAssetAmount = 1
     const pollQuestion = inputText
@@ -224,6 +224,7 @@ const PostInput = () => {
         likes: [],
         isPersonalized: {},
         assetId: usableAsset.assetId,
+        type: null,
       })
     } catch (error) {
       console.error(error)
@@ -240,6 +241,7 @@ const PostInput = () => {
           likes: [],
           isPersonalized: {},
           assetId: usableAsset.assetId,
+          type: null,
         })
       }, 1000)
     }
@@ -257,8 +259,24 @@ const PostInput = () => {
               postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-72'
             } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
-          <button onClick={(event) => handleCreateVote(event)}>create poll</button>
-          <button onClick={(event) => handleGetAllPolls(event)}>Get all polls</button>
+          <div className="flex gap-4">
+            <button
+              onClick={(event) => {
+                event.preventDefault()
+                handleCreateVote(event)
+              }}
+            >
+              create poll
+            </button>
+          </div>
+          <button
+            onClick={(event) => {
+              event.preventDefault()
+              handleGetAllPolls(event)
+            }}
+          >
+            Get all polls
+          </button>
           <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
           {postType === 'vote' && (
             <div onClick={(event) => event.preventDefault()} className={'absolute right-5 top-2 text-center'}>
@@ -288,7 +306,7 @@ const PostInput = () => {
             </div>
             <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
           </div>
-          <div className={'flex flex-wrap justify-end gap-4 md:flex gap-2 md:gap-4 md:items-center'}>
+          <div className={'flex flex-wrap justify-end md:flex gap-2 md:gap-4 md:items-center'}>
             {postType === 'vote' && (
               <div className={'flex items-center md:gap-2'}>
                 <span className={'mr-2 md:mr-0'}>Prize pool:</span>

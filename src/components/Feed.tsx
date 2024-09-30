@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Post } from '../services/api/types'
+import { Post, PostRequest } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
 import PostCard from './PostCard'
+import VoteCard from './VoteCard'
 
 interface FeedPropsInterface {
   postList: Post[] | null | undefined
@@ -51,7 +52,13 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
     <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full  no-scrollbar">
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
-        paginatedPosts.map((post, index) => <PostCard key={index} handleNewReply={handleNewReply} post={post} />)}
+        paginatedPosts.map((post, index) =>
+          !post.type ? (
+            <PostCard key={index} handleNewReply={handleNewReply} post={post} />
+          ) : (
+            <VoteCard key={index} vote={post as PostRequest} />
+          ),
+        )}
 
       {!isLoading && (!postList || postList.length === 0) && (
         <div className={'w-full justify-center flex'}>

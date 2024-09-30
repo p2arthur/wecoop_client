@@ -1,5 +1,6 @@
 import axios from 'axios'
 import base64 from 'base-64'
+import { getAllPolls } from '../contracts/app-calls/wecoopDaoMethods'
 import { Post, Post as PostInterface } from '../services/api/types'
 import { getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 import { Post as PostService } from './Post'
@@ -11,8 +12,31 @@ export class Feed {
 
   constructor(private postServices: PostService = new PostService()) {}
 
-  public async getAllPosts({ next }: { next?: string | null }) {
+  public async getAllPosts({ next, walletAddress }: { next?: string | null; walletAddress: string }) {
     try {
+      const wecoopDaoAppId = 723107049
+
+      const pollsData = await getAllPolls(wecoopDaoAppId)
+
+      const pollPosts: Post[] = pollsData.map((poll) => {
+        return {
+          text: poll.question,
+          isPersonalized: true,
+          type: 'poll',
+          isTopPost: true,
+          creator_address: poll.creatorAddress,
+          transaction_id: '0',
+          timestamp: poll.timestamp,
+          country: 'BR',
+          likes: [],
+          replies: [],
+          status: 'accepted',
+          assetId: poll.selectedAsset,
+        }
+      })
+
+      pollPosts.forEach((poll) => this.feedData.push(poll))
+
       const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed`)
 
       const { transactions, 'current-round': currentRound, 'next-token': nextToken } = data
@@ -89,7 +113,13 @@ export class Feed {
         }
       }
 
-      return { data: this.feedData, next: nextToken, currentRound }
+      return {
+        data: this.feedData.sort((a, b) => {
+          return b.timestamp! - a.timestamp!
+        }),
+        next: nextToken,
+        currentRound,
+      }
     } catch (error) {
       console.error('Error fetching posts:', error)
       throw error
