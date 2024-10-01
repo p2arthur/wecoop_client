@@ -1,8 +1,8 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetAllPosts, useGetAllPostsByWalletAddress, useGetPostByTransactionId } from '../../services/api/Posts'
 import { Like, Post } from '../../services/api/types'
-import { useQueryClient } from '@tanstack/react-query'
 
 export enum AssetId {
   coopCoin = 796425061,
@@ -92,7 +92,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       const filteredPosts = data.filter((post) => !assetId || post.assetId === assetId)
       setPostList((prevPosts) => {
         // Apenas atualiza se os novos posts são diferentes dos anteriores
-        const updatedList = filteredPosts.map((post) => ({
+        const updatedList = filteredPosts?.map((post) => ({
           ...post,
           status: 'accepted',
           replies: post.replies.map((reply) => ({

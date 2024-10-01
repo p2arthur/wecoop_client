@@ -53,7 +53,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
         paginatedPosts.map((post, index) =>
-          !post.type ? (
+          post.type == 'post' ? (
             <PostCard key={index} handleNewReply={handleNewReply} post={post} />
           ) : (
             <VoteCard key={index} vote={post as PostRequest} />

@@ -5,13 +5,13 @@ import CountUp from 'react-countup'
 import { FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { useGetUserInfo } from '../services/api/Users'
-import { PostRequest, ReplyResponse } from '../services/api/types'
+import { PostRequest } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { ShareButton } from './ShareButton'
 
 interface VoteCardPropsInterface {
-  vote: PostRequest | ReplyResponse
+  vote: PostRequest
 }
 
 const VoteCard = ({ vote }: VoteCardPropsInterface) => {
@@ -91,7 +91,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
             <div className="gap-2 flex justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
               <div className={'w-1/2'}>
                 <h2 className={'font-bold text-2xl mb-2'}>
-                  Vote - Prize pool: $<CountUp end={vote.prize} duration={5} />
+                  Vote - Prize pool: $<CountUp end={vote.depositedAmount!} duration={5} />
                 </h2>
                 {isVoted ? (
                   <div className={'w-full relative'} onClick={() => setIsVoted(false)}>

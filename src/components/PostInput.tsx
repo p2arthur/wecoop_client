@@ -113,7 +113,7 @@ const PostInput = () => {
     const daoAssetAmount = 1
     const pollQuestion = inputText
 
-    getAllPolls(wecoopDaoAppId, activeAccount?.address!, signer)
+    getAllPolls(wecoopDaoAppId)
   }
 
   const handleCreateVote = async (event: React.FormEvent) => {
@@ -127,10 +127,7 @@ const PostInput = () => {
 
     const result = await makePoll(appClient, activeAccount?.address!, signer, BigInt(daoAssetAmount), daoAssetId, pollQuestion)
 
-    const allPolls = await getAllPolls(wecoopDaoAppId, activeAccount?.address!, signer)
-
     console.log('result', result)
-    console.log('allPolls', allPolls)
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -224,7 +221,7 @@ const PostInput = () => {
         likes: [],
         isPersonalized: {},
         assetId: usableAsset.assetId,
-        type: null,
+        type: 'post',
       })
     } catch (error) {
       console.error(error)
@@ -241,7 +238,7 @@ const PostInput = () => {
           likes: [],
           isPersonalized: {},
           assetId: usableAsset.assetId,
-          type: null,
+          type: 'post',
         })
       }, 1000)
     }

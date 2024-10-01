@@ -1,5 +1,5 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FeedComponent from '../components/Feed'
 import MobileSidebar from '../components/interface/MobileSidebar'
@@ -7,58 +7,15 @@ import PostInput from '../components/PostInput'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
 import { MenuFeed } from '../components/templates/MenuFeed'
 import { usePosts } from '../context/Posts/Posts'
-import { getAllPolls } from '../contracts/app-calls/wecoopDaoMethods'
 import { useGetLastPosts } from '../services/api/Posts'
-import { Post } from '../services/api/types'
 
 const Feed = () => {
   const { postList, handleNewReply, isLoading, activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
 
   const { data: dataLastPosts, isLoading: isLoadingLastPosts } = useGetLastPosts()
-  const { activeAccount, signer } = useWallet()
+  const { activeAccount } = useWallet()
 
   const [params, setParams] = useSearchParams()
-
-  // -------------------------------------
-  //Bad code just want to try it
-  const [pollsList, setPollsList] = useState<Post[]>()
-
-  const handleGetAllPolls = async () => {
-    const wecoopDaoAppId = 723107049
-
-    const data = await getAllPolls(wecoopDaoAppId)
-
-    console.log('polls', data)
-
-    const pollPosts: Post[] = data.map((poll) => {
-      return {
-        text: poll.question,
-        isPersonalized: true,
-        type: 'poll',
-        isTopPost: true,
-        creator_address: poll.creatorAddress,
-        transaction_id: '0',
-        timestamp: poll.timestamp,
-        country: 'BR',
-        likes: [],
-        replies: [],
-        status: 'accepted',
-        assetId: poll.selectedAsset,
-        prize: poll.deposited,
-      }
-    })
-
-    setPollsList(pollPosts)
-
-    console.log('polls data', data)
-    console.log('postList ', postList)
-  }
-
-  useEffect(() => {
-    handleGetAllPolls()
-  }, [])
-
-  // -------------------------------------------------
 
   useEffect(() => {
     if (params.get('activeFeed') === 'coinFeed' && params.get('activeAssetId') !== null) {
@@ -120,7 +77,7 @@ const Feed = () => {
           <PostInput />
         </div>
         <div className="overflow-y-hidden  h-full">
-          <FeedComponent postList={isLoading ? dataLastPosts : pollsList} isLoading={isLoadingLastPosts} handleNewReply={handleNewReply} />
+          <FeedComponent postList={isLoading ? dataLastPosts : postList} isLoading={isLoadingLastPosts} handleNewReply={handleNewReply} />
         </div>
       </div>
       <div className="w-3/12 hidden md:flex">
