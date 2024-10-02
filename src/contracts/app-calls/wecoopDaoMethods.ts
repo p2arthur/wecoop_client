@@ -40,7 +40,8 @@ export const makePoll = async (
     amount: 3_450,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
-  const xferFirstDeposit = await algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+
+  const xferFirstDeposit = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: appAddress,
     amount: 120_000,
@@ -72,18 +73,22 @@ export const getAllPolls = async (appId: number) => {
   // Iterate through all boxes, retrieve their contents, and decode them
   for (const box of boxesResponse.boxes) {
     const boxNameBytes = box.name // Uint8Array containing the box name
+
     let offset = 0
 
     try {
       // Decode the box name (starts with 'poll_' prefix, followed by pollId as uint64)
       const prefixBytes = boxNameBytes.slice(offset, offset + 5)
       const prefix = decoder.decode(prefixBytes) // 'poll_'
+
       offset += 5
 
       // Decode the pollId (next 8 bytes as uint64 big-endian)
       const pollIdBytes = boxNameBytes.slice(offset, offset + 8)
       const pollId = decodeUint64(pollIdBytes, 'bigint')
       offset += 8
+
+      console.log('prefix', prefix, pollId)
 
       // Get the box content (Uint8Array)
       const boxContentResponse = await algod.getApplicationBoxByName(appId, boxNameBytes).do()
@@ -158,4 +163,33 @@ export const getAllPolls = async (appId: number) => {
   console.log('allPolls', allPolls)
 
   return allPolls
+}
+
+export const makeVote = async (
+  appClient: WecoopDaoClient,
+  algodClient: AlgodClient,
+  pollId: number,
+  sender: string,
+  signer: TransactionSigner,
+  asset: number,
+) => {
+  const { appAddress } = await appClient.appClient.getAppReference()
+
+  const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: appAddress,
+    amount: 3_450,
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+  })
+
+  // Create the asset funding transaction (axfer)
+  const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: sender,
+    suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
+    to: appAddress,
+    amount: 1,
+    assetIndex: asset,
+  })
+
+  const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor: false }, { sender: { addr: sender, signer } })
 }

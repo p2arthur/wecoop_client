@@ -95,7 +95,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
         const updatedList = filteredPosts?.map((post) => ({
           ...post,
           status: 'accepted',
-          replies: post.replies.map((reply) => ({
+          replies: post.replies?.map((reply) => ({
             ...reply,
             status: 'accepted',
           })),
@@ -112,10 +112,10 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       const filteredPosts = postDataByWalletAddress.filter((post) => !assetId || post.assetId === assetId)
       setPostList((prevPosts) => {
         // Apenas atualiza se os novos posts são diferentes dos anteriores
-        const updatedList = filteredPosts.map((post) => ({
+        const updatedList = filteredPosts?.map((post) => ({
           ...post,
           status: 'accepted',
-          replies: post.replies.map((reply) => ({
+          replies: post.replies?.map((reply) => ({
             ...reply,
             status: 'accepted',
           })),
@@ -149,10 +149,10 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
           setPostList(
             data
               .filter((post) => post.assetId === assetId)
-              .map((post) => ({
+              ?.map((post) => ({
                 ...post,
                 status: 'accepted',
-                replies: post.replies.map((reply) => ({
+                replies: post.replies?.map((reply) => ({
                   ...reply,
                   status: 'accepted',
                 })),
@@ -165,7 +165,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
               .map((post) => ({
                 ...post,
                 status: 'accepted',
-                replies: post.replies.map((reply) => ({
+                replies: post.replies?.map((reply) => ({
                   ...reply,
                   status: 'accepted',
                 })),
@@ -213,7 +213,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }
 
   const handleNewReply = (newReply: Post, transactionCreatorId: string) => {
-    const newPostsList = postList.map((post) => {
+    const newPostsList = postList?.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
         return { ...post, replies: [...(post.replies || []), newReply] }
       }
@@ -223,7 +223,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }
 
   const handleNewLike = (newLike: Like, transactionCreatorId: string) => {
-    const newPostsList = postList.map((post) => {
+    const newPostsList = postList?.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
         return { ...post, likes: [...(post.likes || []), newLike] }
       }

@@ -1,13 +1,16 @@
 import ProgressBar from '@ramonak/react-progress-bar'
+import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
 import CountUp from 'react-countup'
 import { FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
-import { useGetUserInfo } from '../services/api/Users'
+import { useOutletContext } from 'react-router-dom'
+import { createAppClient, makeVote } from '../contracts/app-calls/wecoopDaoMethods'
 import { PostRequest } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
+import { PostInputOutletContext } from './PostInput'
 import { ShareButton } from './ShareButton'
 
 interface VoteCardPropsInterface {
@@ -15,7 +18,8 @@ interface VoteCardPropsInterface {
 }
 
 const VoteCard = ({ vote }: VoteCardPropsInterface) => {
-  const { data: userData } = useGetUserInfo(vote.creator_address)
+  const { algod, userData } = useOutletContext() as PostInputOutletContext
+  const { activeAccount, signer } = useWallet()
 
   console.log('vote card', vote)
 
@@ -32,6 +36,26 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
 
   const handleGoToPostPage = () => {
     window.location.href = `/post?id=${vote.transaction_id}`
+  }
+
+  const handleVoteClick = async (inFavor: boolean, pollId: number) => {
+    if (!activeAccount) return
+
+    try {
+      const wecoopDaoAppId = 723107049
+      const daoAssetId = 721969155
+      const daoAssetAmount = 1
+
+      const appClient = createAppClient(activeAccount?.address, signer, algod, wecoopDaoAppId)
+
+      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId)
+
+      setIsVoted(true)
+
+      console.log('vote made successfully', result)
+    } catch (error) {
+      console.error('error voting', error)
+    }
   }
 
   const handleTextPost = (text: string) => {
@@ -65,6 +89,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
+                <p></p>
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-md border-2 border-gray-900 bg-white overflow-hidden border-b-4">
                   <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(vote.creator_address!)} alt="" />
                 </div>
@@ -74,6 +99,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                   </h2>
                 </a>
               </div>
+              <p>{vote.transaction_id}</p>
               <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
                 {vote.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
@@ -115,7 +141,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                       className={
                         'w-1/2 h-10 rounded-md border-2 border-gray-900 bg-green-600 dark:bg-green-600 dark:border-gray-500 dark:hover:text-white hover:text-2xl  '
                       }
-                      onClick={() => setIsVoted(true)}
+                      onClick={() => handleVoteClick(true, Number(vote.transaction_id))}
                     >
                       YES
                     </button>

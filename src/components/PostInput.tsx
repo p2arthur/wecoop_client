@@ -116,7 +116,7 @@ const PostInput = () => {
     getAllPolls(wecoopDaoAppId)
   }
 
-  const handleCreateVote = async (event: React.FormEvent) => {
+  const handleCreatePoll = async (event: React.FormEvent) => {
     event.preventDefault()
     const wecoopDaoAppId = 723107049
     const daoAssetId = 721969155
@@ -260,7 +260,7 @@ const PostInput = () => {
             <button
               onClick={(event) => {
                 event.preventDefault()
-                handleCreateVote(event)
+                handleCreatePoll(event)
               }}
             >
               create poll

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import base64 from 'base-64'
-import { getAllPolls } from '../contracts/app-calls/wecoopDaoMethods'
+
 import { Post, Post as PostInterface } from '../services/api/types'
 import { getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 import { Post as PostService } from './Post'
@@ -101,7 +101,7 @@ export class Feed {
               country: '',
               isPersonalized: false,
               assetId: 0,
-              type: null,
+              type: 'post',
             }
 
             const post = await this.postServices.setPostData(postData)
