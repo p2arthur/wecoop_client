@@ -172,6 +172,7 @@ export const makeVote = async (
   sender: string,
   signer: TransactionSigner,
   asset: number,
+  inFavor: boolean,
 ) => {
   const { appAddress } = await appClient.appClient.getAppReference()
 
@@ -191,5 +192,5 @@ export const makeVote = async (
     assetIndex: asset,
   })
 
-  const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor: false }, { sender: { addr: sender, signer } })
+  const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor }, { sender: { addr: sender, signer } })
 }

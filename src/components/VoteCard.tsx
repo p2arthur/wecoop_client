@@ -4,17 +4,15 @@ import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
 import CountUp from 'react-countup'
 import { FaSpinner } from 'react-icons/fa6'
-import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
 import { createAppClient, makeVote } from '../contracts/app-calls/wecoopDaoMethods'
-import { PostRequest } from '../services/api/types'
+import { PollRequest } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { PostInputOutletContext } from './PostInput'
-import { ShareButton } from './ShareButton'
 
 interface VoteCardPropsInterface {
-  vote: PostRequest
+  vote: PollRequest
 }
 
 const VoteCard = ({ vote }: VoteCardPropsInterface) => {
@@ -34,9 +32,9 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
     return formatDateFromTimestamp(date)
   }
 
-  const handleGoToPostPage = () => {
-    window.location.href = `/post?id=${vote.transaction_id}`
-  }
+  // const handleGoToPostPage = () => {
+  //   window.location.href = `/post?id=${vote.transaction_id}`
+  // }
 
   const handleVoteClick = async (inFavor: boolean, pollId: number) => {
     if (!activeAccount) return
@@ -48,7 +46,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
 
       const appClient = createAppClient(activeAccount?.address, signer, algod, wecoopDaoAppId)
 
-      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId)
+      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId, inFavor)
 
       setIsVoted(true)
 
@@ -84,7 +82,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
       <div>
         {vote.status === 'accepted' ? (
           <div
-            onClick={handleGoToPostPage}
+            // onClick={handleGoToPostPage}
             className="border-4 border-yellow-400 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900"
           >
             <div className="flex items-center justify-between">
@@ -99,7 +97,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                   </h2>
                 </a>
               </div>
-              <p>{vote.transaction_id}</p>
+              <p>{vote.pollId}</p>
               <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
                 {vote.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
@@ -112,18 +110,27 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                 <p>{handleTimestamp()}</p>
               </div>
             </div>
-            <p className="tracking-wide break-words w-full">{vote?.text?.length > 0 && handleTextPost(vote.text)}</p>
 
-            <div className="gap-2 flex justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
-              <div className={'w-1/2'}>
-                <h2 className={'font-bold text-2xl mb-2'}>
-                  Vote - Prize pool: $<CountUp end={vote.depositedAmount!} duration={5} />
-                </h2>
+            <div className="gap-2 flex flex-col justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col gap-1 w-full">
+                <p className="tracking-wide break-words w-full">{vote?.text?.length > 0 && handleTextPost(vote.text)}</p>
+                <div className="flex w-full">
+                  <h2 className={'font-bold text-2xl w-full flex gap-2 items-center'}>
+                    Vote - Prize pool: <CountUp end={Number(vote.depositedAmount?.toFixed(0))} duration={2} />{' '}
+                    <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
+                      <img
+                        className="h-full w-full"
+                        src="https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2023/12/27/9e4d1ca7fc5a408b87b2f47b50e4749b.png?width=200&quality=70"
+                        alt=""
+                      />
+                    </div>
+                  </h2>
+                </div>
                 {isVoted ? (
                   <div className={'w-full relative'} onClick={() => setIsVoted(false)}>
                     <div className={'flex items-center justify-between'}>
-                      <span className={'flex items-center '}>Yes (69 votes)</span>
-                      <span className={'flex items-center'}>No (69 votes)</span>
+                      <span className={'flex items-center '}>Yes {vote.yesVotes}</span>
+                      <span className={'flex items-center'}>No {vote.totalVotes - vote.yesVotes}</span>
                     </div>
                     <ProgressBar
                       className={'w-full '}
@@ -141,7 +148,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                       className={
                         'w-1/2 h-10 rounded-md border-2 border-gray-900 bg-green-600 dark:bg-green-600 dark:border-gray-500 dark:hover:text-white hover:text-2xl  '
                       }
-                      onClick={() => handleVoteClick(true, Number(vote.transaction_id))}
+                      onClick={() => handleVoteClick(true, Number(vote.pollId))}
                     >
                       YES
                     </button>
@@ -157,18 +164,6 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                 )}
               </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
-                <div className="flex gap-1 items-center" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    className={
-                      'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'
-                    }
-                  >
-                    <a target="_blank" href={`https://allo.info/tx/${vote.transaction_id}`}>
-                      <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
-                    </a>
-                  </button>
-                  <ShareButton id={vote.transaction_id} />
-                </div>
                 <div className="flex flex-col md:gap-2 md:hidden">
                   {vote.country ? (
                     <div className="flex items-center justify-center gap-2">
@@ -185,7 +180,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
           </div>
         ) : vote.status === 'loading' ? (
           <div
-            key={vote.transaction_id}
+            key={vote.pollId}
             className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
           >
             <div className="flex flex-col">

@@ -1,7 +1,6 @@
 export type IGetAllPosts = PostRequest[]
 
 export interface Post {
-  isPersonalized: unknown
   text: string
   creator_address: string
   transaction_id: string
@@ -10,11 +9,22 @@ export interface Post {
   nfd?: string
   likes: Like[]
   replies: Reply[]
+  status: 'accepted' | 'loading' | 'rejected' | null
+  assetId: number
+  isPersonalized: boolean
+}
+export interface Poll {
+  text: string
+  creator_address: string
+  pollId: number
+  timestamp: number | null
+  country: string
+  nfd?: string
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number | null
-  isTopPost?: boolean
-  type: 'post' | 'poll'
-  depositedAmount?: number
+  depositedAmount: number
+  totalVotes: number
+  yesVotes: number
 }
 
 export interface PostRequest {
@@ -29,8 +39,19 @@ export interface PostRequest {
   status: 'accepted' | 'loading' | 'rejected' | null
   assetId: number
   isPersonalized: boolean
-  type: 'post' | 'poll'
-  depositedAmount?: number
+}
+export interface PollRequest {
+  text: string
+  creator_address: string
+  pollId: number
+  timestamp: number | null
+  country: string
+  nfd?: string
+  status: 'accepted' | 'loading' | 'rejected' | string | null
+  assetId: number | null
+  depositedAmount: number
+  totalVotes: number
+  yesVotes: number
 }
 
 export interface Like {
