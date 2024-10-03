@@ -20,6 +20,8 @@ import Counter from './Counter'
 //--------------
 import { createAppClient, getAllPolls, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { getOptedIn } from '../utils/getOptedIn'
+import { PostTypeSwitch } from './PostTypeSwitch'
+import { toast } from 'react-toastify'
 
 //----------
 
@@ -117,17 +119,31 @@ const PostInput = () => {
   }
 
   const handleCreatePoll = async (event: React.FormEvent) => {
-    event.preventDefault()
-    const wecoopDaoAppId = 723107049
-    const daoAssetId = 721969155
-    const daoAssetAmount = 1
-    const pollQuestion = inputText
+    try {
+      event.preventDefault()
+      const wecoopDaoAppId = 723107049
+      const daoAssetId = 721969155
+      const pollQuestion = inputText
 
-    const appClient = createAppClient(activeAccount?.address!, signer, algod, wecoopDaoAppId)
+      const appClient = createAppClient(activeAccount?.address!, signer, algod, wecoopDaoAppId)
 
-    const result = await makePoll(appClient, activeAccount?.address!, signer, BigInt(daoAssetAmount), daoAssetId, pollQuestion)
-
-    console.log('result', result)
+      const result = await makePoll(appClient, activeAccount?.address!, signer, BigInt(prizePool), daoAssetId, pollQuestion)
+      toast('Create a pool vote successfully', {
+        position: 'bottom-right',
+        theme: 'dark',
+      })
+      setInputText('')
+      setPrizePool(10)
+      console.log('result', result)
+    } catch (e) {
+      setInputText('')
+      toast('Failed to make a vote try', {
+        position: 'bottom-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+    }
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -245,38 +261,21 @@ const PostInput = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => (postType === 'post' ? handleSubmit(e) : handleCreatePoll(e))}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea
             maxLength={postType === 'post' ? 300 : 100}
+            value={inputText}
             onChange={handleChange}
             placeholder={postType === 'post' ? placeholder : 'Create your vote'}
             className={`w-full border-2  align-top text-start break-all whitespace-normal h-32 ${
               postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-72'
             } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
-          <div className="flex gap-4">
-            <button
-              onClick={(event) => {
-                event.preventDefault()
-                handleCreatePoll(event)
-              }}
-            >
-              create poll
-            </button>
-          </div>
-          <button
-            onClick={(event) => {
-              event.preventDefault()
-              handleGetAllPolls(event)
-            }}
-          >
-            Get all polls
-          </button>
           <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
           {postType === 'vote' && (
-            <div onClick={(event) => event.preventDefault()} className={'absolute right-5 top-2 text-center'}>
+            <div className={'absolute right-5 top-2 text-center'}>
               <span>Expires in:</span>
               <Counter count={counter} onIncrement={() => setCounter(counter + 1)} onDecrement={() => setCounter(counter - 1)} max={5} />
             </div>
@@ -303,19 +302,20 @@ const PostInput = () => {
             </div>
             <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
           </div>
-          <div className={'flex flex-wrap justify-end md:flex gap-2 md:gap-4 md:items-center'}>
+          <div className={'flex gap-4 items-center'}>
             {postType === 'vote' && (
-              <div className={'flex items-center md:gap-2'}>
-                <span className={'mr-2 md:mr-0'}>Prize pool:</span>
-                {/*<input
+              <div className={'flex items-center gap-2'}>
+                <span>Prize pool:</span>
+                <input
                   type={'number'}
-                  className={'w-20 md:w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
+                  className={'w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
                   min={10}
                   value={prizePool}
                   onChange={(e) => setPrizePool(e.target.value)}
-                />*/}
+                />
               </div>
             )}
+            <PostTypeSwitch />
             <CoinDropdown
               usableAsset={usableAsset}
               handleAssetSelect={handleAssetSelect}
@@ -323,18 +323,16 @@ const PostInput = () => {
               selectedAsset={selectedAsset}
               selectorOpen={selectorOpen}
             />
-            <div className={'flex '}>
-              {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
-                <Button buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`} full justify={'center'} />
-              ) : (
-                <Button
-                  inactive={true}
-                  buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`}
-                  full
-                  justify={'center'}
-                />
-              )}
-            </div>
+            {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
+              <Button buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`} full justify={'center'} />
+            ) : (
+              <Button
+                inactive={true}
+                buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`}
+                full
+                justify={'center'}
+              />
+            )}
           </div>
         </div>
       </div>
