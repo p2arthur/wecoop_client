@@ -4,6 +4,7 @@ import { AssetId, FeedType, usePosts } from '../../context/Posts/Posts'
 import { usableAssetsList } from '../../data/usableAssetsList'
 import { FaShareNodes } from 'react-icons/fa6'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 interface IMenuFeed {
   hasFeedPosts: boolean
@@ -23,6 +24,7 @@ const version = (packageJson as PackageJson).version
 export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleChangeAssetId, activeAssetId, openByParams }: IMenuFeed) => {
   const [openCoinFeed, setOpenCoinFeed] = useState<boolean>(false)
   const { isLoading } = usePosts()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (openByParams) {
@@ -32,6 +34,14 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
 
   return (
     <div className="w-full">
+      <div
+        onClick={() => {
+          navigate('/community')
+        }}
+        className={`w-full flex justify-start  p-3 cursor-pointer`}
+      >
+        <p className={`font-bold text-xl cursor-pointer border-b-2 border-transparent hover:scale-105`}>Community 🎀</p>
+      </div>
       {hasFeedPosts ? (
         <div
           onClick={() => {
@@ -119,7 +129,7 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
 
                     navigator.clipboard.writeText(url)
 
-                    toast('Community coin feed copied to clipboard', {
+                    toast('CommunityPage coin feed copied to clipboard', {
                       position: 'bottom-right',
                       theme: 'dark',
                     })

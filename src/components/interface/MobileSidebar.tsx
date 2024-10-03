@@ -60,8 +60,8 @@ export default function MobileSidebar() {
   }, [isOpen])
 
   return (
-    <div className={`w-screen h-screen bg-black/50 fixed z-50 justify-end overflow-hidden ${isOpen ? 'flex' : 'hidden'}`}>
-      <nav className="w-80 p-2 h-screen bg-white dark:bg-gray-900 border-l-4 border-black flex flex-col gap-5 justify-between">
+    <div className={`w-screen h-full bg-black/50 fixed z-50 justify-end overflow-scroll ${isOpen ? 'flex' : 'hidden'}`}>
+      <nav className="w-80 p-2 h-full bg-white dark:bg-gray-900 border-l-4 border-black flex flex-col gap-5 justify-between">
         <div className="h-12 items-center justify-between flex">
           <a className="flex gap-2 items-center" href="/">
             <img
