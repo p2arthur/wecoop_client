@@ -143,9 +143,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         nfd: userData?.nfd.name,
         timestamp: Date.now(),
         replies: [],
-        isPersonalized: undefined,
+        isPersonalized: false,
         assetId: usableAsset.assetId,
-        type: null,
       }
 
       handleNewReply && handleNewReply(acceptedReply, parentReplyId)

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Post } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
+import VoteCard from './PollCard'
 import PostCard from './PostCard'
-import VoteCard from './VoteCard'
 
 interface FeedPropsInterface {
   postList: Post[] | null | undefined
@@ -53,7 +53,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
         paginatedPosts.map((post, index) =>
-          post.transaction_id ? <PostCard key={index} handleNewReply={handleNewReply} post={post} /> : <VoteCard key={index} vote={post} />,
+          post.transaction_id ? <PostCard key={index} handleNewReply={handleNewReply} post={post} /> : <VoteCard key={index} poll={post} />,
         )}
 
       {!isLoading && (!postList || postList.length === 0) && (
