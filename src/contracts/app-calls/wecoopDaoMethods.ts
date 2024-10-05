@@ -11,11 +11,13 @@ const algodPort = getAlgodConfigFromViteEnvironment().port
 
 const algod = new algosdk.Algodv2(algodToken as AlgodTokenHeader, algodServer, algodPort)
 
-export const createAppClient = (senderAddress: string, signer: TransactionSigner, algod: AlgodClient, appId: number) => {
+const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
+
+export const createAppClient = (senderAddress: string, signer: TransactionSigner, algod: AlgodClient) => {
   const appClient = new WecoopDaoClient(
     {
       resolveBy: 'id',
-      id: appId,
+      id: wecoopDaoAppId,
       sender: { addr: senderAddress, signer },
     },
     algod,
@@ -55,6 +57,8 @@ export const makePoll = async (
         mbrTxn: boxMBRPayment,
         axfer: xferFirstDeposit,
         question: pollQuestion,
+        country: 'CA',
+        expires_in: 8600,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
     )
@@ -63,9 +67,9 @@ export const makePoll = async (
   }
 }
 
-export const getAllPolls = async (appId: number) => {
+export const getAllPolls = async () => {
   // Get all boxes for the application
-  const boxesResponse = await algod.getApplicationBoxes(appId).do()
+  const boxesResponse = await algod.getApplicationBoxes(wecoopDaoAppId).do()
   const allPolls: any[] = []
 
   const decoder = new TextDecoder('utf-8')
@@ -91,7 +95,7 @@ export const getAllPolls = async (appId: number) => {
       console.log('prefix', prefix, pollId)
 
       // Get the box content (Uint8Array)
-      const boxContentResponse = await algod.getApplicationBoxByName(appId, boxNameBytes).do()
+      const boxContentResponse = await algod.getApplicationBoxByName(wecoopDaoAppId, boxNameBytes).do()
 
       console.log('box content response', boxContentResponse)
 
@@ -175,6 +179,10 @@ export const makeVote = async (
   inFavor: boolean,
 ) => {
   const { appAddress } = await appClient.appClient.getAppReference()
+
+  const suggestedParams = await algokit.getTransactionParams(undefined, algod)
+
+  console.log('suggested prams', suggestedParams.lastRound)
 
   const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: sender,

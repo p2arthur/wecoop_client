@@ -1,7 +1,7 @@
 import ProgressBar from '@ramonak/react-progress-bar'
 import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
 import { FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
@@ -19,6 +19,8 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const { activeAccount, signer } = useWallet()
 
+  const [currentVotes, setCurrentVotes] = useState({ yesVotes: vote.yesVotes, totalVotes: vote.totalVotes })
+
   console.log('vote card', vote)
 
   const [isVoted, setIsVoted] = useState(false)
@@ -27,8 +29,9 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
-  const handleTimestamp = () => {
-    const date = vote.timestamp! * 1000
+  const handleTimestamp = (timestamp: number) => {
+    if (!timestamp) return
+    const date = timestamp! * 1000
     return formatDateFromTimestamp(date)
   }
 
@@ -40,13 +43,19 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
     if (!activeAccount) return
 
     try {
-      const wecoopDaoAppId = 723107049
+      const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
       const daoAssetId = 721969155
       const daoAssetAmount = 1
 
-      const appClient = createAppClient(activeAccount?.address, signer, algod, wecoopDaoAppId)
+      const appClient = createAppClient(activeAccount?.address, signer, algod)
 
       const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId, inFavor)
+
+      if (inFavor) {
+        setCurrentVotes({ totalVotes: currentVotes.totalVotes + 1, yesVotes: currentVotes.yesVotes + 1 })
+      } else {
+        setCurrentVotes({ ...currentVotes, totalVotes: currentVotes.totalVotes + 1 })
+      }
 
       setIsVoted(true)
 
@@ -77,6 +86,13 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
     })
   }
 
+  useEffect(() => {
+    const alreadyVoted = vote.voters.filter((voter) => voter.voterAddress == activeAccount?.address).length == 0 ? false : true
+    if (alreadyVoted) {
+      setIsVoted(true)
+    }
+  }, [activeAccount])
+
   return (
     <>
       <div>
@@ -97,7 +113,6 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                   </h2>
                 </a>
               </div>
-              <p>{vote.pollId}</p>
               <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
                 {vote.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
@@ -107,7 +122,7 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                     <p className="w-full text-center">{vote.country}</p>
                   </div>
                 ) : null}
-                <p>{handleTimestamp()}</p>
+                {vote.timestamp ? <p>{handleTimestamp(vote?.timestamp!)}</p> : null}
               </div>
             </div>
 
@@ -125,12 +140,13 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                       />
                     </div>
                   </h2>
+                  <h3>{currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}</h3>
                 </div>
                 {isVoted ? (
                   <div className={'w-full relative'} onClick={() => setIsVoted(false)}>
                     <div className={'flex items-center justify-between'}>
-                      <span className={'flex items-center '}>Yes {vote.yesVotes}</span>
-                      <span className={'flex items-center'}>No {vote.totalVotes - vote.yesVotes}</span>
+                      <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
+                      <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
                     </div>
                     <ProgressBar
                       className={'w-full '}
@@ -139,8 +155,11 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                       animateOnRender={true}
                       baseBgColor={'rgb(220 38 38)'}
                       borderRadius={'10px'}
-                      completed={50}
+                      completed={currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}
                     />
+                    <h3>
+                      claimed: {vote.voters.find((voter) => voter.voterAddress == activeAccount?.address)?.claimed ? 'true' : 'false'}
+                    </h3>
                   </div>
                 ) : (
                   <div className={'w-full flex justify-left items-center gap-2'}>
@@ -156,12 +175,13 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                       className={
                         'w-1/2 h-10 rounded-md border-2 border-gray-900 bg-red-600  dark:bg-red-600 dark:border-gray-500 dark:hover:text-white hover:text-2xl '
                       }
-                      onClick={() => setIsVoted(true)}
+                      onClick={() => handleVoteClick(false, Number(vote.pollId))}
                     >
                       NO
                     </button>
                   </div>
                 )}
+                <h4>expires: {handleTimestamp(vote.expiry_timestamp)}</h4>
               </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex flex-col md:gap-2 md:hidden">
@@ -173,7 +193,6 @@ const VoteCard = ({ vote }: VoteCardPropsInterface) => {
                       <p className="text-center">{vote.country}</p>
                     </div>
                   ) : null}
-                  <p className="text-center">{handleTimestamp()}</p>
                 </div>
               </div>
             </div>

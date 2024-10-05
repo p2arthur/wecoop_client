@@ -1,7 +1,7 @@
 import { useWallet } from '@txnlab/use-wallet'
 import algosdk, { Transaction } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
@@ -18,10 +18,10 @@ import { CoinDropdown } from './CoinDropdown'
 import Counter from './Counter'
 
 //--------------
+import { toast } from 'react-toastify'
 import { createAppClient, getAllPolls, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { getOptedIn } from '../utils/getOptedIn'
 import { PostTypeSwitch } from './PostTypeSwitch'
-import { toast } from 'react-toastify'
 
 //----------
 
@@ -70,6 +70,11 @@ const PostInput = () => {
   const [placeholder, setPlaceholder] = useState(placeholderSelected.slice(0, 0))
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
 
+  const handleSetPrizePool = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const prizePool = event.target.value
+    setPrizePool(Number(prizePool))
+  }
+
   useEffect(() => {
     const intr = setInterval(() => {
       setPlaceholder((prevPlaceholder) => {
@@ -110,22 +115,22 @@ const PostInput = () => {
   }
 
   const handleGetAllPolls = async (event: React.FormEvent) => {
-    const wecoopDaoAppId = 723107049
+    const wecoopDaoAppId = import.meta.env.VITE_WECOOP_POLL_APP_ID
     const daoAssetId = 721969155
     const daoAssetAmount = 1
     const pollQuestion = inputText
 
-    getAllPolls(wecoopDaoAppId)
+    getAllPolls()
   }
 
   const handleCreatePoll = async (event: React.FormEvent) => {
     try {
       event.preventDefault()
-      const wecoopDaoAppId = 723107049
+      const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
       const daoAssetId = 721969155
       const pollQuestion = inputText
 
-      const appClient = createAppClient(activeAccount?.address!, signer, algod, wecoopDaoAppId)
+      const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
       const result = await makePoll(appClient, activeAccount?.address!, signer, BigInt(prizePool), daoAssetId, pollQuestion)
       toast('Create a pool vote successfully', {
@@ -235,9 +240,8 @@ const PostInput = () => {
         timestamp: new Date().getDate(),
         replies: [],
         likes: [],
-        isPersonalized: {},
+        isPersonalized: false,
         assetId: usableAsset.assetId,
-        type: 'post',
       })
     } catch (error) {
       console.error(error)
@@ -252,9 +256,8 @@ const PostInput = () => {
           replies: [],
           country,
           likes: [],
-          isPersonalized: {},
+          isPersonalized: false,
           assetId: usableAsset.assetId,
-          type: 'post',
         })
       }, 1000)
     }
@@ -311,7 +314,7 @@ const PostInput = () => {
                   className={'w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
                   min={10}
                   value={prizePool}
-                  onChange={(e) => setPrizePool(e.target.value)}
+                  onChange={(event) => handleSetPrizePool(event)}
                 />
               </div>
             )}

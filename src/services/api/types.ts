@@ -25,6 +25,8 @@ export interface Poll {
   depositedAmount: number
   totalVotes: number
   yesVotes: number
+  voters: VoterInterface[]
+  expiry_timestamp: number
 }
 
 export interface PostRequest {
@@ -52,6 +54,14 @@ export interface PollRequest {
   depositedAmount: number
   totalVotes: number
   yesVotes: number
+  voters: VoterInterface[]
+  expiry_timestamp: number
+}
+
+export interface VoterInterface {
+  pollId: number
+  voterAddress: string
+  claimed: boolean
 }
 
 export interface Like {
