@@ -68,9 +68,9 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   }
 
   const checkClaimed = (address: string) => {
-    const currentUserVoted = poll.voters.find((voter) => voter.voterAddress == address)?.claimed
+    const currentUserVoted = poll?.voters?.find((voter) => voter.voterAddress == address)?.claimed
 
-    return currentUserVoted
+    return currentUserVoted || false
   }
 
   const checkIsCreator = (address: string) => {
@@ -100,7 +100,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   }
 
   useEffect(() => {
-    const alreadyVoted = poll.voters.filter((voter) => voter.voterAddress == activeAccount?.address).length == 0 ? false : true
+    const alreadyVoted = poll?.voters?.filter((voter) => voter.voterAddress == activeAccount?.address).length == 0 ? false : true
     if (alreadyVoted) {
       setIsVoted(true)
     }
@@ -141,10 +141,11 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
 
             <div className="gap-2 flex flex-col justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
               <div className="flex flex-col gap-1 w-full">
-                <p className="tracking-wide break-words w-full">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
+                <p className="tracking-wide break-words w-full ">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
                 <div className="flex w-full">
-                  <h2 className={'font-bold text-2xl w-full flex gap-2 items-center'}>
-                    Vote - Prize pool: <CountUp end={Number(poll.depositedAmount?.toFixed(0))} duration={2} />{' '}
+                  <h2 className={'font-bold md:text-2xl w-full flex gap-2 items-center border-top'}>
+                    <span>Vote - Prize pool: </span>
+                    <CountUp end={Number(poll.depositedAmount?.toFixed(0))} duration={2} />{' '}
                     <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
                       <img
                         className="h-full w-full"
@@ -153,10 +154,9 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       />
                     </div>
                   </h2>
-                  <h3>{currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}</h3>
                 </div>
                 {isVoted || (activeAccount?.address && checkIsCreator(activeAccount?.address)) ? (
-                  <div className={'w-full relative flex flex-col gap-3'} onClick={() => setIsVoted(false)}>
+                  <div className={'w-full relative flex flex-col gap-3'}>
                     <div className={'flex items-center justify-between'}>
                       <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
                       <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>

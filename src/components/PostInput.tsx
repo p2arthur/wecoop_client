@@ -285,7 +285,7 @@ const PostInput = () => {
           )}
         </div>
 
-        <div className="grid gap-4  w-full justify-end">
+        <div className="grid items-start  grid-cols-2 md:block gap-4  w-full justify-end">
           <div className={'flex justify-end items-center gap-4'}>
             <div className={'relative'}>
               <Button icon={<FaCircleInfo />} buttonFunction={() => setOpenTooltip(!openTooltip)} />
@@ -305,7 +305,7 @@ const PostInput = () => {
             </div>
             <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
           </div>
-          <div className={'flex gap-4 items-center'}>
+          <div className={'grid justify-items-end md:flex md:justify-end md:mt-4 gap-4 md:items-center'}>
             {postType === 'vote' && (
               <div className={'flex items-center gap-2'}>
                 <span>Prize pool:</span>
@@ -327,14 +327,9 @@ const PostInput = () => {
               selectorOpen={selectorOpen}
             />
             {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
-              <Button buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`} full justify={'center'} />
+              <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create vote'}`} full justify={'center'} />
             ) : (
-              <Button
-                inactive={true}
-                buttonText={`${postType === 'post' ? 'Send your message' : 'Create your vote'}`}
-                full
-                justify={'center'}
-              />
+              <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create your vote'}`} full justify={'center'} />
             )}
           </div>
         </div>
