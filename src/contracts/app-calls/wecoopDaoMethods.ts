@@ -202,3 +202,13 @@ export const makeVote = async (
 
   const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor }, { sender: { addr: sender, signer } })
 }
+
+export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: number) => {
+  try {
+    const result = await appClient.withdrawPollShare({ pollId: [pollId] })
+
+    console.log('result', result)
+  } catch (error) {
+    console.error('error withdrawing pool share', error)
+  }
+}

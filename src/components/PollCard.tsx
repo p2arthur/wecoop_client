@@ -5,7 +5,8 @@ import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
 import { FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
-import { createAppClient, makeVote } from '../contracts/app-calls/wecoopDaoMethods'
+import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
+import { WecoopDaoClient } from '../contracts/clients/WecoopDaoClient'
 import { PollRequest } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import formatDateFromTimestamp from '../utils'
@@ -22,6 +23,11 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   const { data: userData } = useGetUserInfo(poll.creator_address)
 
   const [currentVotes, setCurrentVotes] = useState({ yesVotes: poll.yesVotes, totalVotes: poll.totalVotes })
+
+  let appClient: WecoopDaoClient
+  if (activeAccount?.address) {
+    appClient = createAppClient(activeAccount?.address, signer, algod)
+  }
 
   console.log('vote card', poll)
 
@@ -49,8 +55,6 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
       const daoAssetId = 721969155
       const daoAssetAmount = 1
 
-      const appClient = createAppClient(activeAccount?.address, signer, algod)
-
       const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId, inFavor)
 
       if (inFavor) {
@@ -71,6 +75,16 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
     const currentUserVoted = poll.voters.find((voter) => voter.voterAddress == address)?.claimed
 
     return currentUserVoted
+  }
+
+  const handleClaimPoolShare = async () => {
+    const { pollId } = poll
+
+    const isClaimed = checkClaimed(activeAccount?.address!)
+
+    if (isClaimed) return
+
+    const result = await withdrawPollShare(appClient, pollId)
   }
 
   const checkIsCreator = (address: string) => {
@@ -175,7 +189,9 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                         <button>Claimed</button>
                       ) : (
                         <div className="flex text-white gap-2 items-center">
-                          <button className="p-2 border-white border-2 bg-gray-800">Claim now</button>
+                          <button onClick={handleClaimPoolShare} className="p-2 border-white border-2 bg-gray-800">
+                            Claim now
+                          </button>
                           <h4>expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
                         </div>
                       )}
