@@ -84,7 +84,9 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
 
     if (isClaimed) return
 
-    const result = await withdrawPollShare(appClient, pollId)
+    const result = await withdrawPollShare(appClient, pollId, activeAccount?.address!, signer)
+
+    console.log('claim result', result)
   }
 
   const checkIsCreator = (address: string) => {

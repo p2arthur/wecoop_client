@@ -58,7 +58,7 @@ export const makePoll = async (
         axfer: xferFirstDeposit,
         question: pollQuestion,
         country: 'CA',
-        expires_in: 8600,
+        expires_in: 100,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
     )
@@ -203,12 +203,21 @@ export const makeVote = async (
   const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor }, { sender: { addr: sender, signer } })
 }
 
-export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: number) => {
+export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: number, sender: string, signer: TransactionSigner) => {
   try {
-    const result = await appClient.withdrawPollShare({ pollId: [pollId] })
-
+    const result = await appClient.withdrawPollShare(
+      { pollId: [pollId] },
+      {
+        sender: { addr: sender, signer },
+        sendParams: {
+          fee: algokit.microAlgos(3_000),
+        },
+      },
+    )
     console.log('result', result)
+    return result
   } catch (error) {
     console.error('error withdrawing pool share', error)
+    return error
   }
 }
