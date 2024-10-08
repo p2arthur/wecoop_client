@@ -58,7 +58,7 @@ export const makePoll = async (
         axfer: xferFirstDeposit,
         question: pollQuestion,
         country: 'CA',
-        expires_in: 100,
+        expires_in: 200,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
     )

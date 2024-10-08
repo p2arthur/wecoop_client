@@ -32,10 +32,18 @@ interface PostInputPropsInterface {
   algod: AlgodClient
   userData: User
 }
-
 export const handleTextPost = (text: string) => {
-  // Ensure %0A is replaced with actual newlines (\n)
-  const decodedText = decodeURIComponent(text).replace(/%0A/g, '\n')
+  if (!text) return
+
+  let decodedText: string
+  try {
+    // Ensure %0A is replaced with actual newlines (\n)
+    decodedText = decodeURIComponent(text).replace(/%0A/g, '\n')
+  } catch (error) {
+    console.error('Error decoding URI component:', error)
+    // If decoding fails, return the original text or handle accordingly
+    decodedText = text
+  }
 
   const urlRegex = /(https?:\/\/[^\s]+)/g
   const parts = decodedText.split(urlRegex)

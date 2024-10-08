@@ -157,9 +157,11 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
 
             <div className="gap-2 flex flex-col justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
               <div className="flex flex-col gap-1 w-full">
-                <p className="tracking-wide break-words w-full ">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
+                <div className="border-b-2 py-2 border-gray-300/30">
+                  <p className="tracking-wide break-words w-full ">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
+                </div>
                 <div className="flex w-full">
-                  <h2 className={'font-bold md:text-2xl w-full flex gap-2 items-center border-top'}>
+                  <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
                     <span>Vote - Prize pool: </span>
                     <CountUp end={Number(poll.depositedAmount?.toFixed(0))} duration={2} />{' '}
                     <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
@@ -170,13 +172,12 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       />
                     </div>
                   </h2>
+                  <h4>expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
                 </div>
-                {isVoted || (activeAccount?.address && checkIsCreator(activeAccount?.address)) ? (
+                {isVoted ||
+                (activeAccount?.address && checkIsCreator(activeAccount?.address)) ||
+                poll.expiry_timestamp! * 1000 < Date.now() ? (
                   <div className={'w-full relative flex flex-col gap-3'}>
-                    <div className={'flex items-center justify-between'}>
-                      <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
-                      <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
-                    </div>
                     <ProgressBar
                       className={'w-full '}
                       height={'30px'}
@@ -186,6 +187,10 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       borderRadius={'10px'}
                       completed={currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}
                     />
+                    <div className={'flex items-center justify-between'}>
+                      <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
+                      <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
+                    </div>
                     <div>
                       {checkClaimed(activeAccount?.address!) ? (
                         <button>Claimed</button>
@@ -194,7 +199,6 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                           <button onClick={handleClaimPoolShare} className="p-2 border-white border-2 bg-gray-800">
                             Claim now
                           </button>
-                          <h4>expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
                         </div>
                       )}
                     </div>
