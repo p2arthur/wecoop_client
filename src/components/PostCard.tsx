@@ -15,7 +15,7 @@ import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Post, Reply as IReply, User } from '../services/api/types'
+import { Reply as IReply, Post, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -34,8 +34,17 @@ interface PostInputPropsInterface {
 }
 
 export const handleTextPost = (text: string) => {
-  // Ensure %0A is replaced with actual newlines (\n)
-  const decodedText = decodeURIComponent(text).replace(/%0A/g, '\n')
+  if (!text) return
+
+  let decodedText: string
+  try {
+    // Ensure %0A is replaced with actual newlines (\n)
+    decodedText = decodeURIComponent(text).replace(/%0A/g, '\n')
+  } catch (error) {
+    console.error('Error decoding URI component:', error)
+    // If decoding fails, return the original text or handle accordingly
+    decodedText = text
+  }
 
   const urlRegex = /(https?:\/\/[^\s]+)/g
   const parts = decodedText.split(urlRegex)
