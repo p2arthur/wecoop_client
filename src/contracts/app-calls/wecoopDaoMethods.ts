@@ -30,11 +30,14 @@ export const makePoll = async (
   appClient: WecoopDaoClient,
   sender: string,
   signer: TransactionSigner,
-  amount: bigint,
+  amount: number,
+  expires_in: number,
   assetId: number,
   pollQuestion: string,
 ) => {
   const { appAddress } = await appClient.appClient.getAppReference()
+
+  const expires_in_ms = expires_in * 86400
 
   const boxMBRPayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: sender,
@@ -58,7 +61,7 @@ export const makePoll = async (
         axfer: xferFirstDeposit,
         question: pollQuestion,
         country: 'CA',
-        expires_in: 200,
+        expires_in: expires_in_ms,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
     )

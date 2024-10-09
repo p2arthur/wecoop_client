@@ -64,7 +64,7 @@ const PostInput = () => {
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
-  const [counter, setCounter] = useState(1)
+  const [expiresCounter, setExpiresCounter] = useState(1)
   const [prizePool, setPrizePool] = useState(10)
 
   const [placeholder, setPlaceholder] = useState(placeholderSelected.slice(0, 0))
@@ -130,9 +130,11 @@ const PostInput = () => {
       const daoAssetId = 721969155
       const pollQuestion = inputText
 
+      const expiresInDays = expiresCounter
+
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
-      const result = await makePoll(appClient, activeAccount?.address!, signer, BigInt(prizePool), daoAssetId, pollQuestion)
+      const result = await makePoll(appClient, activeAccount?.address!, signer, prizePool, expiresInDays, daoAssetId, pollQuestion)
       toast('Create a pool vote successfully', {
         position: 'bottom-right',
         theme: 'dark',
@@ -280,7 +282,12 @@ const PostInput = () => {
           {postType === 'vote' && (
             <div className={'absolute right-5 top-2 text-center'}>
               <span>Expires in:</span>
-              <Counter count={counter} onIncrement={() => setCounter(counter + 1)} onDecrement={() => setCounter(counter - 1)} max={5} />
+              <Counter
+                count={expiresCounter}
+                onIncrement={() => setExpiresCounter(expiresCounter + 1)}
+                onDecrement={() => setExpiresCounter(expiresCounter - 1)}
+                max={5}
+              />
             </div>
           )}
         </div>

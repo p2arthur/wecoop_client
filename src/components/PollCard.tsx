@@ -94,6 +94,22 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
     return currentPollCreator === address
   }
 
+  const checkVoted = (address: string) => {
+    const currentVote = poll.voters.find((vote) => vote.voterAddress === address)
+
+    console.log('current vote', currentVote)
+
+    if (!currentVote?.voterAddress) {
+      console.log('this is false')
+
+      return false
+    } else {
+      return true
+    }
+  }
+
+  const checkIsExpired = () => {}
+
   const handleTextPost = (text: string) => {
     const decodedText = decodeURIComponent(text)
 
@@ -192,15 +208,22 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
                     </div>
                     <div>
-                      {checkClaimed(activeAccount?.address!) ? (
-                        <button>Claimed</button>
-                      ) : (
-                        <div className="flex text-white gap-2 items-center">
-                          <button onClick={handleClaimPoolShare} className="p-2 border-white border-2 bg-gray-800">
-                            Claim now
-                          </button>
+                      {checkVoted(activeAccount?.address!) ? (
+                        <div className="flex gap-2 items-end">
+                          {checkClaimed(activeAccount?.address!) ? (
+                            <button>Claimed</button>
+                          ) : (
+                            <div className="flex text-white gap-2 items-center">
+                              <button onClick={handleClaimPoolShare} className="p-1 border-white border-2 bg-gray-800">
+                                Claim now
+                              </button>
+                            </div>
+                          )}
+                          <p>
+                            {poll.depositedAmount / poll.voters.length} x asset: {poll.assetId}
+                          </p>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 ) : (
