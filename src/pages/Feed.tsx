@@ -7,12 +7,10 @@ import PostInput from '../components/PostInput'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
 import { MenuFeed } from '../components/templates/MenuFeed'
 import { usePosts } from '../context/Posts/Posts'
-import { useGetLastPosts } from '../services/api/Posts'
 
 const Feed = () => {
   const { postList, handleNewReply, isLoading, activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
 
-  const { data: dataLastPosts, isLoading: isLoadingLastPosts } = useGetLastPosts()
   const { activeAccount } = useWallet()
 
   const [params, setParams] = useSearchParams()
@@ -77,7 +75,7 @@ const Feed = () => {
           <PostInput />
         </div>
         <div className="md:overflow-y-hidden  h-full">
-          <FeedComponent postList={isLoading ? dataLastPosts : postList} isLoading={isLoadingLastPosts} handleNewReply={handleNewReply} />
+          <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
         </div>
       </div>
       <div className="w-3/12 hidden md:flex">

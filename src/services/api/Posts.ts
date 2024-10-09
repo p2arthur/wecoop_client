@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { IGetAllPosts, Post } from './types'
+import { GetFeedByMongo, IGetAllPosts, Post } from './types'
 
 export const getAllPosts = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
@@ -56,4 +56,15 @@ export const useGetPostsByAddress = (address: string) =>
   useQuery<IGetAllPosts>({
     queryKey: ['getPostsByAddress', address],
     queryFn: () => getPostsByAddress(address),
+  })
+
+const getFeedByMongo = async () => {
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global/mongodb`)
+  return data
+}
+
+export const useGetFeedByMongo = () =>
+  useQuery<GetFeedByMongo>({
+    queryKey: ['getFeedByMongo'],
+    queryFn: () => getFeedByMongo(),
   })

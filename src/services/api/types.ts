@@ -13,6 +13,7 @@ export interface Post {
   assetId: number
   isPersonalized: boolean
 }
+
 export interface Poll {
   text: string
   creator_address: string
@@ -42,6 +43,7 @@ export interface PostRequest {
   assetId: number
   isPersonalized: boolean
 }
+
 export interface PollRequest {
   text: string
   creator_address: string
@@ -112,4 +114,72 @@ export interface User {
 export interface Nfd {
   name: string
   avatar: string
+}
+
+export interface GetFeedByMongo {
+  data: Daum[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
+}
+
+export interface Daum {
+  _id: Id
+  pollId?: number
+  creator_address: string
+  text: string
+  timestamp: number
+  country: string
+  assetId: number
+  depositedAmount?: number
+  totalVotes?: number
+  yesVotes?: number
+  expiry_timestamp?: number
+  status?: string
+  voters?: Voter[]
+  type: string
+  transaction_id?: string
+  replies?: Reply[]
+  likes?: Like[]
+}
+
+export interface Id {
+  $oid: string
+}
+
+export interface Voter {
+  _id: Id2
+  pollId: number
+  voterAddress: string
+  claimed: boolean
+}
+
+export interface Id2 {
+  $oid: string
+}
+
+export interface Reply {
+  _id: Id3
+  transaction_id: string
+  post_transaction_id: string
+  creator_address: string
+  text: string
+  timestamp: number
+  country: string
+  assetId: number
+}
+
+export interface Id3 {
+  $oid: string
+}
+
+export interface Like {
+  _id: Id4
+  transaction_id: string
+  creator_address: string
+  post_transaction_id: string
+}
+
+export interface Id4 {
+  $oid: string
 }

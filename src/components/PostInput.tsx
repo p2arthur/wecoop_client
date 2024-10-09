@@ -19,7 +19,7 @@ import Counter from './Counter'
 
 //--------------
 import { toast } from 'react-toastify'
-import { createAppClient, getAllPolls, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
+import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { getOptedIn } from '../utils/getOptedIn'
 import { PostTypeSwitch } from './PostTypeSwitch'
 
@@ -112,15 +112,6 @@ const PostInput = () => {
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = event.target.value
     setInputText(text)
-  }
-
-  const handleGetAllPolls = async (event: React.FormEvent) => {
-    const wecoopDaoAppId = import.meta.env.VITE_WECOOP_POLL_APP_ID
-    const daoAssetId = 721969155
-    const daoAssetAmount = 1
-    const pollQuestion = inputText
-
-    getAllPolls()
   }
 
   const handleCreatePoll = async (event: React.FormEvent) => {

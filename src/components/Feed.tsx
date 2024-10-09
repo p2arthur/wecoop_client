@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Post } from '../services/api/types'
+import { Daum, Post } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
 import VoteCard from './PollCard'
 import PostCard from './PostCard'
 
 interface FeedPropsInterface {
-  postList: Post[] | null | undefined
+  postList: Daum[] | null | undefined
   isLoading: boolean
   handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
 }
@@ -22,7 +22,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
     }
   }
 
-  const paginatedPosts: Post[] | undefined = postList?.slice(0, currentPage * postsPerPage)
+  const paginatedPosts: Daum[] | undefined = postList?.slice(0, currentPage * postsPerPage)
 
   useEffect(() => {
     const container = feedContainerRef.current
@@ -53,7 +53,11 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
         paginatedPosts.map((post, index) =>
-          post.transaction_id ? <PostCard key={index} handleNewReply={handleNewReply} post={post} /> : <VoteCard key={index} poll={post} />,
+          post.type === 'post' ? (
+            <PostCard key={index} handleNewReply={handleNewReply} post={post} />
+          ) : (
+            <VoteCard key={index} poll={post} />
+          ),
         )}
 
       {!isLoading && (!postList || postList.length === 0) && (

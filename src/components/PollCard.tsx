@@ -25,11 +25,6 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   const [currentVotes, setCurrentVotes] = useState({ yesVotes: poll.yesVotes, totalVotes: poll.totalVotes })
 
   let appClient: WecoopDaoClient
-  if (activeAccount?.address) {
-    appClient = createAppClient(activeAccount?.address, signer, algod)
-  }
-
-  console.log('vote card', poll)
 
   const [isVoted, setIsVoted] = useState(false)
 
@@ -43,10 +38,6 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
     return formatDateFromTimestamp(date)
   }
 
-  // const handleGoToPostPage = () => {
-  //   window.location.href = `/post?id=${vote.transaction_id}`
-  // }
-
   const handleVoteClick = async (inFavor: boolean, pollId: number) => {
     if (!activeAccount) return
 
@@ -54,6 +45,8 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
       const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
       const daoAssetId = 721969155
       const daoAssetAmount = 1
+      console.log(activeAccount, signer, algod)
+      appClient = createAppClient(activeAccount?.address, signer, algod)
 
       const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId, inFavor)
 
@@ -79,6 +72,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
 
   const handleClaimPoolShare = async () => {
     const { pollId } = poll
+    appClient = createAppClient(activeAccount?.address, signer, algod)
 
     const isClaimed = checkClaimed(activeAccount?.address!)
 

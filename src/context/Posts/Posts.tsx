@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { useGetAllPosts, useGetAllPostsByWalletAddress, useGetPostByTransactionId } from '../../services/api/Posts'
-import { Like, Post } from '../../services/api/types'
+import { useGetAllPostsByWalletAddress, useGetFeedByMongo, useGetPostByTransactionId } from '../../services/api/Posts'
+import { Daum, Like, Post } from '../../services/api/types'
 
 export enum AssetId {
   coopCoin = 796425061,
@@ -57,7 +57,7 @@ const PostsContext = createContext<IPostsContext>({
 
 const PostsProvider = ({ children }: IPostsProviderProps) => {
   const queryClient = useQueryClient()
-  const [postList, setPostList] = useState<Post[]>([])
+  const [postList, setPostList] = useState<Daum[]>([])
   const [assetId, setAssetId] = useState<AssetId | null>(null)
   const [postType, setPostType] = useState<string>('post')
   const [transactionId, setTransactionId] = useState<string>('')
@@ -65,7 +65,9 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
 
   const { activeAccount } = useWallet()
 
-  const { data, isFetching: isLoadingGetAllPosts, refetch } = useGetAllPosts(false)
+  const { data: dataMongo, isFetching: isLoadingGetAllPosts, refetch } = useGetFeedByMongo()
+
+  const data = dataMongo?.data
 
   const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
 
