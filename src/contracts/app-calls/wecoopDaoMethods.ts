@@ -48,10 +48,12 @@ export const makePoll = async (
   const xferFirstDeposit = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: appAddress,
-    amount: 120_000,
+    amount,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
     assetIndex: assetId,
   })
+
+  //TODO: Make payment transaction to the wecoop main address
 
   try {
     const result = await appClient.createPoll(

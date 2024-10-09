@@ -1,9 +1,9 @@
 import CountUp from 'react-countup'
+import { usePosts } from '../../context/Posts/Posts'
+import useLeaderboard from '../../hooks/useLeaderboard'
 import FeaturedSection from '../featured-section/FeaturedSection'
 import TopCreatorCard from '../featured-section/TopCreatorCard'
 import TopPostCard from '../featured-section/TopPostCard'
-import { usePosts } from '../../context/Posts/Posts'
-import useLeaderboard from '../../hooks/useLeaderboard'
 
 interface ProfileMenuProps {
   activeAssetId: number | null | undefined
@@ -48,14 +48,10 @@ export const ProfileMenu = ({ activeAssetId }: ProfileMenuProps) => {
           <a className="underline text-blue-700 hover:text-blue-500" target="_blank" href="https://twitter.com/iam_p2">
             @iam_p2
           </a>{' '}
-          /{' '}
+          and{' '}
           <a className="underline text-blue-700 hover:text-blue-500" target="_blank" href="https://github.com/FelipeQueiroz">
             Felipe
           </a>{' '}
-          /{' '}
-          <a className="underline text-blue-700 hover:text-blue-500" target="_blank" href="https://www.linkedin.com/feed/">
-            D2dods
-          </a>
         </div>
         <a href="/about">
           <p className="text-blue-700 underline">About the app</p>

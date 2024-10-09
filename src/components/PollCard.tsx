@@ -72,7 +72,9 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
 
   const handleClaimPoolShare = async () => {
     const { pollId } = poll
-    appClient = createAppClient(activeAccount?.address, signer, algod)
+
+    if (!activeAccount) return
+    appClient = createAppClient(activeAccount.address, signer, algod)
 
     const isClaimed = checkClaimed(activeAccount?.address!)
 
@@ -197,12 +199,14 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       borderRadius={'10px'}
                       completed={currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}
                     />
-                    <div className={'flex items-center justify-between'}>
-                      <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
-                      <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
-                    </div>
+                    {
+                      <div className={'flex items-center justify-between'}>
+                        <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
+                        <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
+                      </div>
+                    }
                     <div>
-                      {checkVoted(activeAccount?.address!) ? (
+                      {checkVoted(activeAccount?.address!) && poll.expiry_timestamp * 1000 < Date.now() ? (
                         <div className="flex gap-2 items-end">
                           {checkClaimed(activeAccount?.address!) ? (
                             <button>Claimed</button>
@@ -220,11 +224,16 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       ) : null}
                     </div>
                   </div>
-                ) : (
-                  <div className={'w-full flex justify-left items-center gap-2'}>
+                ) : null}
+                {activeAccount?.address &&
+                !checkVoted(activeAccount.address) &&
+                !isVoted &&
+                poll.expiry_timestamp * 1000 > Date.now() &&
+                !checkIsCreator(activeAccount.address) ? (
+                  <div className={'w-full flex justify-left items-center gap-6'}>
                     <button
                       className={
-                        'w-1/2 h-10 rounded-md border-2 border-gray-900 bg-green-600 dark:bg-green-600 dark:border-gray-500 dark:hover:text-white hover:text-2xl  '
+                        'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
                       }
                       onClick={() => handleVoteClick(true, Number(poll.pollId))}
                     >
@@ -232,14 +241,14 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                     </button>
                     <button
                       className={
-                        'w-1/2 h-10 rounded-md border-2 border-gray-900 bg-red-600  dark:bg-red-600 dark:border-gray-500 dark:hover:text-white hover:text-2xl '
+                        'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
                       }
                       onClick={() => handleVoteClick(false, Number(poll.pollId))}
                     >
                       NO
                     </button>
                   </div>
-                )}
+                ) : null}
               </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex flex-col md:gap-2 md:hidden">

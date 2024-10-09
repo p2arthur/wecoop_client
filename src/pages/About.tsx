@@ -93,6 +93,9 @@ const Whitepaper = () => (
         censorship is no longer a barrier. Join us in shaping the future of decentralized networks. If you'd like to support our mission,
         consider donating to <strong>wecoopapp.algo</strong> or reach out to help us grow.
       </p>
+      <a className="text-blue-500 underline" href="https://www.linkedin.com/in/diego-cardoso-marques/">
+        Special thanks to d2dods who helped
+      </a>
     </div>
 
     <div className="flex justify-center mt-8 space-x-4">

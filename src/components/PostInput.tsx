@@ -125,7 +125,17 @@ const PostInput = () => {
 
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
-      const result = await makePoll(appClient, activeAccount?.address!, signer, prizePool, expiresInDays, daoAssetId, pollQuestion)
+      console.log('prize poll', prizePool)
+
+      const result = await makePoll(
+        appClient,
+        activeAccount?.address!,
+        signer,
+        prizePool * 1000000,
+        expiresInDays,
+        daoAssetId,
+        pollQuestion,
+      )
       toast('Create a pool vote successfully', {
         position: 'bottom-right',
         theme: 'dark',
