@@ -175,7 +175,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                 <div className="flex w-full">
                   <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
                     <span>Vote - Prize pool: </span>
-                    <CountUp end={Number(poll.depositedAmount?.toFixed(0))} duration={2} />{' '}
+                    <CountUp end={Number((poll.depositedAmount / 1000000).toFixed(2))} duration={2} />{' '}
                     <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
                       <img
                         className="h-full w-full"
