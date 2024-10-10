@@ -1,6 +1,7 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import axios from 'axios'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopDaoClient } from '../clients/WecoopDaoClient'
 
@@ -33,6 +34,10 @@ export const makePoll = async (
   expires_in: number,
   assetId: number,
   pollQuestion: string,
+  pollId: number, // Pass pollId dynamically
+  creator_address: string, // Pass creator address dynamically
+  country: string, // Pass country dynamically
+  depositedAmount: number, // Pass deposited amount dynamically
 ) => {
   const { appAddress } = await appClient.appClient.getAppReference()
 
@@ -53,19 +58,38 @@ export const makePoll = async (
     assetIndex: assetId,
   })
 
-  //TODO: Make payment transaction to the wecoop main address
-
   try {
     const result = await appClient.createPoll(
       {
         mbrTxn: boxMBRPayment,
         axfer: xferFirstDeposit,
         question: pollQuestion,
-        country: 'CA',
+        country: country,
         expires_in: expires_in_ms,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
     )
+
+    // Dynamically create the poll data
+    const pollData = {
+      pollId: pollId,
+      creator_address: creator_address,
+      text: pollQuestion,
+      timestamp: Date.now() / 100,
+      expiry_timestamp: (Date.now() + Number(expires_in_ms)) / 100,
+      country: country,
+      depositedAmount: depositedAmount,
+      assetId: assetId,
+      totalVotes: 0,
+      yesVotes: 0,
+      status: 'accepted',
+      type: 'poll',
+    }
+
+    console.log('poll data', pollData)
+
+    // Dynamic axios request
+    await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/create`, pollData)
   } catch (error) {
     console.error('error creating poll', error)
   }

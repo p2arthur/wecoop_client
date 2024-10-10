@@ -125,7 +125,11 @@ const PostInput = () => {
 
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
+      const { totalPolls } = await appClient.getGlobalState()
+
       console.log('prize poll', prizePool)
+
+      const country = await getUserCountry()
 
       const result = await makePoll(
         appClient,
@@ -135,6 +139,10 @@ const PostInput = () => {
         expiresInDays,
         daoAssetId,
         pollQuestion,
+        totalPolls?.asNumber()! + 1,
+        activeAccount?.address!,
+        country,
+        prizePool * 1000,
       )
       toast('Create a pool vote successfully', {
         position: 'bottom-right',
