@@ -3,17 +3,16 @@ import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
-import { FaSpinner } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
 import { WecoopDaoClient } from '../contracts/clients/WecoopDaoClient'
+import { useClaimPoll, useCreateVote } from '../services/api/Posts'
 import { PollRequest } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { PostInputOutletContext } from './PostInput'
-import { useClaimPoll, useCreateVote } from '../services/api/Posts'
-import { toast } from 'react-toastify'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -155,11 +154,14 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   return (
     <>
       <div>
-        {poll.status === 'accepted' ? (
+        {poll.status === 'accepted' || poll.status === 'loading' ? (
           <div
-            // onClick={handleGoToPostPage}
-            className="border-4 border-yellow-400 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900"
+            className={` ${
+              poll.status === 'loading' ? 'animate-pulse opacity-70' : null
+            } relative border-4 border-yellow-400 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
           >
+            {/* Overlay Loading Spinner if still loading */}
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <p></p>
@@ -172,7 +174,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                   </h2>
                 </a>
               </div>
-              <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
+              <div className="md:flex flex-col md:flex-row md:loagap-2 hidden">
                 {poll.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
                     <div className="w-6 rounded-full overflow-hidden">
@@ -217,12 +219,10 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       borderRadius={'10px'}
                       completed={currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}
                     />
-                    {
-                      <div className={'flex items-center justify-between'}>
-                        <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
-                        <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
-                      </div>
-                    }
+                    <div className={'flex items-center justify-between'}>
+                      <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
+                      <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
+                    </div>
                     <div>
                       {checkVoted(activeAccount?.address!) && poll.expiry_timestamp * 1000 < Date.now() ? (
                         <div className="flex gap-2 items-end">
@@ -268,44 +268,12 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                   </div>
                 ) : null}
               </div>
-              <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
-                <div className="flex flex-col md:gap-2 md:hidden">
-                  {poll.country ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-6 rounded-full overflow-hidden">
-                        <img className="w-full h-full" src={`https://flagsapi.com/${poll.country}/flat/64.png`} alt="" />
-                      </div>
-                      <p className="text-center">{poll.country}</p>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
             </div>
-          </div>
-        ) : poll.status === 'loading' ? (
-          <div
-            key={poll.pollId}
-            className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
-          >
-            <div className="flex flex-col">
-              <div className="flex items-center gap-3">
-                <div className="w-10 rounded-full border-2 border-gray-900">
-                  <img className="w-full" src={generateIdIcon(poll.creator_address!)} alt="" />
-                </div>
-                <h2 className="font-bold text-xl h-full">{poll.nfd ? poll.nfd.toUpperCase() : ellipseAddress(poll.creator_address)}</h2>
-              </div>
-              <p className="w-full" onClick={(e) => e.stopPropagation()}>
-                {handleTextPost(poll.text)}
-              </p>
-            </div>
-            <span>
-              <FaSpinner className="w-6 animate-spin" />
-            </span>
           </div>
         ) : (
           <div
             key={poll.text}
-            className="border-2 opacity-40 border-red-900 flex-col p-2   hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
+            className="border-2 opacity-40 border-red-900 flex-col p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
           >
             <h2>{poll.nfd ? poll.nfd.toUpperCase() : ellipseAddress(poll.creator_address)}</h2>
             <p className="w-full">{poll.text}</p>

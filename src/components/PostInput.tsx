@@ -19,9 +19,9 @@ import Counter from './Counter'
 //--------------
 import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
+import { useCreatePost } from '../services/api/Posts'
 import { getOptedIn } from '../utils/getOptedIn'
 import { PostTypeSwitch } from './PostTypeSwitch'
-import { useCreatePost } from '../services/api/Posts'
 
 //----------
 
@@ -54,7 +54,7 @@ const placeholderPhrases = [
 const PostInput = () => {
   const { usableAssetId } = useParams<{ usableAssetId: string }>()
   const { signTransactions, sendTransactions, activeAccount, signer } = useWallet()
-  const { handleAddNewPost, handleDeletePost, handleRefreshPosts, postType } = usePosts()
+  const { handleAddNewPost, handleDeleteLoadingPost, handleRefreshPosts, postType } = usePosts()
   const [openTooltip, setOpenTooltip] = useState(false)
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
@@ -126,13 +126,30 @@ const PostInput = () => {
 
       const expiresInDays = expiresCounter
 
+      const expires_in_ms = expiresInDays * 86400
+
+      const country = await getUserCountry()
+
+      handleAddNewPost({
+        pollId: 0,
+        creator_address: activeAccount?.address!,
+        text: pollQuestion,
+        timestamp: Math.floor(new Date().getTime() / 1000),
+        expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
+        country: country,
+        depositedAmount: prizePool * 1000000,
+        assetId: selectedAsset.assetId,
+        totalVotes: 0,
+        yesVotes: 0,
+        status: 'loading',
+        voters: [],
+      })
+
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
       const { totalPolls } = await appClient.getGlobalState()
 
       console.log('prize poll', prizePool)
-
-      const country = await getUserCountry()
 
       const result = await makePoll(
         appClient,
@@ -147,9 +164,24 @@ const PostInput = () => {
         country,
         prizePool * 1000,
       )
+      handleDeleteLoadingPost('loading_id')
       toast('Create a pool vote successfully', {
         position: 'bottom-right',
         theme: 'dark',
+      })
+      handleAddNewPost({
+        pollId: 0,
+        creator_address: activeAccount?.address!,
+        text: pollQuestion,
+        timestamp: Math.floor(new Date().getTime() / 1000),
+        expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
+        country: country,
+        depositedAmount: prizePool * 1000000,
+        assetId: selectedAsset.assetId,
+        totalVotes: 0,
+        yesVotes: 0,
+        status: 'accepted',
+        voters: [],
       })
       setInputText('')
       setLoadingSubmit(false)
@@ -267,12 +299,12 @@ const PostInput = () => {
       }
       createPost(postToMongo)
 
-      handleDeletePost('loading_id')
+      handleDeleteLoadingPost('loading_id')
       setLoadingSubmit(false)
     } catch (error) {
       console.error(error)
       setTimeout(() => {
-        handleDeletePost('loading_id')
+        handleDeleteLoadingPost('loading_id')
         toast('Failed to create post, try again later', {
           position: 'bottom-right',
           className: 'black-background',

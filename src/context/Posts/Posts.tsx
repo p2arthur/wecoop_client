@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetFeedByMongo, useGetPostByTransactionId } from '../../services/api/Posts'
-import { Daum, Like, Post } from '../../services/api/types'
+import { Daum, Like, Poll, Post } from '../../services/api/types'
 
 export enum AssetId {
   coopCoin = 796425061,
@@ -17,10 +17,10 @@ export type FeedType = 'personalized' | 'global' | 'coinFeed'
 type IPostsContext = {
   postList: Daum[] | null
   handleGetPostByAddress(address: string): Post | undefined
-  handleAddNewPost(post: Post): void
+  handleAddNewPost(post: Post | Poll): void
   handleNewReply(newReply: Post, transactionCreatorId: string): void
   handleNewLike(newLike: Like, transactionCreatorId: string): void
-  handleDeletePost(transactionCreatorId: string): void
+  handleDeleteLoadingPost(transactionCreatorId: string): void
   handleGetPostByTransactionId(transactionId: string): Post | undefined
   handleFilterByAssetId(assetId: number | null): void
   handleRefreshPosts(): void
@@ -42,7 +42,7 @@ const PostsContext = createContext<IPostsContext>({
   handleAddNewPost: () => undefined,
   handleNewReply: () => undefined,
   handleNewLike: () => undefined,
-  handleDeletePost: () => undefined,
+  handleDeleteLoadingPost: () => undefined,
   handleGetPostByTransactionId: () => undefined,
   handleRefreshPosts: () => undefined,
   handleChangeFeed: () => undefined,
@@ -104,8 +104,8 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     }
   }
 
-  const handleDeletePost = (transactionCreatorId: string) => {
-    const newPostsList = postList.filter((post) => post.transaction_id !== transactionCreatorId)
+  const handleDeleteLoadingPost = (transactionCreatorId: string) => {
+    const newPostsList = postList.filter((post) => post.status == 'accepted')
     setPostList(newPostsList)
   }
 
@@ -162,7 +162,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
       handleGetPostByTransactionId,
       handleRefreshPosts,
       handleAddNewPost,
-      handleDeletePost,
+      handleDeleteLoadingPost,
       handleChangeFeed,
       handleFilterByAssetId,
     }),
