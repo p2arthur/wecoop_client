@@ -70,7 +70,7 @@ export const useGetFeedByMongo = () =>
   })
 
 const createPost = async (newPost: PostCreateMongo): Promise<PostCreateMongo> => {
-  const response = await axios.post('/posts', newPost) // Substitua pela URL da sua API
+  const response = await axios.post(`${import.meta.env.VITE_WECOOP_API}/post`, newPost) // Substitua pela URL da sua API
   return response.data
 }
 
@@ -86,7 +86,7 @@ export const useCreatePost = () => {
 }
 
 const createReply = async (newReply: ReplyCreateMongo): Promise<ReplyCreateMongo> => {
-  const response = await axios.post('/replies', newReply)
+  const response = await axios.post(`${import.meta.env.VITE_WECOOP_API}/replies`, newReply)
   return response.data
 }
 
@@ -97,7 +97,7 @@ export const useCreateReply = () => {
 }
 
 const createLike = async (newLike: LikeCreateMongo): Promise<LikeCreateMongo> => {
-  const response = await axios.post('/likes', newLike)
+  const response = await axios.post(`${import.meta.env.VITE_WECOOP_API}/likes`, newLike)
   return response.data
 }
 
@@ -108,7 +108,7 @@ export const useCreateLike = () => {
 }
 
 const createVote = async (newVote: VoterCreateMongo): Promise<VoterCreateMongo> => {
-  const response = await axios.post('/polls/vote', newVote)
+  const response = await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/vote`, newVote)
   return response.data
 }
 
@@ -119,7 +119,7 @@ export const useCreateVote = () => {
 }
 
 const claimPoll = async (voterAddress: string, pollId: number) => {
-  const response = await axios.patch(`/polls/${voterAddress}/${pollId}/claim`)
+  const response = await axios.patch(`${import.meta.env.VITE_WECOOP_API}/polls/${voterAddress}/${pollId}/claim`)
   return response.data
 }
 

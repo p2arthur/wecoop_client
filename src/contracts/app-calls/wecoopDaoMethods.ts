@@ -75,7 +75,7 @@ export const makePoll = async (
       pollId: pollId,
       creator_address: creator_address,
       text: pollQuestion,
-      timestamp: Date.now() / 100,
+      timestamp: Math.floor(new Date().getTime() / 1000),
       expiry_timestamp: (Date.now() + Number(expires_in_ms)) / 100,
       country: country,
       depositedAmount: depositedAmount,

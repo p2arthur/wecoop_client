@@ -263,14 +263,12 @@ const PostInput = () => {
         status: 'accepted',
         transaction_id: id,
         country,
-        timestamp: new Date().getDate(),
+        timestamp: Math.floor(new Date().getTime() / 1000),
         assetId: usableAsset.assetId,
       }
       createPost(postToMongo)
 
-      if (isSuccessCreatePost) {
-        handleDeletePost('loading_id')
-      }
+      handleDeletePost('loading_id')
       setLoadingSubmit(false)
     } catch (error) {
       console.error(error)
