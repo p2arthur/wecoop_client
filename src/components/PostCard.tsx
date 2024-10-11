@@ -175,7 +175,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         transaction_id: id,
         post_transaction_id: parentReplyId,
         text: encodeURIComponent(replyText),
-        timestamp: Date.now(),
+        timestamp: (Date.now() + Number(expires_in_ms)) / 100,
         country,
         assetId: usableAsset.assetId,
       })

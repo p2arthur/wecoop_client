@@ -260,7 +260,6 @@ const PostInput = () => {
       const postToMongo = {
         creator_address: userData.address,
         text: inputText,
-        status: 'accepted',
         transaction_id: id,
         country,
         timestamp: Math.floor(new Date().getTime() / 1000),
