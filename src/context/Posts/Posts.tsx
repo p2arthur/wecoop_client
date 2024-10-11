@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useWallet } from '@txnlab/use-wallet'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { useGetAllPostsByWalletAddress, useGetFeedByMongo, useGetPostByTransactionId } from '../../services/api/Posts'
+import { useGetFeedByMongo, useGetPostByTransactionId } from '../../services/api/Posts'
 import { Daum, Like, Post } from '../../services/api/types'
 
 export enum AssetId {
@@ -16,7 +15,7 @@ export enum AssetId {
 export type FeedType = 'personalized' | 'global' | 'coinFeed'
 
 type IPostsContext = {
-  postList: Post[] | null
+  postList: Daum[] | null
   handleGetPostByAddress(address: string): Post | undefined
   handleAddNewPost(post: Post): void
   handleNewReply(newReply: Post, transactionCreatorId: string): void
@@ -63,69 +62,17 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   const [transactionId, setTransactionId] = useState<string>('')
   const [activeFeed, setActiveFeed] = useState<FeedType>('global')
 
-  const { activeAccount } = useWallet()
-
   const { data: dataMongo, isFetching: isLoadingGetAllPosts, refetch } = useGetFeedByMongo()
-
-  const data = dataMongo?.data
 
   const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
 
-  const {
-    data: postDataByWalletAddress,
-    isFetching: isLoadingPostDataByWalletAddress,
-    refetch: refetchPostByWalletAddress,
-  } = useGetAllPostsByWalletAddress(activeAccount?.address || '', false)
-
-  const isLoading = isLoadingGetAllPosts || isLoadingPostDataByWalletAddress
-
   useEffect(() => {
-    const savedPosts = sessionStorage.getItem('postList')
-    if (savedPosts) {
-      setPostList(JSON.parse(savedPosts))
-    } else {
-      refetch()
+    if (dataMongo) {
+      setPostList(dataMongo?.data)
     }
-  }, [refetch])
+  }, [dataMongo])
 
-  useEffect(() => {
-    if (activeFeed === 'global' && data) {
-      sessionStorage.setItem('postList', JSON.stringify(data))
-      const filteredPosts = data.filter((post) => !assetId || post.assetId === assetId)
-      setPostList((prevPosts) => {
-        // Apenas atualiza se os novos posts são diferentes dos anteriores
-        const updatedList = filteredPosts?.map((post) => ({
-          ...post,
-          status: 'accepted',
-          replies: post.replies?.map((reply) => ({
-            ...reply,
-            status: 'accepted',
-          })),
-        }))
-        return JSON.stringify(prevPosts) !== JSON.stringify(updatedList) ? updatedList : prevPosts
-      })
-    } else if (activeFeed === 'coinFeed' && assetId && data) {
-      setPostList(data?.filter((post) => post.assetId === assetId))
-    }
-  }, [data, assetId, activeFeed])
-
-  useEffect(() => {
-    if (postDataByWalletAddress && activeFeed === 'personalized') {
-      const filteredPosts = postDataByWalletAddress.filter((post) => !assetId || post.assetId === assetId)
-      setPostList((prevPosts) => {
-        // Apenas atualiza se os novos posts são diferentes dos anteriores
-        const updatedList = filteredPosts?.map((post) => ({
-          ...post,
-          status: 'accepted',
-          replies: post.replies?.map((reply) => ({
-            ...reply,
-            status: 'accepted',
-          })),
-        }))
-        return JSON.stringify(prevPosts) !== JSON.stringify(updatedList) ? updatedList : prevPosts
-      })
-    }
-  }, [postDataByWalletAddress, assetId, activeFeed])
+  const isLoading = isLoadingGetAllPosts
 
   const handleChangePostType = (postType: string) => {
     setPostType(postType)
@@ -134,58 +81,25 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   const handleFilterByAssetId = (assetId: number) => {
     setActiveFeed('coinFeed')
     setAssetId(assetId)
-    const localPostList = sessionStorage.getItem('postList')
-    if (localPostList) {
-      setPostList(JSON.parse(localPostList).filter((post: any) => post.assetId === assetId))
-    } else {
-      setPostList(data?.filter((post) => post.assetId === assetId) || [])
-    }
   }
 
   const handleRefreshPosts = () => {
-    sessionStorage.removeItem('postList')
-    queryClient.refetchQueries({ queryKey: ['getLastPosts'] })
-    refetch().then(() => {
-      if (data) {
-        if (assetId) {
-          setPostList(
-            data
-              .filter((post) => post.assetId === assetId)
-              ?.map((post) => ({
-                ...post,
-                status: 'accepted',
-                replies: post.replies?.map((reply) => ({
-                  ...reply,
-                  status: 'accepted',
-                })),
-              })),
-          )
-        } else {
-          setPostList(
-            data
-              .filter((post) => post.assetId === assetId)
-              .map((post) => ({
-                ...post,
-                status: 'accepted',
-                replies: post.replies?.map((reply) => ({
-                  ...reply,
-                  status: 'accepted',
-                })),
-              })),
-          )
-        }
+    queryClient.refetchQueries({ queryKey: ['getFeedByMongo'] }).then(() => {
+      if (dataMongo && assetId === null) {
+        setPostList(dataMongo.data)
+      } else {
+        setPostList(dataMongo?.data?.filter((post) => post.assetId === assetId) || [])
       }
     })
   }
 
-  const handleChangeFeed = (feed: FeedType, assetIdFilter?: number) => {
+  const handleChangeFeed = (feed: FeedType) => {
     setActiveFeed(feed)
 
     if (feed === 'personalized') {
-      setAssetId(assetIdFilter || null)
-      refetchPostByWalletAddress()
+      setAssetId(null)
     } else if (feed === 'global') {
-      setAssetId(assetIdFilter || null)
+      setAssetId(null)
       refetch()
     }
   }
@@ -210,7 +124,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     }
   }
 
-  const handleAddNewPost = (post: Post) => {
+  const handleAddNewPost = (post: Daum) => {
     setPostList((prevPosts) => [post, ...(prevPosts || [])])
   }
 

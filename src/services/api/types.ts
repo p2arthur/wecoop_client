@@ -1,5 +1,36 @@
 export type IGetAllPosts = PostRequest[]
 
+export interface PostCreateMongo {
+  transaction_id: string
+  creator_address: string
+  text: string
+  timestamp: number
+  country: string
+  assetId: number
+}
+
+export interface ReplyCreateMongo {
+  transaction_id: string
+  post_transaction_id: string
+  creator_address: string
+  text: string
+  timestamp: number
+  country: string
+  assetId: number
+}
+
+export interface LikeCreateMongo {
+  transaction_id: string
+  creator_address: string
+  post_transaction_id: string
+}
+
+export interface VoterCreateMongo {
+  pollId: number
+  voterAddress: string
+  claimed: boolean
+}
+
 export interface Post {
   text: string
   creator_address: string

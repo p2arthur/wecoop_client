@@ -34,7 +34,7 @@ export const ProfileMenu = ({ activeAssetId }: ProfileMenuProps) => {
         sectionTitle="Top posts"
         isLoadingAnalytics={isLoadingTotal}
         content={
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 ">
             {topPosts?.map((post) => {
               return <TopPostCard post={post} />
             })}

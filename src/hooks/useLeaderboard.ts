@@ -1,7 +1,7 @@
-import { Like, Post } from '../services/api/types'
+import { Daum, Like } from '../services/api/types'
 import { useMemo } from 'react'
 
-const useLeaderboard = (postList: Post[] | null, assetIdFilter: number | null | undefined) => {
+const useLeaderboard = (postList: Daum[] | null, assetIdFilter: number | null | undefined) => {
   const leaderboardData = useMemo(() => {
     if (!postList) return { topPosts: [], topUsers: [], totalInteractions: 0 }
 

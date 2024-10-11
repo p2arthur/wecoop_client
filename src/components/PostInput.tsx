@@ -4,7 +4,6 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import React, { useEffect, useState } from 'react'
 import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
 import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
@@ -22,6 +21,7 @@ import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { getOptedIn } from '../utils/getOptedIn'
 import { PostTypeSwitch } from './PostTypeSwitch'
+import { useCreatePost } from '../services/api/Posts'
 
 //----------
 
@@ -61,6 +61,8 @@ const PostInput = () => {
   const [selectedAsset, setSelectedAsset] = useState(usableAssetsList[0])
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
+  const { mutate: createPost, isSuccess: isSuccessCreatePost } = useCreatePost()
+  const [loadingSubmit, setLoadingSubmit] = useState(false)
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
@@ -116,6 +118,7 @@ const PostInput = () => {
 
   const handleCreatePoll = async (event: React.FormEvent) => {
     try {
+      setLoadingSubmit(true)
       event.preventDefault()
       const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
       const daoAssetId = 721969155
@@ -149,10 +152,12 @@ const PostInput = () => {
         theme: 'dark',
       })
       setInputText('')
+      setLoadingSubmit(false)
       setPrizePool(10)
       console.log('result', result)
     } catch (e) {
       setInputText('')
+      setLoadingSubmit(false)
       toast('Failed to make a vote try', {
         position: 'bottom-right',
         className: 'black-background',
@@ -162,36 +167,48 @@ const PostInput = () => {
     }
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmitPost = async (event: React.FormEvent) => {
     event.preventDefault()
+    setLoadingSubmit(true)
     const country = await getUserCountry()
 
-    // Get suggested transaction parameters from the Algod node
-    const suggestedParams = await algod.getTransactionParams().do()
-
-    const allTransactions: Transaction[] = []
-
-    for (const asset of usableAssetsList) {
-      console.log('viewing opted in', asset)
-      const userOptedIn = await getOptedIn(activeAccount?.address!, asset.assetId, algod)
-      console.log('userOptedin', userOptedIn)
-
-      if (asset.assetId === 0) continue
-
-      if (!userOptedIn) {
-        const transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-          from: userData.address,
-          to: userData.address,
-          amount: 0, // Amount of asset to transfer
-          assetIndex: asset.assetId,
-          suggestedParams: suggestedParams, // Use suggested transaction params
-        })
-
-        allTransactions.push(transaction)
-      }
-    }
-
     try {
+      handleAddNewPost({
+        text: inputText,
+        creator_address: userData.address,
+        status: 'loading',
+        timestamp: new Date().getDate(),
+        transaction_id: 'loading_id',
+        replies: [],
+        country,
+        likes: [],
+        isPersonalized: false,
+        assetId: usableAsset.assetId,
+      })
+
+      // Get suggested transaction parameters from the Algod node
+      const suggestedParams = await algod.getTransactionParams().do()
+
+      const allTransactions: Transaction[] = []
+
+      for (const asset of usableAssetsList) {
+        const userOptedIn = await getOptedIn(activeAccount?.address!, asset.assetId, algod)
+
+        if (asset.assetId === 0) continue
+
+        if (!userOptedIn) {
+          const transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+            from: userData.address,
+            to: userData.address,
+            amount: 0, // Amount of asset to transfer
+            assetIndex: asset.assetId,
+            suggestedParams: suggestedParams, // Use suggested transaction params
+          })
+
+          allTransactions.push(transaction)
+        }
+      }
+
       const encodedInputText = encodeURIComponent(inputText.replace(/\n/g, '%0A'))
       const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
@@ -240,42 +257,38 @@ const PostInput = () => {
       const encodedTransactions = allTransactions.map((transaction) => algosdk.encodeUnsignedTransaction(transaction))
       const signedTransactions = await signTransactions(encodedTransactions)
       const { id } = await sendTransactions(signedTransactions, 4)
-
-      handleDeletePost('loading_id')
-      handleAddNewPost({
+      const postToMongo = {
         creator_address: userData.address,
         text: inputText,
         status: 'accepted',
         transaction_id: id,
         country,
         timestamp: new Date().getDate(),
-        replies: [],
-        likes: [],
-        isPersonalized: false,
         assetId: usableAsset.assetId,
-      })
+      }
+      createPost(postToMongo)
+
+      if (isSuccessCreatePost) {
+        handleDeletePost('loading_id')
+      }
+      setLoadingSubmit(false)
     } catch (error) {
       console.error(error)
       setTimeout(() => {
         handleDeletePost('loading_id')
-        handleAddNewPost({
-          text: inputText,
-          creator_address: userData.address,
-          status: 'rejected',
-          timestamp: new Date().getDate(),
-          transaction_id: uuidv4(),
-          replies: [],
-          country,
-          likes: [],
-          isPersonalized: false,
-          assetId: usableAsset.assetId,
+        toast('Failed to create post, try again later', {
+          position: 'bottom-right',
+          className: 'black-background',
+          bodyClassName: 'grow-font-size',
+          progressClassName: 'fancy-progress-bar',
         })
+        setLoadingSubmit(false)
       }, 1000)
     }
   }
 
   return (
-    <form onSubmit={(e) => (postType === 'post' ? handleSubmit(e) : handleCreatePoll(e))}>
+    <form onSubmit={(e) => (postType === 'post' ? handleSubmitPost(e) : handleCreatePoll(e))}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea
@@ -342,7 +355,11 @@ const PostInput = () => {
               selectedAsset={selectedAsset}
               selectorOpen={selectorOpen}
             />
-            {activeAccount?.address && inputText !== '' && inputText.length <= 300 && userData.balance[selectedAsset.assetId] > 0.1 ? (
+            {activeAccount?.address &&
+            inputText !== '' &&
+            inputText.length <= 300 &&
+            userData.balance[selectedAsset.assetId] > 0.1 &&
+            !loadingSubmit ? (
               <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create vote'}`} full justify={'center'} />
             ) : (
               <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create your vote'}`} full justify={'center'} />

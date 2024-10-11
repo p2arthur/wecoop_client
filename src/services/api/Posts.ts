@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { GetFeedByMongo, IGetAllPosts, Post } from './types'
+import { GetFeedByMongo, IGetAllPosts, LikeCreateMongo, Post, PostCreateMongo, ReplyCreateMongo, VoterCreateMongo } from './types'
 
 export const getAllPosts = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
@@ -68,3 +68,63 @@ export const useGetFeedByMongo = () =>
     queryKey: ['getFeedByMongo'],
     queryFn: () => getFeedByMongo(),
   })
+
+const createPost = async (newPost: PostCreateMongo): Promise<PostCreateMongo> => {
+  const response = await axios.post('/posts', newPost) // Substitua pela URL da sua API
+  return response.data
+}
+
+export const useCreatePost = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<PostCreateMongo, Error, PostCreateMongo>({
+    mutationFn: createPost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['getFeedByMongo'] })
+    },
+  })
+}
+
+const createReply = async (newReply: ReplyCreateMongo): Promise<ReplyCreateMongo> => {
+  const response = await axios.post('/replies', newReply)
+  return response.data
+}
+
+export const useCreateReply = () => {
+  return useMutation<ReplyCreateMongo, Error, ReplyCreateMongo>({
+    mutationFn: createReply,
+  })
+}
+
+const createLike = async (newLike: LikeCreateMongo): Promise<LikeCreateMongo> => {
+  const response = await axios.post('/likes', newLike)
+  return response.data
+}
+
+export const useCreateLike = () => {
+  return useMutation<LikeCreateMongo, Error, LikeCreateMongo>({
+    mutationFn: createLike,
+  })
+}
+
+const createVote = async (newVote: VoterCreateMongo): Promise<VoterCreateMongo> => {
+  const response = await axios.post('/polls/vote', newVote)
+  return response.data
+}
+
+export const useCreateVote = () => {
+  return useMutation<VoterCreateMongo, Error, VoterCreateMongo>({
+    mutationFn: createVote,
+  })
+}
+
+const claimPoll = async (voterAddress: string, pollId: number) => {
+  const response = await axios.patch(`/polls/${voterAddress}/${pollId}/claim`)
+  return response.data
+}
+
+export const useClaimPoll = () => {
+  return useMutation<void, Error, { voterAddress: string; pollId: number }>({
+    mutationFn: ({ voterAddress, pollId }) => claimPoll(voterAddress, pollId),
+  })
+}

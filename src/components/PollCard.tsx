@@ -12,6 +12,8 @@ import { useGetUserInfo } from '../services/api/Users'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { PostInputOutletContext } from './PostInput'
+import { useClaimPoll, useCreateVote } from '../services/api/Posts'
+import { toast } from 'react-toastify'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -21,6 +23,8 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   const { algod } = useOutletContext() as PostInputOutletContext
   const { activeAccount, signer } = useWallet()
   const { data: userData } = useGetUserInfo(poll.creator_address)
+  const { mutate: createVote } = useCreateVote()
+  const { mutate: claimPoll } = useClaimPoll()
 
   const [currentVotes, setCurrentVotes] = useState({ yesVotes: poll.yesVotes, totalVotes: poll.totalVotes })
 
@@ -55,6 +59,11 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
       } else {
         setCurrentVotes({ ...currentVotes, totalVotes: currentVotes.totalVotes + 1 })
       }
+      createVote({
+        pollId: pollId,
+        voterAddress: activeAccount.address,
+        claimed: false,
+      })
 
       setIsVoted(true)
 
@@ -71,18 +80,33 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   }
 
   const handleClaimPoolShare = async () => {
-    const { pollId } = poll
+    try {
+      const { pollId } = poll
 
-    if (!activeAccount) return
-    appClient = createAppClient(activeAccount.address, signer, algod)
+      if (!activeAccount) return
+      appClient = createAppClient(activeAccount.address, signer, algod)
 
-    const isClaimed = checkClaimed(activeAccount?.address!)
+      const isClaimed = checkClaimed(activeAccount.address!)
 
-    if (isClaimed) return
+      if (isClaimed) return
 
-    const result = await withdrawPollShare(appClient, pollId, activeAccount?.address!, signer)
-
-    console.log('claim result', result)
+      const result = await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
+      console.log(result, 'result')
+      claimPoll({ pollId, voterAddress: activeAccount.address! })
+      toast('Claimed successfully, congrats!!!', {
+        position: 'bottom-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+    } catch (error) {
+      toast('Failed to claim poll, if you think that is a mistake, please contact us', {
+        position: 'bottom-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+    }
   }
 
   const checkIsCreator = (address: string) => {
@@ -93,18 +117,12 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   const checkVoted = (address: string) => {
     const currentVote = poll.voters.find((vote) => vote.voterAddress === address)
 
-    console.log('current vote', currentVote)
-
     if (!currentVote?.voterAddress) {
-      console.log('this is false')
-
       return false
     } else {
       return true
     }
   }
-
-  const checkIsExpired = () => {}
 
   const handleTextPost = (text: string) => {
     const decodedText = decodeURIComponent(text)
