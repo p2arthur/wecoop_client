@@ -58,6 +58,14 @@ export const makePoll = async (
     assetIndex: assetId,
   })
 
+  const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: appAddress,
+    amount: 1000,
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+    assetIndex: assetId,
+  })
+
   try {
     const result = await appClient.createPoll(
       {
@@ -66,6 +74,7 @@ export const makePoll = async (
         question: pollQuestion,
         country: country,
         expires_in: expires_in_ms,
+        platformFeeTxn,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
     )
@@ -125,6 +134,26 @@ export const makeVote = async (
     amount: 1,
     assetIndex: asset,
   })
+
+  try {
+    //Save vote into the database
+    // Dynamically create the poll data
+    const voteData = {
+      pollId: pollId,
+      voterAddress: sender,
+      claimed: false,
+      in_favor: inFavor,
+    }
+
+    console.log('vote data', voteData)
+
+    console.log('poll data', voteData)
+
+    // Dynamic axios request
+    await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/vote`, voteData)
+  } catch (error) {
+    console.error('error creating vote', error)
+  }
 
   const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor }, { sender: { addr: sender, signer } })
 }

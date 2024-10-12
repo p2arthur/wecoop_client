@@ -17,6 +17,7 @@ import { CoinDropdown } from './CoinDropdown'
 import Counter from './Counter'
 
 //--------------
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
@@ -76,6 +77,8 @@ const PostInput = () => {
     const prizePool = event.target.value
     setPrizePool(Number(prizePool))
   }
+
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const intr = setInterval(() => {
@@ -169,20 +172,9 @@ const PostInput = () => {
         position: 'bottom-right',
         theme: 'dark',
       })
-      handleAddNewPost({
-        pollId: 0,
-        creator_address: activeAccount?.address!,
-        text: pollQuestion,
-        timestamp: Math.floor(new Date().getTime() / 1000),
-        expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
-        country: country,
-        depositedAmount: prizePool * 1000000,
-        assetId: selectedAsset.assetId,
-        totalVotes: 0,
-        yesVotes: 0,
-        status: 'accepted',
-        voters: [],
-      })
+
+      queryClient.invalidateQueries({ queryKey: ['getFeedByMongo'] })
+
       setInputText('')
       setLoadingSubmit(false)
       setPrizePool(10)
