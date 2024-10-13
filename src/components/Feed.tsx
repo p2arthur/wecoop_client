@@ -50,7 +50,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
   if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
 
   return (
-    <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full  no-scrollbar">
+    <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full no-scrollbar overflow-x-hidden">
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
         paginatedPosts.map((post, index) =>
