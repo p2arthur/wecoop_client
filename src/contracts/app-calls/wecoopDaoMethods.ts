@@ -113,31 +113,29 @@ export const makeVote = async (
   asset: number,
   inFavor: boolean,
 ) => {
-  const { appAddress } = await appClient.appClient.getAppReference()
-
-  const suggestedParams = await algokit.getTransactionParams(undefined, algod)
-
-  console.log('suggested prams', suggestedParams.lastRound)
-
-  const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: sender,
-    to: appAddress,
-    amount: 3_450,
-    suggestedParams: await algokit.getTransactionParams(undefined, algod),
-  })
-
-  // Create the asset funding transaction (axfer)
-  const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: sender,
-    suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
-    to: appAddress,
-    amount: 1,
-    assetIndex: asset,
-  })
-
   try {
-    //Save vote into the database
-    // Dynamically create the poll data
+    const { appAddress } = await appClient.appClient.getAppReference()
+
+    const suggestedParams = await algokit.getTransactionParams(undefined, algod)
+
+    console.log('suggested prams', suggestedParams.lastRound)
+
+    const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: sender,
+      to: appAddress,
+      amount: 3_450,
+      suggestedParams: await algokit.getTransactionParams(undefined, algod),
+    })
+
+    // Create the asset funding transaction (axfer)
+    const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: sender,
+      suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
+      to: appAddress,
+      amount: 1,
+      assetIndex: asset,
+    })
+
     const voteData = {
       pollId: pollId,
       voterAddress: sender,
@@ -151,11 +149,11 @@ export const makeVote = async (
 
     // Dynamic axios request
     await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/vote`, voteData)
-  } catch (error) {
-    console.error('error creating vote', error)
-  }
 
-  const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor }, { sender: { addr: sender, signer } })
+    const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor }, { sender: { addr: sender, signer } })
+  } catch (error) {
+    console.error('error', error)
+  }
 }
 
 export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: number, sender: string, signer: TransactionSigner) => {
