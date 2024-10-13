@@ -73,7 +73,7 @@ export const makePoll = async (
         axfer: xferFirstDeposit,
         question: pollQuestion,
         country: country,
-        expires_in: expires_in_ms,
+        expires_in: 100,
         platformFeeTxn,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
@@ -85,7 +85,7 @@ export const makePoll = async (
       creator_address: creator_address,
       text: pollQuestion,
       timestamp: Math.floor(new Date().getTime() / 1000),
-      expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
+      expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + 100,
       country: country,
       depositedAmount: depositedAmount,
       assetId: assetId,
@@ -170,6 +170,9 @@ export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: numb
       },
     )
     console.log('result', result)
+
+    await axios.patch(`${import.meta.env.VITE_WECOOP_API}/polls/${sender}/${pollId}`)
+
     return result
   } catch (error) {
     console.error('error withdrawing pool share', error)

@@ -13,6 +13,7 @@ import { useGetUserInfo } from '../services/api/Users'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { PostInputOutletContext } from './PostInput'
+import { FaCheckCircle, FaParachuteBox } from 'react-icons/fa'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -174,7 +175,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                   </h2>
                 </a>
               </div>
-              <div className="md:flex flex-col md:flex-row md:loagap-2 hidden">
+              <div className="md:flex flex-col md:flex-row md:loagap-2 hidden gap-4">
                 {poll.country ? (
                   <div className="flex gap-0 flex-col items-center justify-center">
                     <div className="w-6 rounded-full overflow-hidden">
@@ -194,7 +195,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                 </div>
                 <div className="flex w-full">
                   <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
-                    <span>Vote - Prize pool: </span>
+                    <span>Prize pool: </span>
                     <CountUp end={Number((poll.depositedAmount / 1000000).toFixed(2))} duration={2} />{' '}
                     <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
                       <img
@@ -223,21 +224,39 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
                       <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
                     </div>
-                    <div>
+                    <div className="pt-4 border-t-2 border-gray-300/30">
                       {checkVoted(activeAccount?.address!) && poll.expiry_timestamp * 1000 < Date.now() ? (
                         <div className="flex gap-2 items-end">
                           {checkClaimed(activeAccount?.address!) ? (
-                            <button>Claimed</button>
+                            <div className="flex justify-end w-full">
+                              <h3 className="flex gap-2 bg-white p-1 text-black rounded-md">
+                                <FaCheckCircle className="text-2xl text-green-500" />
+                                <p>Claimed</p>
+                              </h3>
+                            </div>
                           ) : (
-                            <div className="flex text-white gap-2 items-center">
-                              <button onClick={handleClaimPoolShare} className="p-1 border-white border-2 bg-gray-800">
-                                Claim now
-                              </button>
+                            <div className="flex text-white items-end gap-8 justify-between w-full">
+                              <p className="underline flex items-end gap-2 text-xl">
+                                {poll.depositedAmount / poll.voters.length} x asset:{' '}
+                                <div className="rounded-full overflow-hidden w-8 h-8">
+                                  <img
+                                    className="h-full w-full"
+                                    src="https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2023/12/27/9e4d1ca7fc5a408b87b2f47b50e4749b.png?width=200&quality=70"
+                                    alt=""
+                                  />
+                                </div>
+                              </p>{' '}
+                              <div className="relative">
+                                <div className=" rounded-md absolute border-2 w-full h-full animate-ping pointer-events-none"></div>
+                                <h2
+                                  onClick={handleClaimPoolShare}
+                                  className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center text-xl"
+                                >
+                                  <FaParachuteBox className="text-green-500" /> <p>Claim now</p>
+                                </h2>
+                              </div>
                             </div>
                           )}
-                          <p>
-                            {poll.depositedAmount / poll.voters.length} x asset: {poll.assetId}
-                          </p>
                         </div>
                       ) : null}
                     </div>
