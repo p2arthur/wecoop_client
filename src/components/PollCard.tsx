@@ -8,11 +8,13 @@ import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
 import { WecoopDaoClient } from '../contracts/clients/WecoopDaoClient'
+import { usableAssetsList } from '../data/usableAssetsList'
 import { useClaimPoll, useCreateVote } from '../services/api/Posts'
 import { PollRequest } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
+import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { PostInputOutletContext } from './PostInput'
 
 interface PollCardPropsInterface {
@@ -21,6 +23,7 @@ interface PollCardPropsInterface {
 
 const VoteCard = ({ poll }: PollCardPropsInterface) => {
   const { algod } = useOutletContext() as PostInputOutletContext
+  const [pollPrize, setPollPrize] = useState(0)
   const { activeAccount, signer } = useWallet()
   const { data: userData } = useGetUserInfo(poll.creator_address)
   const { mutate: createVote } = useCreateVote()
@@ -48,15 +51,15 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
 
     try {
       const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
-      const daoAssetId = 721969155
+      const daoAssetId = poll.assetId
       const daoAssetAmount = 1
       console.log(activeAccount, signer, algod)
       appClient = createAppClient(activeAccount?.address, signer, algod)
 
-      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId, inFavor)
+      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId!, inFavor)
 
       if (inFavor) {
-        setCurrentVotes({ totalVotes: currentVotes.totalVotes + 1, yesVotes: currentVotes.yesVotes + 1 })
+        setCurrentVotes({ totalVotes: (currentVotes.totalVotes += 1), yesVotes: (currentVotes.yesVotes += 1) })
       } else {
         setCurrentVotes({ ...currentVotes, totalVotes: currentVotes.totalVotes + 1 })
       }
@@ -118,7 +121,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   }
 
   const checkVoted = (address: string) => {
-    const currentVote = poll.voters.find((vote) => vote.voterAddress === address)
+    const currentVote = poll.voters?.find((vote) => vote.voterAddress === address)
 
     if (!currentVote?.voterAddress) {
       return false
@@ -126,6 +129,16 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
       return true
     }
   }
+
+  const appendPrizePoll = async () => {
+    const assetDecimals = await getAssetDecimals(algod, poll.assetId!)
+
+    setPollPrize(poll.depositedAmount / 10 ** assetDecimals)
+  }
+
+  useEffect(() => {
+    appendPrizePoll()
+  }, [])
 
   const handleTextPost = (text: string) => {
     const decodedText = decodeURIComponent(text)
@@ -199,11 +212,11 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                 <div className="flex w-full select-none">
                   <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
                     <span>Prize pool: </span>
-                    <CountUp end={Number((poll.depositedAmount / 1000000).toFixed(2))} duration={2} />{' '}
+                    <CountUp end={Number(pollPrize.toFixed(2))} duration={2} />{' '}
                     <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
                       <img
                         className="h-full w-full"
-                        src="https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2023/12/27/9e4d1ca7fc5a408b87b2f47b50e4749b.png?width=200&quality=70"
+                        src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
                         alt=""
                       />
                     </div>

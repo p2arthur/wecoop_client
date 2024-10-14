@@ -2,6 +2,8 @@ import * as algokit from '@algorandfoundation/algokit-utils'
 import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import axios from 'axios'
+import { getAssetDecimals } from '../../utils/getAssetDecimals'
+import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopDaoClient } from '../clients/WecoopDaoClient'
 
@@ -34,10 +36,10 @@ export const makePoll = async (
   expires_in: number,
   assetId: number,
   pollQuestion: string,
-  pollId: number, // Pass pollId dynamically
-  creator_address: string, // Pass creator address dynamically
-  country: string, // Pass country dynamically
-  depositedAmount: number, // Pass deposited amount dynamically
+  pollId: number,
+  creator_address: string,
+  country: string,
+  depositedAmount: number,
 ) => {
   const { appAddress } = await appClient.appClient.getAppReference()
 
@@ -58,13 +60,21 @@ export const makePoll = async (
     assetIndex: assetId,
   })
 
+  const assetDecimals = await getAssetDecimals(algod, assetId)
+
+  const amountToDeposit = await getFeePriceByAsset(assetId, assetDecimals, InteractionMultipliers.CreatePoll)
+
+  console.log('amount to deposit', amountToDeposit)
+
   const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
-    to: appAddress,
-    amount: 1000,
+    to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
+    amount: Math.floor(Number(amountToDeposit) * 1000000),
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
     assetIndex: assetId,
   })
+
+  console.log('create poll platform fee', platformFeeTxn)
 
   try {
     const result = await appClient.createPoll(

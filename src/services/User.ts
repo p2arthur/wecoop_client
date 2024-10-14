@@ -1,3 +1,4 @@
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import axios from 'axios'
 import { minidenticon } from 'minidenticons'
 import { User as UserInterface } from '../services/api/types'
@@ -19,7 +20,7 @@ export class User {
     return data
   }
 
-  public async setUser(walletAddress: string) {
+  public async setUser(walletAddress: string, algod: AlgodClient) {
     const { data } = await this.getUserByWalletAddress(walletAddress)
     this.userData = data
     return this.userData
@@ -54,7 +55,7 @@ export class User {
 
       const assetDecimals = assetData['asset'].params.decimals
 
-      const balance = Number.parseFloat((assets[0].amount / 10 ** assetDecimals).toFixed(2))
+      const balance = Number.parseFloat((assets[0].amount / 100 ** assetDecimals).toFixed(2))
       return balance
     } catch (error) {
       return 0

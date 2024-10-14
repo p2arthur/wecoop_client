@@ -21,6 +21,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
+import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
 import { PostTypeSwitch } from './PostTypeSwitch'
 
@@ -124,7 +125,7 @@ const PostInput = () => {
       setLoadingSubmit(true)
       event.preventDefault()
       const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
-      const daoAssetId = 721969155
+      const daoAssetId = usableAsset.assetId
       const pollQuestion = inputText
 
       const expiresInDays = expiresCounter
@@ -141,7 +142,7 @@ const PostInput = () => {
         expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
         country: country,
         depositedAmount: prizePool * 1000000,
-        assetId: selectedAsset.assetId,
+        assetId: usableAsset.assetId,
         totalVotes: 0,
         yesVotes: 0,
         status: 'loading',
@@ -154,19 +155,26 @@ const PostInput = () => {
 
       console.log('prize poll', prizePool)
 
-      const result = await makePoll(
-        appClient,
-        activeAccount?.address!,
-        signer,
-        prizePool * 1000000,
-        expiresInDays,
-        daoAssetId,
-        pollQuestion,
-        totalPolls?.asNumber()! + 1,
-        activeAccount?.address!,
-        country,
-        prizePool * 1000,
-      )
+      const assetDecimals = await getAssetDecimals(algod, usableAsset.assetId)
+
+      try {
+        const result = await makePoll(
+          appClient,
+          activeAccount?.address!,
+          signer,
+          prizePool * 10 ** assetDecimals,
+          expiresInDays,
+          daoAssetId,
+          pollQuestion,
+          totalPolls?.asNumber()! + 1,
+          activeAccount?.address!,
+          country,
+          prizePool * 10 ** assetDecimals,
+        )
+      } catch (error) {
+        console.error('error creating poll ', error)
+      }
+
       handleDeleteLoadingPost('loading_id')
       toast('Create a pool vote successfully', {
         position: 'bottom-right',
@@ -322,7 +330,7 @@ const PostInput = () => {
             } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
           <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
-          {postType === 'vote' && (
+          {postType === 'poll' && (
             <div className={'absolute right-5 top-2 text-center'}>
               <span>Expires in:</span>
               <Counter
@@ -356,13 +364,13 @@ const PostInput = () => {
             <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
           </div>
           <div className={'grid justify-items-end md:flex md:justify-end md:mt-4 gap-4 md:items-center'}>
-            {postType === 'vote' && (
+            {postType === 'poll' && (
               <div className={'flex items-center gap-2'}>
                 <span>Prize pool:</span>
                 <input
                   type={'number'}
                   className={'w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
-                  min={10}
+                  min={1}
                   value={prizePool}
                   onChange={(event) => handleSetPrizePool(event)}
                 />
@@ -383,7 +391,7 @@ const PostInput = () => {
             !loadingSubmit ? (
               <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create vote'}`} full justify={'center'} />
             ) : (
-              <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create your vote'}`} full justify={'center'} />
+              <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
             )}
           </div>
         </div>
