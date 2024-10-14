@@ -96,6 +96,20 @@ export const useCreateReply = () => {
   })
 }
 
+const getFeedByAssetId = async (assetId: number): Promise<GetFeedByMongo> => {
+  console.log('asset id', assetId)
+
+  const response = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/asset/${assetId}`)
+  return response.data
+}
+
+export const useGetPostsByAssetId = (assetId: number) => {
+  return useQuery<GetFeedByMongo>({
+    queryKey: ['getFeedByAssetId', assetId], // Include assetId in the queryKey
+    queryFn: () => getFeedByAssetId(assetId), // Fetch data for the specific assetId
+  })
+}
+
 const createLike = async (newLike: LikeCreateMongo): Promise<LikeCreateMongo> => {
   const response = await axios.post(`${import.meta.env.VITE_WECOOP_API}/likes`, newLike)
   return response.data

@@ -3,6 +3,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
+import { FaCheckCircle, FaParachuteBox } from 'react-icons/fa'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
@@ -13,7 +14,6 @@ import { useGetUserInfo } from '../services/api/Users'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { PostInputOutletContext } from './PostInput'
-import { FaCheckCircle, FaParachuteBox } from 'react-icons/fa'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -31,6 +31,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
   let appClient: WecoopDaoClient
 
   const [isVoted, setIsVoted] = useState(false)
+  const [isClaimed, setIsClaimed] = useState(false)
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -99,6 +100,8 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
         bodyClassName: 'grow-font-size',
         progressClassName: 'fancy-progress-bar',
       })
+
+      setIsClaimed(true)
     } catch (error) {
       toast('Failed to claim poll, if you think that is a mistake, please contact us', {
         position: 'bottom-right',
@@ -193,7 +196,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                 <div className="border-b-2 py-2 border-gray-300/30">
                   <p className="tracking-wide break-words w-full ">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
                 </div>
-                <div className="flex w-full">
+                <div className="flex w-full select-none">
                   <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
                     <span>Prize pool: </span>
                     <CountUp end={Number((poll.depositedAmount / 1000000).toFixed(2))} duration={2} />{' '}
@@ -227,7 +230,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                     <div className="pt-4 border-t-2 border-gray-300/30">
                       {checkVoted(activeAccount?.address!) && poll.expiry_timestamp * 1000 < Date.now() ? (
                         <div className="flex gap-2 items-end">
-                          {checkClaimed(activeAccount?.address!) ? (
+                          {checkClaimed(activeAccount?.address!) || isClaimed ? (
                             <div className="flex justify-end w-full">
                               <h3 className="flex gap-2 bg-white p-1 text-black rounded-md">
                                 <FaCheckCircle className="text-2xl text-green-500" />
