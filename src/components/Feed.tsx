@@ -24,8 +24,6 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
 
   const paginatedPosts: Daum[] | undefined = postList?.slice(0, currentPage * postsPerPage)
 
-  console.log(paginatedPosts, 'paginatedPosts')
-
   useEffect(() => {
     const container = feedContainerRef.current
     if (container) {

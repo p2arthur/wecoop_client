@@ -64,8 +64,6 @@ export const makePoll = async (
 
   const amountToDeposit = await getFeePriceByAsset(assetId, assetDecimals, InteractionMultipliers.CreatePoll)
 
-  console.log('amount to deposit', amountToDeposit)
-
   const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
@@ -73,8 +71,6 @@ export const makePoll = async (
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
     assetIndex: assetId,
   })
-
-  console.log('create poll platform fee', platformFeeTxn)
 
   try {
     const result = await appClient.createPoll(
@@ -105,8 +101,6 @@ export const makePoll = async (
       type: 'poll',
     }
 
-    console.log('poll data', pollData)
-
     // Dynamic axios request
     await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/create`, pollData)
   } catch (error) {
@@ -122,13 +116,14 @@ export const makeVote = async (
   signer: TransactionSigner,
   asset: number,
   inFavor: boolean,
+  pollCreator: string,
 ) => {
   try {
     const { appAddress } = await appClient.appClient.getAppReference()
 
     const suggestedParams = await algokit.getTransactionParams(undefined, algod)
 
-    console.log('suggested prams', suggestedParams.lastRound)
+    const assetDecimals = await getAssetDecimals(algodClient, asset)
 
     const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: sender,
@@ -137,12 +132,44 @@ export const makeVote = async (
       suggestedParams: await algokit.getTransactionParams(undefined, algod),
     })
 
+    const baseVotePrice = await getFeePriceByAsset(asset, assetDecimals, InteractionMultipliers.VotePoll)
+
+    const pollDepositMultiplier = 2
+    const pollDepositPrice = Math.floor(baseVotePrice! * pollDepositMultiplier * 10 ** assetDecimals)
+    console.log('poll deposit', pollDepositPrice)
+
     // Create the asset funding transaction (axfer)
     const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
       suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
       to: appAddress,
-      amount: 1,
+      amount: pollDepositPrice,
+      assetIndex: asset,
+    })
+
+    const platformMultiplier = 1
+    const platformFeePrice = Math.floor(baseVotePrice! * platformMultiplier! * 10 ** assetDecimals)
+
+    console.log('poll deposit', platformFeePrice)
+    //User pays 1.5 cents to the platform in order to vote
+    const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: sender,
+      suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
+      to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
+      amount: platformFeePrice!,
+      assetIndex: asset,
+    })
+
+    //User pays 2 times the platform fee to the poll creator in order to vote
+    const pollCreatorMultiplier = 2
+    const pollCreatorPrice = Math.floor(baseVotePrice! * 10 ** pollCreatorMultiplier)
+
+    console.log('poll deposit', pollCreatorPrice)
+    const pollCreatorPaymentTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: sender,
+      suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
+      to: pollCreator,
+      amount: pollCreatorPrice,
       assetIndex: asset,
     })
 
@@ -151,16 +178,16 @@ export const makeVote = async (
       voterAddress: sender,
       claimed: false,
       in_favor: inFavor,
+      deposited_amount: pollDepositPrice,
     }
-
-    console.log('vote data', voteData)
-
-    console.log('poll data', voteData)
 
     // Dynamic axios request
     await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/vote`, voteData)
 
-    const result = await appClient.makeVote({ pollId: [pollId], axfer, mbrTxn, inFavor }, { sender: { addr: sender, signer } })
+    const result = await appClient.makeVote(
+      { pollId: [pollId], axfer, mbrTxn, inFavor, platrformFeeTxn: platformFeeTxn, creatorFeeTxn: pollCreatorPaymentTxn },
+      { sender: { addr: sender, signer } },
+    )
   } catch (error) {
     console.error('error', error)
   }
@@ -177,7 +204,6 @@ export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: numb
         },
       },
     )
-    console.log('result', result)
 
     await axios.patch(`${import.meta.env.VITE_WECOOP_API}/polls/${sender}/${pollId}`)
 

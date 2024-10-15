@@ -46,17 +46,17 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
     return formatDateFromTimestamp(date)
   }
 
-  const handleVoteClick = async (inFavor: boolean, pollId: number) => {
+  const handleVoteClick = async (inFavor: boolean, pollId: number, pollCreator: string) => {
     if (!activeAccount) return
 
     try {
       const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
       const daoAssetId = poll.assetId
       const daoAssetAmount = 1
-      console.log(activeAccount, signer, algod)
+
       appClient = createAppClient(activeAccount?.address, signer, algod)
 
-      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId!, inFavor)
+      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId!, inFavor, pollCreator)
 
       if (inFavor) {
         setCurrentVotes({ totalVotes: (currentVotes.totalVotes += 1), yesVotes: (currentVotes.yesVotes += 1) })
@@ -70,8 +70,6 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
       })
 
       setIsVoted(true)
-
-      console.log('vote made successfully', result)
     } catch (error) {
       console.error('error voting', error)
     }
@@ -95,7 +93,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
       if (isClaimed) return
 
       const result = await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
-      console.log(result, 'result')
+
       claimPoll({ pollId, voterAddress: activeAccount.address! })
       toast('Claimed successfully, congrats!!!', {
         position: 'bottom-right',
@@ -288,7 +286,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       className={
                         'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
                       }
-                      onClick={() => handleVoteClick(true, Number(poll.pollId))}
+                      onClick={() => handleVoteClick(true, Number(poll.pollId), poll.creator_address)}
                     >
                       YES
                     </button>
@@ -296,7 +294,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                       className={
                         'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
                       }
-                      onClick={() => handleVoteClick(false, Number(poll.pollId))}
+                      onClick={() => handleVoteClick(false, Number(poll.pollId), poll.creator_address)}
                     >
                       NO
                     </button>

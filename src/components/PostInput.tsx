@@ -153,8 +153,6 @@ const PostInput = () => {
 
       const { totalPolls } = await appClient.getGlobalState()
 
-      console.log('prize poll', prizePool)
-
       const assetDecimals = await getAssetDecimals(algod, usableAsset.assetId)
 
       try {
@@ -186,7 +184,6 @@ const PostInput = () => {
       setInputText('')
       setLoadingSubmit(false)
       setPrizePool(10)
-      console.log('result', result)
     } catch (e) {
       setInputText('')
       setLoadingSubmit(false)
@@ -244,10 +241,7 @@ const PostInput = () => {
       const encodedInputText = encodeURIComponent(inputText.replace(/\n/g, '%0A'))
       const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
-      console.log(note)
       let transaction: algosdk.Transaction
-
-      console.log(usableAsset.assetId, 'usableAsset.assetId')
 
       // Check if it's a payment transaction or an asset transfer transaction
       if (usableAsset.assetId === 0) {
@@ -262,15 +256,13 @@ const PostInput = () => {
       } else {
         // Calculate the fee price based on the asset
         const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Post)
-        console.log(feePrice, 'feePrice')
+
         // Split the fee by interaction type
         const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: 'post' })
-        console.log(splitFee, 'splitFee')
 
         // Example calculation to ensure platformFee is used as an integer
         const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
 
-        console.log(finalFeeForTransaction, 'finalFeeForTransaction')
         // Asset transfer transaction (ASA)
         transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
           from: userData.address,

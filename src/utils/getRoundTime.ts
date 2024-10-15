@@ -15,7 +15,6 @@ export async function getRoundTimestamp(algodClient: Algodv2, roundNumber: numbe
     } else {
       // Handle the case where the timestamp is invalid
       console.error('Invalid timestamp received from the blockchain')
-      console.log('Using fallback date: N/A')
     }
   } catch (error) {
     console.error('Error fetching block timestamp:', error)

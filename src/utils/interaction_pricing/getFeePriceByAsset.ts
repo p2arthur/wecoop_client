@@ -5,6 +5,7 @@ export enum InteractionMultipliers {
   Reply = 1.5,
   Like = 1,
   CreatePoll = 34,
+  VotePoll = 0.5,
 }
 
 export interface InteractionFee {
@@ -23,8 +24,6 @@ export const getFeePriceByAsset = async (assetId: number, decimals: number, type
   }
 
   const { data } = await axios.get(`https://free-api.vestige.fi/asset/${assetId}/price`)
-
-  console.log('price data', data)
 
   let assetUsdPrice = data['USD']
 

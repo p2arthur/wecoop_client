@@ -50,7 +50,6 @@ const Feed = () => {
   }
 
   const handleAssetIdChange = (newAssetId: number | null) => {
-    console.log('new asset id', newAssetId)
     if (activeFeed) {
       updateUrlParams(activeFeed, newAssetId || 0)
       handleFilterByAssetId(newAssetId)

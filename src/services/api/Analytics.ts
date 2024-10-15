@@ -31,8 +31,6 @@ const getTopPostsByLike = async () => {
   )
   const savedPosts: Post[] = JSON.parse(sessionStorage.getItem('postList')!)
 
-  console.log('topPosts data', savedPosts)
-
   // Map over the data to extract postIds
   const topPosts: Post[] = []
 

@@ -97,8 +97,6 @@ export const useCreateReply = () => {
 }
 
 const getFeedByAssetId = async (assetId: number): Promise<GetFeedByMongo> => {
-  console.log('asset id', assetId)
-
   const response = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/asset/${assetId}`)
   return response.data
 }
