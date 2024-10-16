@@ -4,6 +4,7 @@ import { AssetId, FeedType, usePosts } from '../../context/Posts/Posts'
 import { usableAssetsList } from '../../data/usableAssetsList'
 import { FaShareNodes } from 'react-icons/fa6'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 interface IMenuFeed {
   hasFeedPosts: boolean
@@ -22,6 +23,7 @@ const version = (packageJson as PackageJson).version
 
 export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleChangeAssetId, activeAssetId, openByParams }: IMenuFeed) => {
   const [openCoinFeed, setOpenCoinFeed] = useState<boolean>(false)
+  const navigate = useNavigate()
   const { isLoading } = usePosts()
 
   useEffect(() => {
@@ -32,27 +34,14 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
 
   return (
     <div className="w-full">
-      {hasFeedPosts ? (
-        <div
-          onClick={() => {
-            handleChangeFeed('personalized')
-            setOpenCoinFeed(false)
-          }}
-          className={`w-full flex justify-start  p-3 cursor-pointer ${
-            activeFeed === 'personalized' ? 'bg-black text-white dark:bg-white dark:text-black' : ''
-          }`}
-        >
-          <p
-            className={`font-bold text-xl cursor-pointer hover:scale-105 ${
-              activeFeed === 'personalized' ? 'border-b-2 border-gray-900 dark:border-black' : 'border-b-2 border-transparent'
-            }`}
-          >
-            Your Feed
-          </p>
-        </div>
-      ) : (
-        <p className="font-bold text-gray-400 text-xl cursor-pointer">Your feed</p>
-      )}
+      <div
+        onClick={() => {
+          navigate('/polls')
+        }}
+        className={`w-full flex justify-start  p-3 cursor-pointer`}
+      >
+        <p className={`font-bold text-xl cursor-pointer border-b-2 border-transparent hover:scale-105`}>Polls Feed 🗳️</p>
+      </div>
       <div
         onClick={() => {
           handleChangeFeed('global')

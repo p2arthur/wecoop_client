@@ -53,10 +53,14 @@ const placeholderPhrases = [
   'WeCoop Your platform, your messages. Coop Coin echoes in Algorand.',
 ]
 
-const PostInput = () => {
+type PostInputProps = {
+  postTypeProp?: string
+}
+
+const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const { usableAssetId } = useParams<{ usableAssetId: string }>()
   const { signTransactions, sendTransactions, activeAccount, signer } = useWallet()
-  const { handleAddNewPost, handleDeleteLoadingPost, handleRefreshPosts, postType } = usePosts()
+  const { handleAddNewPost, handleDeleteLoadingPost, handleRefreshPosts, postType, handleChangePostType } = usePosts()
   const [openTooltip, setOpenTooltip] = useState(false)
   const { algod, userData } = useOutletContext() as PostInputOutletContext
   const [inputText, setInputText] = useState<string>('')
@@ -80,6 +84,10 @@ const PostInput = () => {
   }
 
   const queryClient = useQueryClient()
+
+  useEffect(() => {
+    handleChangePostType(postTypeProp)
+  }, [postTypeProp])
 
   useEffect(() => {
     const intr = setInterval(() => {
@@ -212,6 +220,7 @@ const PostInput = () => {
         timestamp: new Date().getDate(),
         transaction_id: 'loading_id',
         replies: [],
+        type: 'post',
         country,
         likes: [],
         isPersonalized: false,
@@ -376,7 +385,7 @@ const PostInput = () => {
                 />
               </div>
             )}
-            <PostTypeSwitch />
+            {postTypeProp !== 'poll' && <PostTypeSwitch />}
             <CoinDropdown
               usableAsset={usableAsset}
               handleAssetSelect={handleAssetSelect}

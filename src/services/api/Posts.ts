@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { GetFeedByMongo, IGetAllPosts, LikeCreateMongo, Post, PostCreateMongo, ReplyCreateMongo, VoterCreateMongo } from './types'
+import {
+  GetFeedByMongo,
+  GetPollsByMongo,
+  IGetAllPosts,
+  LikeCreateMongo,
+  Poll,
+  Post,
+  PostCreateMongo,
+  ReplyCreateMongo,
+  VoterCreateMongo,
+} from './types'
 
 export const getAllPosts = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
@@ -140,5 +150,30 @@ const claimPoll = async (voterAddress: string, pollId: number) => {
 export const useClaimPoll = () => {
   return useMutation<void, Error, { voterAddress: string; pollId: number }>({
     mutationFn: ({ voterAddress, pollId }) => claimPoll(voterAddress, pollId),
+  })
+}
+
+const getAllPolls = async () => {
+  const response = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global/polls/mongodb`)
+  return response.data
+}
+
+export const useGetAllPolls = () => {
+  return useQuery<GetPollsByMongo>({
+    queryKey: ['getAllPolls'],
+    queryFn: getAllPolls,
+  })
+}
+
+const getlPollsByVoterAddress = async (voterAddress: string) => {
+  const response = await axios.get(`${import.meta.env.VITE_WECOOP_API}/polls/voter/${voterAddress}`)
+  return response.data
+}
+
+export const useGetPollsByVoterAddress = (voterAddress: string, enabled: boolean) => {
+  return useQuery<Poll[]>({
+    queryKey: ['getPollsByVoterAddress', voterAddress],
+    queryFn: () => getlPollsByVoterAddress(voterAddress),
+    enabled,
   })
 }
