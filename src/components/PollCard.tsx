@@ -19,9 +19,10 @@ import { PostInputOutletContext } from './PostInput'
 
 interface PollCardPropsInterface {
   poll: PollRequest
+  type?: 'poll' | 'feed'
 }
 
-const VoteCard = ({ poll }: PollCardPropsInterface) => {
+const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
   const { algod } = useOutletContext() as PostInputOutletContext
   const [pollPrize, setPollPrize] = useState(0)
   const { activeAccount, signer } = useWallet()
@@ -171,9 +172,9 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
       <div>
         {poll.status === 'accepted' || poll.status === 'loading' ? (
           <div
-            className={` ${
-              poll.status === 'loading' ? 'animate-pulse opacity-70' : null
-            } relative border-4 border-yellow-400 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
+            className={` ${poll.status === 'loading' ? 'animate-pulse opacity-70' : null} ${
+              type === 'poll' ? 'min-h-[350px] justify-around' : ''
+            }  relative border-4 border-yellow-400 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
           >
             {/* Overlay Loading Spinner if still loading */}
 
@@ -251,7 +252,7 @@ const VoteCard = ({ poll }: PollCardPropsInterface) => {
                           ) : (
                             <div className="flex text-white items-end gap-8 justify-between w-full">
                               <p className="underline flex items-end gap-2 text-xl">
-                                {poll.depositedAmount / poll.voters.length} x asset:{' '}
+                                {(poll.depositedAmount / poll.voters.length).toFixed(2)} x asset:{' '}
                                 <div className="rounded-full overflow-hidden w-8 h-8">
                                   <img
                                     className="h-full w-full"

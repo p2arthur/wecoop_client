@@ -67,10 +67,12 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   const { data: postData, refetch: refetchPostData } = useGetPostByTransactionId(transactionId, false)
 
   useEffect(() => {
-    if (dataMongo) {
+    if (dataMongo && assetId === null) {
       setPostList(dataMongo?.data)
+    } else if (assetId !== null) {
+      setPostList(dataMongo?.data?.filter((post) => post.assetId === assetId) || [])
     }
-  }, [dataMongo])
+  }, [dataMongo, assetId])
 
   const isLoading = isLoadingGetAllPosts
 

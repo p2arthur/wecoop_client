@@ -8,9 +8,10 @@ interface FeedPropsInterface {
   postList: Daum[] | null | undefined
   isLoading: boolean
   handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
+  type?: string
 }
 
-const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterface) => {
+const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: FeedPropsInterface) => {
   const [currentPage, setCurrentPage] = useState(1)
   const feedContainerRef = useRef<HTMLDivElement | null>(null)
   const postsPerPage = 10
@@ -48,14 +49,21 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
   if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
 
   return (
-    <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full no-scrollbar overflow-x-hidden">
+    <div
+      ref={feedContainerRef}
+      className={`${
+        type === 'post'
+          ? 'flex flex-col gap-4 w-full overflow-y-scroll h-full no-scrollbar overflow-x-hidden'
+          : 'grid grid-cols-3 items-center  overflow-y-scroll gap-4 w-full h-full no-scrollbar overflow-x-hidden pb-24'
+      }`}
+    >
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
         paginatedPosts.map((post, index) =>
           post.type === 'post' ? (
             <PostCard key={index} handleNewReply={handleNewReply} post={post} />
           ) : (
-            <VoteCard key={index} poll={post} />
+            <VoteCard type={type === 'poll' ? 'poll' : 'feed'} key={index} poll={post} />
           ),
         )}
 

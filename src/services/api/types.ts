@@ -214,3 +214,44 @@ export interface Like {
 export interface Id4 {
   $oid: string
 }
+
+export interface GetPollsByMongo {
+  data: Poll[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
+}
+
+export interface Poll {
+  _id: Id
+  pollId: number
+  creator_address: string
+  text: string
+  timestamp: number
+  country: string
+  assetId: number
+  depositedAmount: number
+  totalVotes: number
+  yesVotes: number
+  expiry_timestamp: number
+  status: string
+  voters: Voter[]
+  type: string
+}
+
+export interface Id {
+  $oid: string
+}
+
+export interface Voter {
+  _id: Id2
+  pollId: number
+  voterAddress: string
+  claimed: boolean
+  in_favor: boolean
+  deposited_amount?: number
+}
+
+export interface Id2 {
+  $oid: string
+}
