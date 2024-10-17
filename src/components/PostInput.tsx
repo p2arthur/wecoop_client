@@ -132,6 +132,10 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     try {
       setLoadingSubmit(true)
       event.preventDefault()
+      toast('Creating a poll - processing and creating your wecoop poll', {
+        position: 'top-right',
+        theme: 'dark',
+      })
       const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
       const daoAssetId = usableAsset.assetId
       const pollQuestion = inputText
