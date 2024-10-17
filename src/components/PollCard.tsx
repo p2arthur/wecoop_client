@@ -3,7 +3,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
-import { FaCheckCircle, FaParachuteBox } from 'react-icons/fa'
+import { FaCheckCircle, FaCircleNotch, FaParachuteBox } from 'react-icons/fa'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
@@ -16,6 +16,7 @@ import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { PostInputOutletContext } from './PostInput'
+import axios from 'axios'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -29,6 +30,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
   const { data: userData } = useGetUserInfo(poll.creator_address)
   const { mutate: createVote } = useCreateVote()
   const { mutate: claimPoll } = useClaimPoll()
+  const [isClaiming, setIsClaiming] = useState(false)
 
   const [currentVotes, setCurrentVotes] = useState({ yesVotes: poll.yesVotes, totalVotes: poll.totalVotes })
 
@@ -49,6 +51,13 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
 
   const handleVoteClick = async (inFavor: boolean, pollId: number, pollCreator: string) => {
     if (!activeAccount) return
+
+    toast('Casting your vote into the wecoop poll', {
+      position: 'top-right',
+      className: 'black-background',
+      bodyClassName: 'grow-font-size',
+      progressClassName: 'fancy-progress-bar',
+    })
 
     try {
       const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
@@ -71,6 +80,12 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
       })
 
       setIsVoted(true)
+      toast('Your vote into the wecoop poll was accepted', {
+        position: 'top-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
     } catch (error) {
       console.error('error voting', error)
     }
@@ -86,6 +101,14 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
     try {
       const { pollId } = poll
 
+      setIsClaiming(true)
+      toast('Claiming participation on wecoop pools prize', {
+        position: 'top-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+
       if (!activeAccount) return
       appClient = createAppClient(activeAccount.address, signer, algod)
 
@@ -93,20 +116,23 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
 
       if (isClaimed) return
 
-      const result = await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
+      await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
 
-      claimPoll({ pollId, voterAddress: activeAccount.address! })
-      toast('Claimed successfully, congrats!!!', {
-        position: 'bottom-right',
+      // claimPoll({ pollId, voterAddress: activeAccount.address! })
+      toast('Claimed your participation prize successfully!', {
+        position: 'top-right',
         className: 'black-background',
         bodyClassName: 'grow-font-size',
         progressClassName: 'fancy-progress-bar',
       })
 
+      await axios.patch(`${import.meta.env.VITE_WECOOP_API}/polls/${activeAccount.address}/${pollId}`)
+      setIsClaiming(false)
       setIsClaimed(true)
     } catch (error) {
+      setIsClaiming(false)
       toast('Failed to claim poll, if you think that is a mistake, please contact us', {
-        position: 'bottom-right',
+        position: 'top-right',
         className: 'black-background',
         bodyClassName: 'grow-font-size',
         progressClassName: 'fancy-progress-bar',
@@ -267,7 +293,20 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                                   onClick={handleClaimPoolShare}
                                   className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center text-xl"
                                 >
-                                  <FaParachuteBox className="text-green-500" /> <p>Claim now</p>
+                                  {isClaiming ? (
+                                    <div className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center text-xl opacity-50">
+                                      <FaCircleNotch className="animate-spin" />
+                                      <p>Claiming</p>
+                                    </div>
+                                  ) : (
+                                    <div
+                                      onClick={handleClaimPoolShare}
+                                      className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center"
+                                    >
+                                      <FaParachuteBox className="text-green-500" />
+                                      <p className="">Claim now</p>
+                                    </div>
+                                  )}
                                 </h2>
                               </div>
                             </div>
