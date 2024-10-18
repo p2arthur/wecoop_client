@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 import PostCard from '../components/PostCard'
 import { usePosts } from '../context/Posts/Posts'
-import { Post } from '../services/api/types'
+import { Daum } from '../services/api/types'
 
 const PostPage = () => {
   const [searchParams] = useSearchParams()
@@ -11,10 +11,10 @@ const PostPage = () => {
 
   const post = handleGetPostByTransactionId(transactionId)
 
-  const updateRepliesStatus = (post: Post) => {
+  const updateRepliesStatus = (post: Daum) => {
     return {
       ...post,
-      replies: post.replies.map((reply) => ({
+      replies: post.replies?.map((reply) => ({
         ...reply,
         status: 'accepted',
       })),

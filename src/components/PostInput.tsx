@@ -225,7 +225,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         type: 'post',
         country,
         likes: [],
-        isPersonalized: false,
         assetId: usableAsset.assetId,
       })
 

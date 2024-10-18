@@ -1,16 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import {
-  GetFeedByMongo,
-  GetPollsByMongo,
-  IGetAllPosts,
-  LikeCreateMongo,
-  Poll,
-  Post,
-  PostCreateMongo,
-  ReplyCreateMongo,
-  VoterCreateMongo,
-} from './types'
+import { GetFeedByMongo, IGetAllPosts, LikeCreateMongo, Poll, Post, PostCreateMongo, ReplyCreateMongo, VoterCreateMongo } from './types'
+import { GetPollsByMongo } from '../../types/Feed'
 
 export const getAllPosts = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)

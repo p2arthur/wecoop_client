@@ -8,7 +8,7 @@ import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetPostsByAddress } from '../services/api/Posts'
-import { Post, User } from '../services/api/types'
+import { Daum, User } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import { ellipseAddress } from '../utils/ellipseAddress'
 
@@ -22,7 +22,7 @@ const ProfilePage = () => {
   const { activeAccount } = useWallet()
   const [user, setUser] = useState<User | null>(null)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [postsList, setPostsList] = useState<Post[]>([])
+  const [postsList, setPostsList] = useState<Daum[]>([])
   const [isFollowing, setIsFollowing] = useState<boolean>(false)
 
   // Get the profile data for the walletAddress being viewed
@@ -44,7 +44,8 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (data) {
-      const posts = setPostsList(updateRepliesStatus(data))
+      // @ts-ignore
+      setPostsList(updateRepliesStatus(data))
     }
   }, [data])
 
@@ -54,10 +55,10 @@ const ProfilePage = () => {
     }
   }, [currentUser, user])
 
-  const updateRepliesStatus = (posts: Post[]): Post[] => {
+  const updateRepliesStatus = (posts: Daum[]): Daum[] => {
     const updatedPosts = posts.map((post) => ({
       ...post,
-      replies: post.replies.map((reply) => ({
+      replies: post.replies?.map((reply) => ({
         ...reply,
         status: 'accepted',
       })),
@@ -74,7 +75,7 @@ const ProfilePage = () => {
     }
   }
 
-  const handleNewReply = (newReply: Post, transactionCreatorId: string) => {
+  const handleNewReply = (newReply: Daum, transactionCreatorId: string) => {
     const newPostsList = postsList.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
         if (post.replies === undefined) {
@@ -84,6 +85,7 @@ const ProfilePage = () => {
       }
       return post
     })
+    // @ts-ignore
     setPostsList(updateRepliesStatus(newPostsList))
   }
 

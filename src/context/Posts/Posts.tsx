@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetFeedByMongo, useGetPostByTransactionId } from '../../services/api/Posts'
-import { Daum, Like, Poll, Post } from '../../services/api/types'
+import { Daum, Like, Poll } from '../../services/api/types'
 
 export enum AssetId {
   coopCoin = 796425061,
@@ -16,12 +16,12 @@ export type FeedType = 'personalized' | 'global' | 'coinFeed'
 
 type IPostsContext = {
   postList: Daum[] | null
-  handleGetPostByAddress(address: string): Post | undefined
-  handleAddNewPost(post: Post | Poll): void
-  handleNewReply(newReply: Post, transactionCreatorId: string): void
-  handleNewLike(newLike: Like, transactionCreatorId: string): void
+  handleGetPostByAddress(address: string): Daum | undefined
+  handleAddNewPost(post: Daum | Poll): void
+  handleNewReply(newReply: Daum, transactionCreatorId: string): void
+  handleNewLike(newLike: { creator_address: any }, transactionCreatorId: string): void
   handleDeleteLoadingPost(transactionCreatorId: string): void
-  handleGetPostByTransactionId(transactionId: string): Post | undefined
+  handleGetPostByTransactionId(transactionId: string): Daum | undefined
   handleFilterByAssetId(assetId: number | null): void
   handleRefreshPosts(): void
   handleChangeFeed(feed: FeedType | string): void
@@ -130,13 +130,14 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     setPostList((prevPosts) => [post, ...(prevPosts || [])])
   }
 
-  const handleNewReply = (newReply: Post, transactionCreatorId: string) => {
+  const handleNewReply = (newReply: Daum, transactionCreatorId: string) => {
     const newPostsList = postList?.map((post) => {
       if (transactionCreatorId === post.transaction_id) {
         return { ...post, replies: [...(post.replies || []), newReply] }
       }
       return post
     })
+    // @ts-ignore
     setPostList(newPostsList)
   }
 

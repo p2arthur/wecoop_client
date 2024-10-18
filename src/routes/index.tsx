@@ -37,7 +37,7 @@ export const Router = () => {
         balance: {},
         followTargets: [],
       })
-      const userData = await userServices.setUser(activeAccount?.address || '')
+      const userData = await userServices.setUser(activeAccount?.address || '', algod)
       setUserData(userData)
     }
 
