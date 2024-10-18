@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Daum, Post } from '../services/api/types'
+import { Daum } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
 import VoteCard from './PollCard'
 import PostCard from './PostCard'
@@ -7,7 +7,7 @@ import PostCard from './PostCard'
 interface FeedPropsInterface {
   postList: Daum[] | null | undefined
   isLoading: boolean
-  handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
+  handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
   type?: string
 }
 
@@ -63,7 +63,20 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
           post.type === 'post' ? (
             <PostCard key={index} handleNewReply={handleNewReply} post={post} />
           ) : (
-            <VoteCard type={type === 'poll' ? 'poll' : 'feed'} key={index} poll={post} />
+            <VoteCard
+              type={type === 'poll' ? 'poll' : 'feed'}
+              key={index}
+              poll={{
+                yesVotes: post.yesVotes || 0,
+                voters: post.voters || [],
+                expiry_timestamp: post.expiry_timestamp || 0,
+                pollId: post.pollId || 0,
+                status: 'accepted',
+                depositedAmount: post.depositedAmount || 0,
+                totalVotes: post.totalVotes || 0,
+                ...post,
+              }}
+            />
           ),
         )}
 

@@ -42,6 +42,7 @@ export interface Post {
   replies: Reply[]
   status: 'accepted' | 'loading' | 'rejected' | null
   assetId: number
+  type: string
   isPersonalized: boolean
 }
 
@@ -155,18 +156,18 @@ export interface GetFeedByMongo {
 }
 
 export interface Daum {
-  _id: Id
+  _id?: Id
   pollId?: number
   creator_address: string
   text: string
-  timestamp: number
+  timestamp: number | null
   country: string
-  assetId: number
+  assetId: number | null
   depositedAmount?: number
   totalVotes?: number
   yesVotes?: number
   expiry_timestamp?: number
-  status?: string
+  status?: string | null
   voters?: Voter[]
   type: string
   transaction_id?: string
@@ -195,9 +196,9 @@ export interface Reply {
   post_transaction_id: string
   creator_address: string
   text: string
-  timestamp: number
+  timestamp: number | null
   country: string
-  assetId: number
+  assetId: number | null
 }
 
 export interface Id3 {
@@ -212,46 +213,5 @@ export interface Like {
 }
 
 export interface Id4 {
-  $oid: string
-}
-
-export interface GetPollsByMongo {
-  data: Poll[]
-  totalCount: number
-  totalPages: number
-  currentPage: number
-}
-
-export interface Poll {
-  _id: Id
-  pollId: number
-  creator_address: string
-  text: string
-  timestamp: number
-  country: string
-  assetId: number
-  depositedAmount: number
-  totalVotes: number
-  yesVotes: number
-  expiry_timestamp: number
-  status: string
-  voters: Voter[]
-  type: string
-}
-
-export interface Id {
-  $oid: string
-}
-
-export interface Voter {
-  _id: Id2
-  pollId: number
-  voterAddress: string
-  claimed: boolean
-  in_favor: boolean
-  deposited_amount?: number
-}
-
-export interface Id2 {
   $oid: string
 }

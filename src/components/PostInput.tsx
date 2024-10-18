@@ -194,7 +194,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       setInputText('')
       setLoadingSubmit(false)
       setPrizePool(10)
-      console.log('result', result)
     } catch (e) {
       setInputText('')
       setLoadingSubmit(false)
@@ -223,7 +222,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         type: 'post',
         country,
         likes: [],
-        isPersonalized: false,
         assetId: usableAsset.assetId,
       })
 

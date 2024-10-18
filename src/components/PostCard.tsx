@@ -15,7 +15,7 @@ import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Daum, Post, Reply as IReply, User } from '../services/api/types'
+import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -26,7 +26,7 @@ import { useCreateLike, useCreateReply } from '../services/api/Posts'
 interface PostPropsInterface {
   post: Daum | IReply
   variant?: 'default' | 'reply'
-  handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
+  handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
 }
 
 interface PostInputPropsInterface {
@@ -155,17 +155,16 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-      const acceptedReply: Post = {
+      const acceptedReply: Daum = {
         creator_address: userData?.address || '',
         text: encodeURIComponent(replyText),
         status: 'accepted',
         transaction_id: id,
         likes: [],
         country,
-        nfd: userData?.nfd.name,
         timestamp: Date.now(),
         replies: [],
-        isPersonalized: false,
+        type: 'post',
         assetId: usableAsset.assetId,
       }
 
@@ -175,7 +174,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         transaction_id: id,
         post_transaction_id: parentReplyId,
         text: encodeURIComponent(replyText),
-        timestamp: (Date.now() + Number(expires_in_ms)) / 100,
+        timestamp: Date.now() / 100,
         country,
         assetId: usableAsset.assetId,
       })
@@ -326,6 +325,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                       post={{
                         text: `${encodeURIComponent(replyText)}`,
                         creator_address: userData?.address || '',
+                        nfd: '',
+                        replies: [],
+                        likes: [],
+                        type: 'post',
+                        post_transaction_id: post.transaction_id,
                         status: 'loading',
                         country: userCountry,
                         timestamp: new Date().getDate(),

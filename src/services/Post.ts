@@ -18,8 +18,8 @@ export class Post {
     replies: [],
     status: null,
     isPersonalized: false,
-    assetId: null,
-    type: null,
+    assetId: 0,
+    type: '',
   }
 
   public async setPostData(postDataInput: PostInterface): Promise<PostInterface> {
@@ -36,15 +36,9 @@ export class Post {
       replies: postDataInput.replies,
       isPersonalized: false,
       assetId: postDataInput.assetId,
-      type: null,
+      type: '',
     }
     return this.postData
-  }
-
-  private decryptPostNote(note: string): string {
-    const decodedString = atob(note)
-
-    return decodedString
   }
 
   public async getPostNfd(address: string) {
@@ -57,5 +51,11 @@ export class Post {
       console.error(error)
       return null
     }
+  }
+
+  private decryptPostNote(note: string): string {
+    const decodedString = atob(note)
+
+    return decodedString
   }
 }
