@@ -4,7 +4,7 @@ export enum InteractionMultipliers {
   Post = 2,
   Reply = 1.5,
   Like = 1,
-  CreatePoll = 34,
+  CreatePoll = 10,
   VotePoll = 0.5,
 }
 

@@ -155,7 +155,7 @@ export interface GetFeedByMongo {
 }
 
 export interface Daum {
-  _id: Id
+  _id?: Id
   pollId?: number
   creator_address: string
   text: string
@@ -223,7 +223,7 @@ export interface GetPollsByMongo {
 }
 
 export interface Poll {
-  _id: Id
+  _id?: Id
   pollId: number
   creator_address: string
   text: string

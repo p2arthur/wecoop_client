@@ -153,12 +153,13 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         timestamp: Math.floor(new Date().getTime() / 1000),
         expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
         country: country,
-        depositedAmount: prizePool * 1000000,
+        depositedAmount: 2,
         assetId: usableAsset.assetId,
         totalVotes: 0,
         yesVotes: 0,
         status: 'loading',
         voters: [],
+        type: 'poll',
       })
 
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
@@ -255,7 +256,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       const note = `${NotePrefix.WeCoopPost}${country}:${encodedInputText}`
 
       let transaction: algosdk.Transaction
-
+      let crvDaoTransaction: algosdk.Transaction
       // Check if it's a payment transaction or an asset transfer transaction
       if (usableAsset.assetId === 0) {
         // Payment transaction (Algo transfer)
