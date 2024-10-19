@@ -287,7 +287,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                                 <div className="rounded-full overflow-hidden w-8 h-8">
                                   <img
                                     className="h-full w-full"
-                                    src="https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2023/12/27/9e4d1ca7fc5a408b87b2f47b50e4749b.png?width=200&quality=70"
+                                    src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
                                     alt=""
                                   />
                                 </div>
