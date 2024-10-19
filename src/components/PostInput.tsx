@@ -395,7 +395,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
             inputText.length <= 300 &&
             userData.balance[selectedAsset.assetId] > 0.1 &&
             !loadingSubmit ? (
-              <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create vote'}`} full justify={'center'} />
+              <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
             ) : (
               <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
             )}
