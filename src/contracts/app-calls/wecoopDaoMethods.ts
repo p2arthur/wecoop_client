@@ -91,7 +91,7 @@ export const makePoll = async (
       creator_address: creator_address,
       text: pollQuestion,
       timestamp: Math.floor(new Date().getTime() / 1000),
-      expiry_timestamp: Math.floor(new Date().getTime() + expires_in_ms) / 1000 + 100,
+      expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
       country: country,
       depositedAmount: depositedAmount,
       assetId: assetId,
