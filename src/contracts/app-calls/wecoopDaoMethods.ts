@@ -136,7 +136,7 @@ export const makeVote = async (
 
     const pollDepositMultiplier = 2
     const pollDepositPrice = Math.floor(baseVotePrice! * pollDepositMultiplier * 10 ** assetDecimals)
-    console.log('poll deposit', pollDepositPrice)
+    console.log('poll deposits', pollDepositPrice)
 
     // Create the asset funding transaction (axfer)
     const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
