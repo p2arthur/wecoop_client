@@ -73,7 +73,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
   const [expiresCounter, setExpiresCounter] = useState(1)
-  const [prizePool, setPrizePool] = useState(10)
+  const [prizePool, setPrizePool] = useState(0.0)
 
   const [placeholder, setPlaceholder] = useState(placeholderSelected.slice(0, 0))
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
@@ -146,6 +146,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
       const country = await getUserCountry()
 
+      const assetDecimals = await getAssetDecimals(algod, usableAsset.assetId)
+
       handleAddNewPost({
         pollId: 0,
         creator_address: activeAccount?.address!,
@@ -153,7 +155,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         timestamp: Math.floor(new Date().getTime() / 1000),
         expiry_timestamp: Math.floor(new Date().getTime()) / 1000 + expires_in_ms,
         country: country,
-        depositedAmount: 2,
+        depositedAmount: prizePool,
         assetId: usableAsset.assetId,
         totalVotes: 0,
         yesVotes: 0,
@@ -165,8 +167,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
       const { totalPolls } = await appClient.getGlobalState()
-
-      const assetDecimals = await getAssetDecimals(algod, usableAsset.assetId)
 
       try {
         const result = await makePoll(
@@ -375,7 +375,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
                 <input
                   type={'number'}
                   className={'w-24 border-black border-2 dark:bg-gray-700 rounded-sm text-center dark:text-white'}
-                  min={1}
+                  min={0.1}
+                  step={0.1}
                   value={prizePool}
                   onChange={(event) => handleSetPrizePool(event)}
                 />

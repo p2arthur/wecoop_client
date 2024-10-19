@@ -15,8 +15,8 @@ import { useGetUserInfo } from '../services/api/Users'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
+import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { PostInputOutletContext } from './PostInput'
-import axios from 'axios'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -67,6 +67,12 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
       appClient = createAppClient(activeAccount?.address, signer, algod)
 
       const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId!, inFavor, pollCreator)
+
+      const assetId = poll.assetId
+
+      const assetDecimals = await getAssetDecimals(algod, assetId!)
+
+      const assetVotePrice = await getFeePriceByAsset(assetId!, assetDecimals, InteractionMultipliers.VotePoll)
 
       if (inFavor) {
         setCurrentVotes({ totalVotes: (currentVotes.totalVotes += 1), yesVotes: (currentVotes.yesVotes += 1) })
@@ -126,7 +132,6 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
         progressClassName: 'fancy-progress-bar',
       })
 
-      await axios.patch(`${import.meta.env.VITE_WECOOP_API}/polls/${activeAccount.address}/${pollId}`)
       setIsClaiming(false)
       setIsClaimed(true)
     } catch (error) {
@@ -237,7 +242,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                 <div className="flex w-full select-none">
                   <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
                     <span>Prize pool: </span>
-                    <CountUp end={Number(pollPrize.toFixed(2))} duration={2} />{' '}
+                    <CountUp end={Number(pollPrize)} duration={2} />{' '}
                     <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
                       <img
                         className="h-full w-full"

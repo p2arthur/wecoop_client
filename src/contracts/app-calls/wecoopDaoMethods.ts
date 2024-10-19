@@ -79,7 +79,7 @@ export const makePoll = async (
         axfer: xferFirstDeposit,
         question: pollQuestion,
         country: country,
-        expires_in: 100,
+        expires_in: 60,
         platformFeeTxn,
       },
       { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
@@ -194,15 +194,21 @@ export const makeVote = async (
 }
 
 export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: number, sender: string, signer: TransactionSigner) => {
-  const result = await appClient.withdrawPollShare(
-    { pollId: [pollId] },
-    {
-      sender: { addr: sender, signer },
-      sendParams: {
-        fee: algokit.microAlgos(3_000),
+  try {
+    const result = await appClient.withdrawPollShare(
+      { pollId: [pollId] },
+      {
+        sender: { addr: sender, signer },
+        sendParams: {
+          fee: algokit.microAlgos(3_000),
+        },
       },
-    },
-  )
+    )
 
-  return result
+    await axios.patch(`${import.meta.env.VITE_WECOOP_API}/polls/${sender}/${pollId}/claim`)
+
+    return result
+  } catch (error) {
+    return error
+  }
 }
