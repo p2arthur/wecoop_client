@@ -204,20 +204,20 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
         {poll.status === 'accepted' || poll.status === 'loading' ? (
           <div
             className={` ${poll.status === 'loading' ? 'animate-pulse opacity-70' : null} ${
-              type === 'poll' ? 'min-h-[350px] justify-around' : ''
-            }  relative border-4 border-yellow-400 flex flex-col gap-3 p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
+              type === 'poll' ? 'min-h-[350px]' : ''
+            }  relative border-4 border-yellow-400 flex flex-col p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
           >
             {/* Overlay Loading Spinner if still loading */}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <p></p>
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-md border-2 border-gray-900 bg-white overflow-hidden border-b-4">
                   <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(poll.creator_address!)} alt="" />
                 </div>
                 <a href={`/profile/${poll.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
-                    {userData?.nfd.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(poll.creator_address)} {<img />}
+                    {userData?.nfd.name ? userData?.nfd?.name.replace('.algo', '').toUpperCase() : ellipseAddress(poll.creator_address)}{' '}
+                    {<img />}
                   </h2>
                 </a>
               </div>
@@ -234,10 +234,10 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
               </div>
             </div>
 
-            <div className="gap-2 flex flex-col justify-between w-full items-end" onClick={(e) => e.stopPropagation()}>
-              <div className="flex flex-col gap-1 w-full">
-                <div className="border-b-2 py-2 border-gray-300/30">
-                  <p className="tracking-wide break-words w-full ">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
+            <div className="flex flex-col justify-between w-full flex-grow min-h-full" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col gap-1 w-full flex-grow-0 min-h-full">
+                <div className="border-b-2 py-2 border-gray-300/30 flex flex-col justify-start h-full">
+                  <p className="tracking-wide break-words w-full font-bold h-24">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
                 </div>
                 <div className="flex w-full select-none">
                   <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
@@ -283,7 +283,8 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                           ) : (
                             <div className="flex text-white items-end gap-8 justify-between w-full">
                               <p className="underline flex items-end gap-2 text-xl">
-                                {(poll.depositedAmount / poll.voters.length).toFixed(2)} x asset:{' '}
+                                {(poll.depositedAmount / poll.voters.length).toFixed(2)} x{' '}
+                                {usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name}
                                 <div className="rounded-full overflow-hidden w-8 h-8">
                                   <img
                                     className="h-full w-full"

@@ -1,9 +1,9 @@
+import { useWallet } from '@txnlab/use-wallet'
+import { useState } from 'react'
+import LoaderSpinner from '../components/LoaderSpinner'
+import VoteCard from '../components/PollCard'
 import PostInput from '../components/PostInput'
 import { useGetAllPolls, useGetPollsByVoterAddress } from '../services/api/Posts'
-import { useWallet } from '@txnlab/use-wallet'
-import VoteCard from '../components/PollCard'
-import LoaderSpinner from '../components/LoaderSpinner'
-import { useState } from 'react'
 
 export const PollFeed = () => {
   const { data: pollList, isLoading } = useGetAllPolls()
@@ -56,7 +56,7 @@ export const PollFeed = () => {
         </div>
         <div className="p-2 border-2 border-gray-950 dark:border-gray-800 dark:bg-gray-900 mb-24">
           {activeTab === 'personal' && personalPolls && (
-            <div className="grid grid-cols-3 items-center gap-4 w-full h-full no-scrollbar overflow-x-hidden p-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 items-center gap-4 w-full h-full no-scrollbar overflow-x-hidden p-2">
               {personalPolls.map((poll) => (
                 <VoteCard poll={poll} type={'poll'} />
               ))}
@@ -64,7 +64,7 @@ export const PollFeed = () => {
           )}
 
           {activeTab === 'polls' && (
-            <div className="grid grid-cols-3 items-center gap-4 w-full h-full no-scrollbar overflow-x-hidden p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 items-center gap-4 w-full h-full no-scrollbar overflow-x-hidden p-2">
               {pollList?.data.map((poll) => <VoteCard poll={poll} type={'poll'} />)}
             </div>
           )}
