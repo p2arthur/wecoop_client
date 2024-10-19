@@ -14,6 +14,7 @@ import { Reply } from '../services/Reply'
 import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
+import { useCreateLike, useCreateReply } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
 import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
@@ -21,7 +22,6 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
-import { useCreateLike, useCreateReply } from '../services/api/Posts'
 
 interface PostPropsInterface {
   post: Daum | IReply
@@ -236,7 +236,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
-                    {userData?.nfd?.name ? userData?.nfd?.name.toUpperCase() : ellipseAddress(post.creator_address)} {<img />}
+                    {userData?.nfd?.name ? userData?.nfd?.name.replace('.algo', '').toUpperCase() : ellipseAddress(post.creator_address)}{' '}
+                    {<img />}
                   </h2>
                 </a>
               </div>
