@@ -1,18 +1,16 @@
 import { useWallet } from '@txnlab/use-wallet'
+import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FeedComponent from '../components/Feed'
+import MobileSidebar from '../components/interface/MobileSidebar'
 import PostInput from '../components/PostInput'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
 import { MenuFeed } from '../components/templates/MenuFeed'
 import { usePosts } from '../context/Posts/Posts'
-import { useEffect } from 'react'
-import MobileSidebar from '../components/interface/MobileSidebar'
-import { useGetLastPosts } from '../services/api/Posts'
 
 const Feed = () => {
   const { postList, handleNewReply, isLoading, activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
 
-  const { data: dataLastPosts, isLoading: isLoadingLastPosts } = useGetLastPosts()
   const { activeAccount } = useWallet()
 
   const [params, setParams] = useSearchParams()
@@ -72,12 +70,12 @@ const Feed = () => {
         />
       </div>
 
-      <div className="p-2 border-2 max-w-full md:max-w-[60%] w-full border-gray-950 dark:border-gray-800 flex flex-col gap-5 h-screen">
+      <div className="p-2 overflow-y-scroll md:overflow-y-hidden border-2 max-w-full md:max-w-[60%] w-full border-gray-950 dark:border-gray-800 flex flex-col gap-5 h-screen">
         <div className=" bg-gray">
           <PostInput />
         </div>
-        <div className="overflow-y-hidden  h-full">
-          <FeedComponent postList={isLoading ? dataLastPosts : postList} isLoading={isLoadingLastPosts} handleNewReply={handleNewReply} />
+        <div className="md:overflow-y-hidden  h-full">
+          <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
         </div>
       </div>
       <div className="w-3/12 hidden md:flex">

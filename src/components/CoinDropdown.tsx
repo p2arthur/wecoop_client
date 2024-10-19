@@ -1,9 +1,9 @@
-import { FaAngleDown } from 'react-icons/fa6'
-import { usableAssetsList } from '../data/usableAssetsList'
-import { UsableAssetInterface } from '../context/UsableAsset/UsableAssetContext'
-import { useOutletContext } from 'react-router-dom'
-import { PostInputOutletContext } from './PostInput'
 import React from 'react'
+import { FaAngleDown } from 'react-icons/fa6'
+import { useOutletContext } from 'react-router-dom'
+import { UsableAssetInterface } from '../context/UsableAsset/UsableAssetContext'
+import { usableAssetsList } from '../data/usableAssetsList'
+import { PostInputOutletContext } from './PostInput'
 
 type CoinDropdownProps = {
   usableAsset: UsableAssetInterface
@@ -26,7 +26,7 @@ export const CoinDropdown = ({ usableAsset, selectedAsset, setSelectorOpen, hand
           <div className="flex gap-2 items-center">
             <div className="rounded-full overflow-hidden border-b-4 border-black my-0.5 dark:border-white ">
               <img
-                className="w-5 w-5"
+                className="w-5"
                 src={usableAsset.image}
                 alt={usableAsset.name}
                 onError={(e) => (e.currentTarget.src = usableAsset.image)}

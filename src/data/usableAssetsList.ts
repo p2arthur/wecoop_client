@@ -1,6 +1,12 @@
 export const usableAssetsList = [
   { name: 'Coop', assetId: 796425061, image: 'https://asa-list.tinyman.org/assets/796425061/icon.png', decimals: 6 },
-  { name: 'Algo', assetId: 0, image: 'https://asa-list.tinyman.org/assets/0/icon.png', decimals: 6 },
+  {
+    name: 'A200',
+    assetId: 1682662165,
+    image:
+      'https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2024/03/22/ff48d99492a840a7bd54dce69c7847ec.png?width=200&quality=70',
+    decimals: 3,
+  },
   { name: 'xUSD', assetId: 760037151, image: 'https://asa-list.tinyman.org/assets/760037151/icon.png', decimals: 6 },
   {
     name: '$JAWS',
@@ -29,13 +35,7 @@ export const usableAssetsList = [
     image: 'https://asa-list.tinyman.org/assets/523683256/icon.png',
     decimals: 6,
   },
-  {
-    name: 'A200',
-    assetId: 1682662165,
-    image:
-      'https://algorand-wallet-mainnet.b-cdn.net/media/asset_verification_requests_logo_png/2024/03/22/ff48d99492a840a7bd54dce69c7847ec.png?width=200&quality=70',
-    decimals: 3,
-  },
+
   {
     name: 'TINY',
     assetId: 2200000000,

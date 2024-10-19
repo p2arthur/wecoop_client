@@ -15,17 +15,18 @@ import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useGetUserInfo } from '../services/api/Users'
-import { Reply as IReply, Post, User } from '../services/api/types'
+import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
+import { useCreateLike, useCreateReply } from '../services/api/Posts'
 
 interface PostPropsInterface {
-  post: Post | IReply
+  post: Daum | IReply
   variant?: 'default' | 'reply'
-  handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
+  handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
 }
 
 interface PostInputPropsInterface {
@@ -89,10 +90,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const [openReplyInput, setOpenReplyInput] = useState(false)
   const [userCountry, setUserContry] = useState('')
 
-  const { usableAsset, setUsableAsset } = useUsableAsset()
+  const { mutate: createLike } = useCreateLike()
+
+  const { mutate: createReply } = useCreateReply()
+
+  const { usableAsset } = useUsableAsset()
 
   const currentPostUsableAsset = usableAssetsList.find((usableAsset) => post.assetId === usableAsset.assetId)
-  const [currentPostAsset, setCurrentPostAsset] = useState(currentPostUsableAsset)
 
   const generateIdIcon = (creatorAddress: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
@@ -113,13 +117,22 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       const signedTransactions = await signTransactions(encodedGroupedTransactions)
       const waitRoundsToConfirm = 4
 
-      await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      const like = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
+      createLike({
+        creator_address: userData?.address || '',
+        transaction_id: like.id,
+        post_transaction_id: post.transaction_id as string,
+      })
 
       setIsLoadingLike(false)
     } catch (error) {
       console.error(error)
-    } finally {
-      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
+      setIsLoadingLike(false)
+      toast('Error sending like', {
+        position: 'bottom-right',
+        theme: 'dark',
+      })
     }
   }
 
@@ -142,21 +155,29 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-      const acceptedReply: Post = {
+      const acceptedReply: Daum = {
         creator_address: userData?.address || '',
         text: encodeURIComponent(replyText),
         status: 'accepted',
         transaction_id: id,
         likes: [],
         country,
-        nfd: userData?.nfd.name,
         timestamp: Date.now(),
         replies: [],
-        isPersonalized: undefined,
+        type: 'post',
         assetId: usableAsset.assetId,
       }
 
       handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+      createReply({
+        creator_address: userData?.address || '',
+        transaction_id: id,
+        post_transaction_id: parentReplyId,
+        text: encodeURIComponent(replyText),
+        timestamp: Date.now() / 100,
+        country,
+        assetId: usableAsset.assetId,
+      })
       setReplyText('')
       setIsLoadingReply(false)
     } catch (error) {
@@ -181,12 +202,32 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   return (
     <>
       <div>
-        {post.status === 'accepted' ? (
+        {post.status === 'loading' ? (
+          <div
+            key={post.transaction_id}
+            className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
+          >
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3">
+                <div className="w-10 rounded-full border-2 border-gray-900">
+                  <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
+                </div>
+                <h2 className="font-bold text-xl h-full">{ellipseAddress(post.creator_address)}</h2>
+              </div>
+              <p className="w-full" onClick={(e) => e.stopPropagation()}>
+                {handleTextPost(post.text)}
+              </p>
+            </div>
+            <span>
+              <FaSpinner className="w-6 animate-spin" />
+            </span>
+          </div>
+        ) : (
           <div
             onClick={handleGoToPostPage}
-            className={`${
-              post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900 dark:border-gray-300/30'
-            } flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer bg-white dark:bg-gray-900`}
+            // TODO add isTopPost
+            // post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900 dark:border-gray-300/30'
+            className={`flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer bg-white dark:bg-gray-900`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -253,7 +294,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                       <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
                     </a>
                   </button>
-                  <ShareButton id={post.transaction_id} />
+                  <ShareButton id={post.transaction_id || ''} />
                 </div>
                 <div className="flex flex-col md:gap-2 md:hidden">
                   {post.country ? (
@@ -284,12 +325,15 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                       post={{
                         text: `${encodeURIComponent(replyText)}`,
                         creator_address: userData?.address || '',
+                        nfd: '',
+                        replies: [],
+                        likes: [],
+                        type: 'post',
+                        post_transaction_id: post.transaction_id,
                         status: 'loading',
                         country: userCountry,
-                        likes: [],
                         timestamp: new Date().getDate(),
                         transaction_id: uuidv4(),
-                        replies: [],
                         assetId: 0,
                       }}
                       variant={'reply'}
@@ -307,34 +351,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 </div>
               )}
             </div>
-          </div>
-        ) : post.status === 'loading' ? (
-          <div
-            key={post.transaction_id}
-            className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
-          >
-            <div className="flex flex-col">
-              <div className="flex items-center gap-3">
-                <div className="w-10 rounded-full border-2 border-gray-900">
-                  <img className="w-full" src={generateIdIcon(post.creator_address!)} alt="" />
-                </div>
-                <h2 className="font-bold text-xl h-full">{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
-              </div>
-              <p className="w-full" onClick={(e) => e.stopPropagation()}>
-                {handleTextPost(post.text)}
-              </p>
-            </div>
-            <span>
-              <FaSpinner className="w-6 animate-spin" />
-            </span>
-          </div>
-        ) : (
-          <div
-            key={post.text}
-            className="border-2 opacity-40 border-red-900 flex-col p-2   hover:bg-gray-100 transition-all duration-75 cursor-pointer hidden"
-          >
-            <h2>{post.nfd ? post.nfd.toUpperCase() : ellipseAddress(post.creator_address)}</h2>
-            <p className="w-full">{post.text}</p>
           </div>
         )}
       </div>

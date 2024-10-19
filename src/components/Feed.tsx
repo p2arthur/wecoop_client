@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { Post } from '../services/api/types'
+import { Daum } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
+import VoteCard from './PollCard'
 import PostCard from './PostCard'
 
 interface FeedPropsInterface {
-  postList: Post[] | null | undefined
+  postList: Daum[] | null | undefined
   isLoading: boolean
-  handleNewReply?: (newReply: Post, transactionCreatorId: string) => void
+  handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
+  type?: string
 }
 
-const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterface) => {
+const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: FeedPropsInterface) => {
   const [currentPage, setCurrentPage] = useState(1)
   const feedContainerRef = useRef<HTMLDivElement | null>(null)
   const postsPerPage = 10
@@ -21,7 +23,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
     }
   }
 
-  const paginatedPosts: Post[] | undefined = postList?.slice(0, currentPage * postsPerPage)
+  const paginatedPosts: Daum[] | undefined = postList?.slice(0, currentPage * postsPerPage)
 
   useEffect(() => {
     const container = feedContainerRef.current
@@ -45,13 +47,38 @@ const FeedComponent = ({ postList, handleNewReply, isLoading }: FeedPropsInterfa
   }, [paginatedPosts, postList])
 
   if (isLoading) return <LoaderSpinner text={'Loading feed...'} />
-  // {paginatedPosts && paginatedPosts.length > 0 && <VoteCard vote={paginatedPosts[0]} />}
 
   return (
-    <div ref={feedContainerRef} className="flex flex-col gap-4 w-full overflow-y-scroll h-full  no-scrollbar">
+    <div
+      ref={feedContainerRef}
+      className={`${
+        type === 'post'
+          ? 'flex flex-col gap-4 w-full overflow-y-scroll h-full no-scrollbar overflow-x-hidden'
+          : 'grid grid-cols-3 items-center  overflow-y-scroll gap-4 w-full h-full no-scrollbar overflow-x-hidden pb-24'
+      }`}
+    >
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
-        paginatedPosts.map((post, index) => <PostCard key={index} handleNewReply={handleNewReply} post={post} />)}
+        paginatedPosts.map((post, index) =>
+          post.type === 'post' ? (
+            <PostCard key={index} handleNewReply={handleNewReply} post={post} />
+          ) : (
+            <VoteCard
+              type={type === 'poll' ? 'poll' : 'feed'}
+              key={index}
+              poll={{
+                yesVotes: post.yesVotes || 0,
+                voters: post.voters || [],
+                expiry_timestamp: post.expiry_timestamp || 0,
+                pollId: post.pollId || 0,
+                status: 'accepted',
+                depositedAmount: post.depositedAmount || 0,
+                totalVotes: post.totalVotes || 0,
+                ...post,
+              }}
+            />
+          ),
+        )}
 
       {!isLoading && (!postList || postList.length === 0) && (
         <div className={'w-full justify-center flex'}>

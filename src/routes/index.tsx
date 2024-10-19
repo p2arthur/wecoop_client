@@ -12,6 +12,7 @@ import { User } from '../services/User'
 import { User as UserInterface } from '../services/api/types'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 import { Home } from '../pages/Home'
+import { PollFeed } from '../pages/PollFeed'
 
 export const Router = () => {
   const { activeAccount } = useWallet()
@@ -36,7 +37,7 @@ export const Router = () => {
         balance: {},
         followTargets: [],
       })
-      const userData = await userServices.setUser(activeAccount?.address || '')
+      const userData = await userServices.setUser(activeAccount?.address || '', algod)
       setUserData(userData)
     }
 
@@ -67,6 +68,7 @@ export const Router = () => {
         { path: '/feed/by/:walletAddress', element: <FeedPage /> },
         { path: '/about', element: <Whitepaper /> },
         { path: '/post', element: <PostPage /> },
+        { path: '/polls', element: <PollFeed /> },
       ],
     },
   ])

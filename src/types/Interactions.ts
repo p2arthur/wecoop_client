@@ -1,3 +1,3 @@
 export interface InteractionInterface {
-  type: 'post' | 'like' | 'reply'
+  type: 'post' | 'like' | 'reply' | 'create-poll'
 }

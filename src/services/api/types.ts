@@ -1,7 +1,37 @@
 export type IGetAllPosts = PostRequest[]
 
+export interface PostCreateMongo {
+  transaction_id: string
+  creator_address: string
+  text: string
+  timestamp: number
+  country: string
+  assetId: number
+}
+
+export interface ReplyCreateMongo {
+  transaction_id: string
+  post_transaction_id: string
+  creator_address: string
+  text: string
+  timestamp: number
+  country: string
+  assetId: number
+}
+
+export interface LikeCreateMongo {
+  transaction_id: string
+  creator_address: string
+  post_transaction_id: string
+}
+
+export interface VoterCreateMongo {
+  pollId: number
+  voterAddress: string
+  claimed: boolean
+}
+
 export interface Post {
-  isPersonalized: unknown
   text: string
   creator_address: string
   transaction_id: string
@@ -10,9 +40,26 @@ export interface Post {
   nfd?: string
   likes: Like[]
   replies: Reply[]
+  status: 'accepted' | 'loading' | 'rejected' | null
+  assetId: number
+  type: string
+  isPersonalized: boolean
+}
+
+export interface Poll {
+  text: string
+  creator_address: string
+  pollId: number
+  timestamp: number | null
+  country: string
+  nfd?: string
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number | null
-  isTopPost?: boolean
+  depositedAmount: number
+  totalVotes: number
+  yesVotes: number
+  voters: VoterInterface[]
+  expiry_timestamp: number
 }
 
 export interface PostRequest {
@@ -27,6 +74,28 @@ export interface PostRequest {
   status: 'accepted' | 'loading' | 'rejected' | null
   assetId: number
   isPersonalized: boolean
+}
+
+export interface PollRequest {
+  text: string
+  creator_address: string
+  pollId: number
+  timestamp: number | null
+  country: string
+  nfd?: string
+  status: 'accepted' | 'loading' | 'rejected' | string | null
+  assetId: number | null
+  depositedAmount: number
+  totalVotes: number
+  yesVotes: number
+  voters: VoterInterface[]
+  expiry_timestamp: number
+}
+
+export interface VoterInterface {
+  pollId: number
+  voterAddress: string
+  claimed: boolean
 }
 
 export interface Like {
@@ -77,4 +146,72 @@ export interface User {
 export interface Nfd {
   name: string
   avatar: string
+}
+
+export interface GetFeedByMongo {
+  data: Daum[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
+}
+
+export interface Daum {
+  _id?: Id
+  pollId?: number
+  creator_address: string
+  text: string
+  timestamp: number | null
+  country: string
+  assetId: number | null
+  depositedAmount?: number
+  totalVotes?: number
+  yesVotes?: number
+  expiry_timestamp?: number
+  status?: string | null
+  voters?: Voter[]
+  type: string
+  transaction_id?: string
+  replies?: Reply[]
+  likes?: Like[]
+}
+
+export interface Id {
+  $oid: string
+}
+
+export interface Voter {
+  _id: Id2
+  pollId: number
+  voterAddress: string
+  claimed: boolean
+}
+
+export interface Id2 {
+  $oid: string
+}
+
+export interface Reply {
+  _id: Id3
+  transaction_id: string
+  post_transaction_id: string
+  creator_address: string
+  text: string
+  timestamp: number | null
+  country: string
+  assetId: number | null
+}
+
+export interface Id3 {
+  $oid: string
+}
+
+export interface Like {
+  _id: Id4
+  transaction_id: string
+  creator_address: string
+  post_transaction_id: string
+}
+
+export interface Id4 {
+  $oid: string
 }
