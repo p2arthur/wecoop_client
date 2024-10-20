@@ -21,7 +21,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
-import { captureVoteCard } from '../utils/captureComponentImage'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
 import { PostTypeSwitch } from './PostTypeSwitch'
@@ -184,6 +183,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           activeAccount?.address!,
           country,
           prizePool * 10 ** assetDecimals,
+          userData,
         )
       } catch (error) {
         console.error('error creating poll ', error)
@@ -195,7 +195,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         theme: 'dark',
       })
 
-      queryClient.invalidateQueries({ queryKey: ['getFeedByMongo'] })
+      // queryClient.invalidateQueries({ queryKey: ['getFeedByMongo'] })
 
       setInputText('')
       setLoadingSubmit(false)

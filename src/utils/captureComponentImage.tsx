@@ -1,17 +1,16 @@
 import html2canvas from 'html2canvas'
 import { createRoot } from 'react-dom/client'
 import { PollCardTweet } from '../components/PollCardTweet'
-import { PollRequest } from '../services/api/types'
+import { PollRequest, User } from '../services/api/types'
 
-export const captureVoteCard = async (poll: PollRequest) => {
+export const captureVoteCard = async (poll: PollRequest, activeAccount: User) => {
   console.log('Creating image for poll ID:', poll.pollId)
 
   try {
     // Create a temporary container element
     const tempContainer = document.createElement('div')
     tempContainer.style.position = 'fixed'
-    tempContainer.style.width = '1100px'
-    tempContainer.style.height = '300px'
+    tempContainer.style.width = '1024px'
     tempContainer.style.top = '-10000px' // Position it off-screen
     tempContainer.style.left = '-10000px'
     document.body.appendChild(tempContainer)
@@ -26,7 +25,7 @@ export const captureVoteCard = async (poll: PollRequest) => {
 
     // Use React 18's createRoot to render the component
     const root = createRoot(tempContainer)
-    root.render(<PollCardTweet poll={poll} onRenderComplete={renderComplete} />)
+    root.render(<PollCardTweet poll={poll} onRenderComplete={renderComplete} activeUser={activeAccount} />)
 
     // Wait for the component to render
     await renderCompletePromise
