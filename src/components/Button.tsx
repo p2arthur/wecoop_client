@@ -16,7 +16,7 @@ const Button = ({ buttonText, buttonFunction, icon, inactive, type, justify, ful
     <div>
       <button
         type={type}
-        className={`${inactive ? 'opacity-30' : 'null'} border-2 border-gray-900
+        className={`${inactive ? 'opacity-30 z-1' : 'null'} border-2 border-gray-900
          p-1  bg-white font-bold
          ${justify && `justify-${justify}`}
         ${full ? 'w-full ' : 'w-auto'}
