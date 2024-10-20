@@ -144,7 +144,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
       const parentReplyId = post.transaction_id as string
       const encodedGroupedTransactions = await replieservice.handlePostReply({
-        creatorAddress: post.creator_address,
+        creatorAddress: userData?.address || '',
         address: activeAccount?.address || '',
         transactionId: post.transaction_id as string,
         text: encodeURIComponent(replyText),
@@ -156,13 +156,13 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
       const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
       const acceptedReply: Daum = {
-        creator_address: userData?.address || '',
+        creator_address: activeAccount?.address || '',
         text: encodeURIComponent(replyText),
         status: 'accepted',
         transaction_id: id,
         likes: [],
         country,
-        timestamp: Date.now(),
+        timestamp: Math.floor(new Date().getTime() / 1000),
         replies: [],
         type: 'post',
         assetId: usableAsset.assetId,
@@ -170,11 +170,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
       handleNewReply && handleNewReply(acceptedReply, parentReplyId)
       createReply({
-        creator_address: userData?.address || '',
+        creator_address: activeAccount?.address || '',
         transaction_id: id,
         post_transaction_id: parentReplyId,
         text: encodeURIComponent(replyText),
-        timestamp: Date.now() / 100,
+        timestamp: Math.floor(new Date().getTime() / 1000),
         country,
         assetId: usableAsset.assetId,
       })
