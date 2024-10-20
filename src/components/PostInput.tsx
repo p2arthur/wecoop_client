@@ -21,6 +21,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
+import { captureVoteCard } from '../utils/captureComponentImage'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
 import { PostTypeSwitch } from './PostTypeSwitch'
@@ -148,8 +149,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
       const assetDecimals = await getAssetDecimals(algod, usableAsset.assetId)
 
-      handleAddNewPost({
-        pollId: 0,
+      const newPoll = {
+        pollId: 150,
         creator_address: activeAccount?.address!,
         text: pollQuestion,
         timestamp: Math.floor(new Date().getTime() / 1000),
@@ -162,7 +163,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         status: 'loading',
         voters: [],
         type: 'poll',
-      })
+      }
+
+      handleAddNewPost(newPoll)
 
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
