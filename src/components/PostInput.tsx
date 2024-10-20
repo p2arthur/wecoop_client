@@ -351,11 +351,19 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         <div className="grid items-start  grid-cols-2 md:block gap-4  w-full justify-end">
           <div className={'flex justify-end items-center gap-4'}>
             <div className={'relative'}>
-              <Button icon={<FaCircleInfo />} buttonFunction={() => setOpenTooltip(!openTooltip)} />
+              <div
+                onMouseEnter={() => {
+                  setOpenTooltip(true)
+                }}
+                onMouseLeave={() => setOpenTooltip(false)}
+                onClick={() => setOpenTooltip(!openTooltip)}
+              >
+                <FaCircleInfo />{' '}
+              </div>
               {openTooltip && (
                 <div
                   className={
-                    'absolute translate-x-1/2 top-8 w-48 right-0 border-2 border-gray-900\n' +
+                    'absolute translate-x-1/2 top-8 w-48 right-0 border-2 border-gray-900\n z-50' +
                     'p-1  bg-white font-bold\n' +
                     'hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-sm md:text-md'
                   }
