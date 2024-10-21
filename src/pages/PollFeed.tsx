@@ -56,7 +56,7 @@ export const PollFeed = () => {
         </div>
         <div className="p-2 border-2 border-gray-950 dark:border-gray-800 dark:bg-gray-900 mb-24">
           {activeTab === 'personal' && personalPolls && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 items-center gap-4 w-full h-full no-scrollbar overflow-x-hidden p-2">
+            <div className="grid grid-cols-1 h-full lg:grid-cols-2 xl:grid-cols-3 items-center gap-4 w-full h-full no-scrollbar overflow-x-hidden p-2">
               {personalPolls
                 .sort((a, b) => b?.timestamp! - a?.timestamp!)
                 .map((poll) => (
