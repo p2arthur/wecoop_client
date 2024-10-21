@@ -206,7 +206,7 @@ export const withdrawPollShare = async (
   pollId: number,
   sender: string,
   signer: TransactionSigner,
-): Promise<r> => {
+): Promise<never> => {
   try {
     const result = await appClient.withdrawPollShare(
       { pollId: [pollId] },
