@@ -200,7 +200,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
 
   return (
     <>
-      <div>
+      <div id={`vote-card-${poll.pollId}`}>
         {poll.status === 'accepted' || poll.status === 'loading' ? (
           <div
             className={` ${poll.status === 'loading' ? 'animate-pulse opacity-70' : null} ${

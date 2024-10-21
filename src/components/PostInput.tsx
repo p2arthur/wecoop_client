@@ -148,8 +148,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
       const assetDecimals = await getAssetDecimals(algod, usableAsset.assetId)
 
-      handleAddNewPost({
-        pollId: 0,
+      const newPoll = {
+        pollId: 150,
         creator_address: activeAccount?.address!,
         text: pollQuestion,
         timestamp: Math.floor(new Date().getTime() / 1000),
@@ -162,7 +162,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         status: 'loading',
         voters: [],
         type: 'poll',
-      })
+      }
+
+      handleAddNewPost(newPoll)
 
       const appClient = createAppClient(activeAccount?.address!, signer, algod)
 
@@ -181,6 +183,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           activeAccount?.address!,
           country,
           prizePool * 10 ** assetDecimals,
+          userData,
         )
       } catch (error) {
         console.error('error creating poll ', error)
@@ -192,7 +195,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         theme: 'dark',
       })
 
-      queryClient.invalidateQueries({ queryKey: ['getFeedByMongo'] })
+      // queryClient.invalidateQueries({ queryKey: ['getFeedByMongo'] })
 
       setInputText('')
       setLoadingSubmit(false)

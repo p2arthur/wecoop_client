@@ -2,6 +2,8 @@ import * as algokit from '@algorandfoundation/algokit-utils'
 import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import axios from 'axios'
+import { User } from '../../services/api/types'
+import { captureVoteCard } from '../../utils/captureComponentImage'
 import { getAssetDecimals } from '../../utils/getAssetDecimals'
 import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
@@ -40,6 +42,7 @@ export const makePoll = async (
   creator_address: string,
   country: string,
   depositedAmount: number,
+  activeAccount: User,
 ) => {
   const { appAddress } = await appClient.appClient.getAppReference()
 
@@ -73,18 +76,6 @@ export const makePoll = async (
   })
 
   try {
-    const result = await appClient.createPoll(
-      {
-        mbrTxn: boxMBRPayment,
-        axfer: xferFirstDeposit,
-        question: pollQuestion,
-        country: country,
-        expires_in: expires_in_ms,
-        platformFeeTxn,
-      },
-      { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
-    )
-
     // Dynamically create the poll data
     const pollData = {
       pollId: pollId,
@@ -99,10 +90,25 @@ export const makePoll = async (
       yesVotes: 0,
       status: 'accepted',
       type: 'poll',
+      voters: [],
     }
+
+    const result = await appClient.createPoll(
+      {
+        mbrTxn: boxMBRPayment,
+        axfer: xferFirstDeposit,
+        question: pollQuestion,
+        country: country,
+        expires_in: expires_in_ms,
+        platformFeeTxn,
+      },
+      { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
+    )
 
     // Dynamic axios request
     await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/create`, pollData)
+
+    captureVoteCard(pollData, activeAccount, algod)
   } catch (error) {
     console.error('error creating poll', error)
   }
