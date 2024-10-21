@@ -3,7 +3,8 @@ import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
-import { FaCheckCircle, FaCircleNotch, FaParachuteBox } from 'react-icons/fa'
+import { FaCheckCircle, FaCircleNotch, FaExclamation, FaParachuteBox, FaThumbsUp } from 'react-icons/fa'
+import { FaBoxOpen, FaClock } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
@@ -200,14 +201,44 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
 
   return (
     <>
-      <div id={`vote-card-${poll.pollId}`}>
+      <div className="bg-red-300 h-full" id={`vote-card-${poll.pollId}`}>
         {poll.status === 'accepted' || poll.status === 'loading' ? (
           <div
             className={` ${poll.status === 'loading' ? 'animate-pulse opacity-70' : null} ${
               type === 'poll' ? 'min-h-[350px]' : ''
-            }  relative border-4 border-yellow-400 flex flex-col p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
+            }  relative border-4 border-yellow-400 h-full gap-2 flex flex-col p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
           >
             {/* Overlay Loading Spinner if still loading */}
+            <div className="flex justify-end py-1 items-center h-8 gap-4">
+              {poll.expiry_timestamp! * 1000 > Date.now() ? (
+                <div className="flex items-center gap-2 relative group">
+                  <div className="absolute top-1/3 translate-y-1/2 -left-1/2 bg-gray-100 border-2 px-2 border-black w-32 hidden group-hover:block">
+                    {' '}
+                    <h4>expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
+                  </div>
+                  <div className="font-bold flex gap-1 items-center text-white bg-green-600 border-b-2 border-black dark:border-white p-1 rounded-md">
+                    <p className="font-bold">Live</p>
+                    <FaBoxOpen />
+                  </div>
+                </div>
+              ) : (
+                <div className="font-bold text-white bg-yellow-500 border-b-2 border-black dark:border-white p-1 rounded-md flex items-center gap-1">
+                  <p>Expired</p>
+                  <FaClock />
+                </div>
+              )}
+              {checkVoted(activeAccount?.address!) ? (
+                <div className="font-bold text-white bg-green-600 border-b-2 border-black dark:border-white p-1 rounded-md flex gap-1">
+                  <p>Voted</p>
+                  <FaThumbsUp />
+                </div>
+              ) : (
+                <div className="font-bold text-white bg-red-500 border-b-2 border-black dark:border-white p-1 rounded-md flex items-center gap-1">
+                  <p>Not voted</p>
+                  <FaExclamation />
+                </div>
+              )}
+            </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -234,118 +265,120 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
               </div>
             </div>
 
-            <div className="flex flex-col justify-between w-full flex-grow min-h-full" onClick={(e) => e.stopPropagation()}>
-              <div className="flex flex-col gap-1 w-full flex-grow-0 min-h-full">
-                <div className="border-b-2 py-2 border-gray-300/30 flex flex-col justify-start h-full">
+            <div className="flex flex-col justify-between w-full flex-grow" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col justify-between w-full flex-grow-0 gap-2 min-h-full">
+                <div className="border-b-2 py-2 border-gray-300/30 h-full flex flex-col justify-start">
                   <p className="tracking-wide break-words w-full font-bold">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
                 </div>
-                <div className="flex w-full select-none">
-                  <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
-                    <span>Prize pool: </span>
-                    <CountUp end={Number(pollPrize)} duration={2} />{' '}
-                    <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
-                      <img
-                        className="h-full w-full"
-                        src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
-                        alt=""
+                <div className="h-full flex flex-col justify-end">
+                  <div className="flex w-full select-none">
+                    <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
+                      <span>Prize pool: </span>
+                      <CountUp end={Number(pollPrize)} duration={2} />{' '}
+                      <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
+                        <img
+                          className="h-full w-full"
+                          src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
+                          alt=""
+                        />
+                      </div>
+                    </h2>
+                  </div>
+
+                  {isVoted ||
+                  (activeAccount?.address && checkIsCreator(activeAccount?.address)) ||
+                  poll.expiry_timestamp! * 1000 < Date.now() ? (
+                    <div className={'w-full relative flex flex-col gap-3'}>
+                      <ProgressBar
+                        className={'w-full '}
+                        height={'30px'}
+                        bgColor={'rgb(22 163 74)'}
+                        animateOnRender={true}
+                        baseBgColor={'rgb(220 38 38)'}
+                        borderRadius={'10px'}
+                        completed={currentVotes.totalVotes > 0 ? ((currentVotes.yesVotes / currentVotes.totalVotes) * 100).toFixed(2) : 0}
                       />
-                    </div>
-                  </h2>
-                  <h4>expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
-                </div>
-                {isVoted ||
-                (activeAccount?.address && checkIsCreator(activeAccount?.address)) ||
-                poll.expiry_timestamp! * 1000 < Date.now() ? (
-                  <div className={'w-full relative flex flex-col gap-3'}>
-                    <ProgressBar
-                      className={'w-full '}
-                      height={'30px'}
-                      bgColor={'rgb(22 163 74)'}
-                      animateOnRender={true}
-                      baseBgColor={'rgb(220 38 38)'}
-                      borderRadius={'10px'}
-                      completed={currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}
-                    />
-                    <div className={'flex items-center justify-between'}>
-                      <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
-                      <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
-                    </div>
-                    <div className="pt-4 border-t-2 border-gray-300/30">
-                      {checkVoted(activeAccount?.address!) && poll.expiry_timestamp * 1000 < Date.now() ? (
-                        <div className="flex gap-2 items-end">
-                          {checkClaimed(activeAccount?.address!) || isClaimed ? (
-                            <div className="flex justify-end w-full">
-                              <h3 className="flex gap-2 bg-white p-1 text-black rounded-md">
-                                <FaCheckCircle className="text-2xl text-green-500" />
-                                <p>Claimed</p>
-                              </h3>
-                            </div>
-                          ) : (
-                            <div className="flex text-white items-end gap-8 justify-between w-full">
-                              <p className="underline flex items-end gap-2 text-xl">
-                                {(poll.depositedAmount / poll.voters.length).toFixed(2)} x{' '}
-                                {usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name}
-                                <div className="rounded-full overflow-hidden w-8 h-8">
-                                  <img
-                                    className="h-full w-full"
-                                    src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
-                                    alt=""
-                                  />
-                                </div>
-                              </p>{' '}
-                              <div className="relative">
-                                <div className=" rounded-md absolute border-2 w-full h-full animate-ping pointer-events-none"></div>
-                                <h2
-                                  onClick={handleClaimPoolShare}
-                                  className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center text-xl"
-                                >
-                                  {isClaiming ? (
-                                    <div className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center text-xl opacity-50">
-                                      <FaCircleNotch className="animate-spin" />
-                                      <p>Claiming</p>
-                                    </div>
-                                  ) : (
-                                    <div
-                                      onClick={handleClaimPoolShare}
-                                      className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center"
-                                    >
-                                      <FaParachuteBox className="text-green-500" />
-                                      <p className="">Claim now</p>
-                                    </div>
-                                  )}
-                                </h2>
+                      <div className={'flex items-center justify-between'}>
+                        <span className={'flex items-center '}>Yes {currentVotes.yesVotes}</span>
+                        <span className={'flex items-center'}>No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
+                      </div>
+                      <div className="pt-4 border-t-2 border-gray-300/30">
+                        {checkVoted(activeAccount?.address!) && poll.expiry_timestamp * 1000 < Date.now() ? (
+                          <div className="flex gap-2 items-end">
+                            {checkClaimed(activeAccount?.address!) || isClaimed ? (
+                              <div className="flex justify-end w-full">
+                                <h3 className="flex gap-2 bg-white p-1 text-black rounded-md">
+                                  <FaCheckCircle className="text-2xl text-green-500" />
+                                  <p>Claimed</p>
+                                </h3>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      ) : null}
+                            ) : (
+                              <div className="flex dark:text-white items-end gap-8 justify-between w-full">
+                                <p className="underline flex items-end gap-2 text-xl">
+                                  {(poll.depositedAmount / poll.voters.length).toFixed(2)} x{' '}
+                                  {usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name}
+                                  <div className="rounded-full overflow-hidden w-8 h-8">
+                                    <img
+                                      className="h-full w-full"
+                                      src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
+                                      alt=""
+                                    />
+                                  </div>
+                                </p>{' '}
+                                <div className="relative">
+                                  <div className=" rounded-md absolute border-2 w-full h-full animate-ping pointer-events-none"></div>
+                                  <h2
+                                    onClick={handleClaimPoolShare}
+                                    className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center text-xl"
+                                  >
+                                    {isClaiming ? (
+                                      <div className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center text-xl opacity-50">
+                                        <FaCircleNotch className="animate-spin" />
+                                        <p>Claiming</p>
+                                      </div>
+                                    ) : (
+                                      <div
+                                        onClick={handleClaimPoolShare}
+                                        className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center"
+                                      >
+                                        <FaParachuteBox className="text-green-500" />
+                                        <p className="">Claim now</p>
+                                      </div>
+                                    )}
+                                  </h2>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                ) : null}
-                {activeAccount?.address &&
-                !checkVoted(activeAccount.address) &&
-                !isVoted &&
-                poll.expiry_timestamp * 1000 > Date.now() &&
-                !checkIsCreator(activeAccount.address) ? (
-                  <div className={'w-full flex justify-left items-center gap-6'}>
-                    <button
-                      className={
-                        'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
-                      }
-                      onClick={() => handleVoteClick(true, Number(poll.pollId), poll.creator_address)}
-                    >
-                      YES
-                    </button>
-                    <button
-                      className={
-                        'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
-                      }
-                      onClick={() => handleVoteClick(false, Number(poll.pollId), poll.creator_address)}
-                    >
-                      NO
-                    </button>
-                  </div>
-                ) : null}
+                  ) : null}
+                  {activeAccount?.address &&
+                  !checkVoted(activeAccount.address) &&
+                  !isVoted &&
+                  poll.expiry_timestamp * 1000 > Date.now() &&
+                  !checkIsCreator(activeAccount.address) ? (
+                    <div className={'w-full flex justify-left items-center gap-6'}>
+                      <button
+                        className={
+                          'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
+                        }
+                        onClick={() => handleVoteClick(true, Number(poll.pollId), poll.creator_address)}
+                      >
+                        YES
+                      </button>
+                      <button
+                        className={
+                          'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
+                        }
+                        onClick={() => handleVoteClick(false, Number(poll.pollId), poll.creator_address)}
+                      >
+                        NO
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
