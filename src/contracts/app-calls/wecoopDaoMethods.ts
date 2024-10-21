@@ -8,6 +8,7 @@ import { getAssetDecimals } from '../../utils/getAssetDecimals'
 import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopDaoClient } from '../clients/WecoopDaoClient'
+import { AppCallTransactionResult, AppCallTransactionResultOfType } from '@algorandfoundation/algokit-utils/types/app'
 
 const algodServer = getAlgodConfigFromViteEnvironment().server
 const algodToken = getAlgodConfigFromViteEnvironment().token
@@ -201,12 +202,16 @@ export const makeVote = async (
   }
 }
 
+type WithdrawPollShareResult =
+  | { status: 'success'; result: AppCallTransactionResultOfType<void> & AppCallTransactionResult }
+  | { status: 'error'; error: unknown }
+
 export const withdrawPollShare = async (
   appClient: WecoopDaoClient,
   pollId: number,
   sender: string,
   signer: TransactionSigner,
-): Promise<never> => {
+): Promise<WithdrawPollShareResult> => {
   try {
     const result = await appClient.withdrawPollShare(
       { pollId: [pollId] },
@@ -220,7 +225,7 @@ export const withdrawPollShare = async (
 
     await axios.patch(`${import.meta.env.VITE_WECOOP_API}/polls/${sender}/${pollId}/claim`)
 
-    return result
+    return { status: 'success', result }
   } catch (error) {
     return { status: 'error', error }
   }
