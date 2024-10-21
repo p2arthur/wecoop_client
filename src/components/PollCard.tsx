@@ -25,12 +25,13 @@ interface PollCardPropsInterface {
 }
 
 const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
-  const { algod } = useOutletContext() as PostInputOutletContext
+  const { algod, userData: user } = useOutletContext() as PostInputOutletContext
   const [pollPrize, setPollPrize] = useState(0)
   const { activeAccount, signer } = useWallet()
   const { data: userData } = useGetUserInfo(poll.creator_address)
   const { mutate: createVote } = useCreateVote()
   const { mutate: claimPoll } = useClaimPoll()
+  const [isVoting, setIsVoting] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
 
   const [currentVotes, setCurrentVotes] = useState({ yesVotes: poll.yesVotes, totalVotes: poll.totalVotes })
@@ -50,52 +51,75 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
     return formatDateFromTimestamp(date)
   }
 
-  const handleVoteClick = async (inFavor: boolean, pollId: number, pollCreator: string) => {
-    if (!activeAccount) return
+  const handleVoteClick = async (inFavor: boolean, pollId: number, pollCreator: string): Promise<void> => {
+    try {
+      setIsVoting(true)
+      if (!activeAccount) return
 
-    toast('Casting your vote into the wecoop poll', {
+      showToast('Casting your vote into the wecoop poll')
+
+      const daoAssetId = poll.assetId
+      appClient = createAppClient(activeAccount.address, signer, algod)
+
+      const assetId = poll.assetId
+      if (!assetId) return
+
+      const assetDecimals = await getAssetDecimals(algod, assetId)
+      const assetVotePrice = await getFeePriceByAsset(assetId, assetDecimals, InteractionMultipliers.VotePoll)
+
+      if (assetVotePrice && !hasSufficientFunds(user.balance[assetId], assetVotePrice)) {
+        showToast('You do not have enough funds to vote')
+        setIsVoting(false)
+        return
+      }
+      if (!daoAssetId) return
+
+      // Attempt to make the vote and await confirmation
+      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId, inFavor, pollCreator)
+
+      if (result.status === 'success') {
+        updateVoteCounts(inFavor)
+        createVoteRecord(pollId, activeAccount.address)
+        finalizeVoting(true, 'Your vote into the wecoop poll was accepted')
+      } else {
+        throw new Error('Transaction failed or not confirmed')
+      }
+    } catch (error) {
+      finalizeVoting(false, 'Your vote failed, try again later')
+    }
+  }
+
+  // Helper functions
+  const showToast = (message: string): void => {
+    toast(message, {
       position: 'top-right',
       className: 'black-background',
       bodyClassName: 'grow-font-size',
       progressClassName: 'fancy-progress-bar',
     })
+  }
 
-    try {
-      const wecoopDaoAppId = Number(import.meta.env.VITE_WECOOP_POLL_APP_ID)
-      const daoAssetId = poll.assetId
-      const daoAssetAmount = 1
+  const hasSufficientFunds = (balance: number, votePrice: number): boolean => balance >= votePrice
 
-      appClient = createAppClient(activeAccount?.address, signer, algod)
+  const updateVoteCounts = (inFavor: boolean): void => {
+    setCurrentVotes((prev) => ({
+      totalVotes: prev.totalVotes + 1,
+      yesVotes: inFavor ? prev.yesVotes + 1 : prev.yesVotes,
+    }))
+  }
 
-      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId!, inFavor, pollCreator)
+  const createVoteRecord = (pollId: number, voterAddress: string): void => {
+    createVote({
+      pollId,
+      voterAddress,
+      claimed: false,
+    })
+  }
 
-      const assetId = poll.assetId
-
-      const assetDecimals = await getAssetDecimals(algod, assetId!)
-
-      const assetVotePrice = await getFeePriceByAsset(assetId!, assetDecimals, InteractionMultipliers.VotePoll)
-
-      if (inFavor) {
-        setCurrentVotes({ totalVotes: (currentVotes.totalVotes += 1), yesVotes: (currentVotes.yesVotes += 1) })
-      } else {
-        setCurrentVotes({ ...currentVotes, totalVotes: currentVotes.totalVotes + 1 })
-      }
-      createVote({
-        pollId: pollId,
-        voterAddress: activeAccount.address,
-        claimed: false,
-      })
-
-      setIsVoted(true)
-      toast('Your vote into the wecoop poll was accepted', {
-        position: 'top-right',
-        className: 'black-background',
-        bodyClassName: 'grow-font-size',
-        progressClassName: 'fancy-progress-bar',
-      })
-    } catch (error) {
-      console.error('error voting', error)
-    }
+  const finalizeVoting = (success: boolean, message: string): void => {
+    setIsVoted(success)
+    setIsVoting(false)
+    showToast(message)
   }
 
   const checkClaimed = (address: string) => {
@@ -367,23 +391,38 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                   !isVoted &&
                   poll.expiry_timestamp * 1000 > Date.now() &&
                   !checkIsCreator(activeAccount.address) ? (
-                    <div className={'w-full flex justify-left items-center gap-6'}>
-                      <button
-                        className={
-                          'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
-                        }
-                        onClick={() => handleVoteClick(true, Number(poll.pollId), poll.creator_address)}
-                      >
-                        YES
-                      </button>
-                      <button
-                        className={
-                          'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
-                        }
-                        onClick={() => handleVoteClick(false, Number(poll.pollId), poll.creator_address)}
-                      >
-                        NO
-                      </button>
+                    <div className={'w-full flex justify-center items-center gap-6'}>
+                      {isVoting ? (
+                        <div className="flex gap-2 items-center text-center h-10 mt-2 px-2 border-b-4 text-white border-gray-900 dark:border-white bg-yellow-500 dark:bg-yellow-500 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold">
+                          <FaCircleNotch className="animate-spin" />
+                          <p>Processing your vote</p>
+                        </div>
+                      ) : (
+                        <>
+                          {user.balance[poll.assetId || 0] === 0 ? (
+                            <h1>Buy {usableAssetsList.find((asset) => asset.assetId === poll.assetId)?.name} to vote!</h1>
+                          ) : (
+                            <>
+                              <button
+                                className={
+                                  'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
+                                }
+                                onClick={() => handleVoteClick(true, Number(poll.pollId), poll.creator_address)}
+                              >
+                                YES
+                              </button>
+                              <button
+                                className={
+                                  'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
+                                }
+                                onClick={() => handleVoteClick(false, Number(poll.pollId), poll.creator_address)}
+                              >
+                                NO
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
                     </div>
                   ) : null}
                 </div>
