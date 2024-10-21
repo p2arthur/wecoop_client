@@ -9,7 +9,7 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 interface PollCardPropsInterface {
   poll: PollRequest
   activeUser: User
-  onRenderComplete?: () => void // Add this prop
+  onRenderComplete?: () => void
 }
 
 export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPropsInterface) => {
@@ -45,7 +45,6 @@ export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPr
     })
   }
 
-  // Call onRenderComplete after rendering
   useEffect(() => {
     if (onRenderComplete) {
       onRenderComplete()
@@ -62,14 +61,14 @@ export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPr
   return (
     <div
       id={`vote-card-${poll.pollId}`}
-      className="relative border-4 border-yellow-400 rounded-3xl h-full w-full flex flex-col p-4 bg-white dark:bg-gray-900"
+      className="relative border-4 border-yellow-400 rounded-3xl h-full w-full flex flex-col p-4 bg-white dark:bg-gray-900 hover:bg-gray-100 transition-all duration-75 cursor-pointer"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-md border-2 border-gray-900 bg-white overflow-hidden flex justify-center items-center">
+          <div className="w-10 h-10 rounded-md border-2 border-gray-900 bg-white overflow-hidden">
             <img className="w-10 h-10" src={activeUser.nfd.avatar || generateIdIcon(poll.creator_address)} alt="" />
           </div>
-          <h2 className="font-bold text-2xl underline hover:text-blue-500 uppercase">
+          <h2 className="font-bold text-lg md:text-xl underline hover:text-blue-500">
             {activeUser.nfd.name || ellipseAddress(poll.creator_address)}
           </h2>
         </div>
@@ -89,11 +88,11 @@ export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPr
       <div className="flex flex-col justify-between w-full flex-grow min-h-full">
         <div className="flex flex-col gap-1 w-full flex-grow-0 min-h-full">
           <div className="border-b-2 py-4 border-gray-300/30 flex flex-col justify-start h-full">
-            <p className="tracking-wide break-words w-full font-bold text-xl">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
+            <p className="tracking-wide break-words w-full font-bold text-lg">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
           </div>
           <div className="flex w-full select-none">
             <h2 className="font-bold md:text-xl w-full flex gap-2 items-center">
-              <span className="text-xl font-bold">Prize pool: </span>
+              <span className="text-xl font-bold">Prize pool:</span>
               <h3 className="text-xl">{poll.depositedAmount}</h3>
               <div className="rounded-full overflow-hidden w-10 h-10">
                 <img className="h-full w-full" src={usableAssetsList.filter((asset) => asset.assetId === poll.assetId)[0]?.image} alt="" />
@@ -102,16 +101,16 @@ export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPr
             <h4>Expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
           </div>
           <ProgressBar
-            className={'w-full '}
-            height={'30px'}
-            bgColor={'rgb(22 163 74)'}
+            className="w-full"
+            height="30px"
+            bgColor="rgb(22 163 74)"
             animateOnRender={true}
-            baseBgColor={'rgb(220 38 38)'}
-            borderRadius={'10px'}
+            baseBgColor="rgb(220 38 38)"
+            borderRadius="10px"
             completed={currentVotes.totalVotes > 0 ? (currentVotes.yesVotes / currentVotes.totalVotes) * 100 : 0}
           />
           <div className="flex items-center justify-between">
-            <span className="flex items-center ">Yes {currentVotes.yesVotes}</span>
+            <span className="flex items-center">Yes {currentVotes.yesVotes}</span>
             <span className="flex items-center">No {currentVotes.totalVotes - currentVotes.yesVotes}</span>
           </div>
         </div>
