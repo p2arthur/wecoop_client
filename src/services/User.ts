@@ -38,7 +38,7 @@ export class User {
       const nfd = data[address].name
       return nfd
     } catch (error) {
-      console.error(error)
+      console.error('', error)
       return null
     }
   }
