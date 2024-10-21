@@ -120,6 +120,10 @@ export const makePoll = async (
   }
 }
 
+type WithdrawPollShareResult =
+  | { status: 'success'; result: AppCallTransactionResultOfType<void> & AppCallTransactionResult }
+  | { status: 'error'; error: unknown }
+
 export const makeVote = async (
   appClient: WecoopDaoClient,
   algodClient: AlgodClient,
@@ -129,19 +133,17 @@ export const makeVote = async (
   asset: number,
   inFavor: boolean,
   pollCreator: string,
-) => {
+): Promise<WithdrawPollShareResult> => {
   try {
     const { appAddress } = await appClient.appClient.getAppReference()
-
     const suggestedParams = await algokit.getTransactionParams(undefined, algod)
-
     const assetDecimals = await getAssetDecimals(algodClient, asset)
 
     const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: sender,
       to: appAddress,
       amount: 3_450,
-      suggestedParams: await algokit.getTransactionParams(undefined, algod),
+      suggestedParams: suggestedParams,
     })
 
     const baseVotePrice = await getFeePriceByAsset(asset, assetDecimals, InteractionMultipliers.VotePoll)
@@ -149,34 +151,31 @@ export const makeVote = async (
     const pollDepositMultiplier = 2
     const pollDepositPrice = Math.floor(baseVotePrice! * pollDepositMultiplier * 10 ** assetDecimals)
 
-    // Create the asset funding transaction (axfer)
     const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
-      suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
+      suggestedParams: suggestedParams,
       to: appAddress,
       amount: pollDepositPrice,
       assetIndex: asset,
     })
 
     const platformMultiplier = 1
-    const platformFeePrice = Math.floor(baseVotePrice! * platformMultiplier! * 10 ** assetDecimals)
+    const platformFeePrice = Math.floor(baseVotePrice! * platformMultiplier * 10 ** assetDecimals)
 
-    //User pays 1.5 cents to the platform in order to vote
     const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
-      suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
+      suggestedParams: suggestedParams,
       to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
       amount: platformFeePrice!,
       assetIndex: asset,
     })
 
-    //User pays 2 times the platform fee to the poll creator in order to vote
     const pollCreatorMultiplier = 2
     const pollCreatorPrice = Math.floor(baseVotePrice! * 10 ** pollCreatorMultiplier)
 
     const pollCreatorPaymentTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
-      suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
+      suggestedParams: suggestedParams,
       to: pollCreator,
       amount: pollCreatorPrice,
       assetIndex: asset,
@@ -190,21 +189,51 @@ export const makeVote = async (
       deposited_amount: pollDepositPrice,
     }
 
-    // Dynamic axios request
+    // Dynamic axios request to register vote data
     await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/vote`, voteData)
 
+    // Executa a transação no Algorand
     const result = await appClient.makeVote(
-      { pollId: [pollId], axfer, mbrTxn, inFavor, platrformFeeTxn: platformFeeTxn, creatorFeeTxn: pollCreatorPaymentTxn },
+      {
+        pollId: [pollId],
+        axfer,
+        mbrTxn,
+        inFavor,
+        platrformFeeTxn: platformFeeTxn,
+        creatorFeeTxn: pollCreatorPaymentTxn,
+      },
       { sender: { addr: sender, signer } },
     )
+
+    // Verifique a confirmação da transação antes de retornar sucesso
+    const confirmed = await waitForTransactionConfirmation(algodClient, result.transaction.txID())
+    if (confirmed) {
+      return { status: 'success', result }
+    } else {
+      throw new Error('Transaction not confirmed')
+    }
   } catch (error) {
-    console.error('error', error)
+    return { status: 'error', error }
   }
 }
 
-type WithdrawPollShareResult =
-  | { status: 'success'; result: AppCallTransactionResultOfType<void> & AppCallTransactionResult }
-  | { status: 'error'; error: unknown }
+// Função para verificar a confirmação da transação
+const waitForTransactionConfirmation = async (algodClient: AlgodClient, txId: string) => {
+  try {
+    const timeout = 60000 // 60 segundos de espera máxima
+    const start = Date.now()
+    while (Date.now() - start < timeout) {
+      const response = await algodClient.pendingTransactionInformation(txId).do()
+      if (response && response['confirmed-round']) {
+        return true
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Espera 2 segundos antes de tentar de novo
+    }
+    return false // Não confirmou a transação dentro do tempo limite
+  } catch (err) {
+    return false // Erro ao verificar a confirmação
+  }
+}
 
 export const withdrawPollShare = async (
   appClient: WecoopDaoClient,
