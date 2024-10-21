@@ -3,8 +3,8 @@ import { useWallet } from '@txnlab/use-wallet'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
-import { FaCheckCircle, FaCircleNotch, FaExclamation, FaParachuteBox, FaThumbsUp } from 'react-icons/fa'
-import { FaBoxOpen, FaClock } from 'react-icons/fa6'
+import { FaCheckCircle, FaCircleNotch, FaExclamation, FaParachuteBox, FaRulerCombined, FaThumbsUp } from 'react-icons/fa'
+import { FaBoxOpen, FaClock, FaQuestion } from 'react-icons/fa6'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
@@ -216,9 +216,9 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                     {' '}
                     <h4>expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
                   </div>
-                  <div className="font-bold flex gap-1 items-center text-white bg-green-600 border-b-2 border-black dark:border-white p-1 rounded-md">
+                  <div className="font-bold flex gap-1 items-center text-white bg-green-500 border-b-2 border-black dark:border-white p-1 rounded-md">
                     <p className="font-bold">Live</p>
-                    <FaBoxOpen />
+                    <FaBoxOpen /> <FaQuestion />
                   </div>
                 </div>
               ) : (
@@ -232,10 +232,15 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                   <p>Voted</p>
                   <FaThumbsUp />
                 </div>
-              ) : (
+              ) : !checkIsCreator(activeAccount?.address!) ? (
                 <div className="font-bold text-white bg-red-500 border-b-2 border-black dark:border-white p-1 rounded-md flex items-center gap-1">
                   <p>Not voted</p>
                   <FaExclamation />
+                </div>
+              ) : (
+                <div className="font-bold text-white bg-orange-500 border-b-2 border-black dark:border-white p-1 rounded-md flex items-center gap-1">
+                  <p>creator</p>
+                  <FaRulerCombined />
                 </div>
               )}
             </div>
