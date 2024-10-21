@@ -185,6 +185,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           prizePool * 10 ** assetDecimals,
           userData,
         )
+
+        queryClient.invalidateQueries({ queryKey: ['getFeedByMongo'] })
       } catch (error) {
         console.error('error creating poll ', error)
       }

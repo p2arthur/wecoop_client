@@ -1,15 +1,11 @@
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import html2canvas from 'html2canvas'
 import { createRoot } from 'react-dom/client'
 import { PollCardTweet } from '../components/PollCardTweet'
 import { PollRequest, User } from '../services/api/types'
 import { getAssetDecimals } from './getAssetDecimals'
-import { useOutletContext } from 'react-router-dom'
-import { PostInputOutletContext } from '../components/PostInput'
-import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 
 export const captureVoteCard = async (poll: PollRequest, activeAccount: User, algod: AlgodClient) => {
-  console.log('Creating image for poll ID:', poll.pollId)
-
   try {
     // Create a temporary container element
     const tempContainer = document.createElement('div')
@@ -18,8 +14,6 @@ export const captureVoteCard = async (poll: PollRequest, activeAccount: User, al
     tempContainer.style.top = '-10000px' // Position it off-screen
     tempContainer.style.left = '-10000px'
     document.body.appendChild(tempContainer)
-
-    console.log('temp container', tempContainer)
 
     // Create a promise that resolves when the component has rendered
     let renderComplete: () => void = () => {}
@@ -45,11 +39,7 @@ export const captureVoteCard = async (poll: PollRequest, activeAccount: User, al
       useCORS: true,
     })
 
-    console.log('Canvas captured:', canvas)
-
     const imageData = canvas.toDataURL('image/png')
-
-    console.log('Image data created:', imageData)
 
     // Send the image data to the server
     await fetch(`${import.meta.env.VITE_WECOOP_API}/polls/uploadVoteCardImage/upload`, {
