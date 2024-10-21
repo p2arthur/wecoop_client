@@ -51,6 +51,8 @@ export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPr
       onRenderComplete()
     }
 
+    console.log('active account', activeUser)
+
     // Calculate poll prize
     const asset = usableAssetsList.find((asset) => asset.assetId === poll.assetId)
     if (asset) {
@@ -88,7 +90,7 @@ export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPr
 
       <div className="flex flex-col justify-between w-full flex-grow min-h-full">
         <div className="flex flex-col gap-1 w-full flex-grow-0 min-h-full">
-          <div className="border-b-2 py-2 border-gray-300/30 flex flex-col justify-start h-full">
+          <div className="border-b-2 py-4 border-gray-300/30 flex flex-col justify-start h-full">
             <p className="tracking-wide break-words w-full font-bold text-xl">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
           </div>
           <div className="flex w-full select-none">

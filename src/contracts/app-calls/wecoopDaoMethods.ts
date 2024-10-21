@@ -93,22 +93,22 @@ export const makePoll = async (
       voters: [],
     }
 
+    const result = await appClient.createPoll(
+      {
+        mbrTxn: boxMBRPayment,
+        axfer: xferFirstDeposit,
+        question: pollQuestion,
+        country: country,
+        expires_in: expires_in_ms,
+        platformFeeTxn,
+      },
+      { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
+    )
+
     // Dynamic axios request
     await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/create`, pollData)
 
-    captureVoteCard(pollData, activeAccount)
-
-    // const result = await appClient.createPoll(
-    //   {
-    //     mbrTxn: boxMBRPayment,
-    //     axfer: xferFirstDeposit,
-    //     question: pollQuestion,
-    //     country: country,
-    //     expires_in: expires_in_ms,
-    //     platformFeeTxn,
-    //   },
-    //   { sender: { addr: sender, signer }, boxes: [algosdk.decodeAddress(sender).publicKey] },
-    // )
+    captureVoteCard(pollData, activeAccount, algod)
   } catch (error) {
     console.error('error creating poll', error)
   }
