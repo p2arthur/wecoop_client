@@ -123,21 +123,21 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
 
       if (isClaimed) return
 
-      try {
+      const result = await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
+      if (result.status === 'error') {
+        throw new Error('Error claiming poll')
+      } else {
         claimPoll({ pollId, voterAddress: activeAccount.address! })
-        await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
-        toast('Claimed your participation prize successfully!', {
-          position: 'top-right',
-          className: 'black-background',
-          bodyClassName: 'grow-font-size',
-          progressClassName: 'fancy-progress-bar',
-        })
-
-        setIsClaiming(false)
-        setIsClaimed(true)
-      } catch (error) {
-        throw new Error('Error claiming')
       }
+      toast('Claimed your participation prize successfully!', {
+        position: 'top-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+
+      setIsClaiming(false)
+      setIsClaimed(true)
     } catch (error) {
       setIsClaiming(false)
       toast('Failed to claim poll, if you think that is a mistake, please contact us', {

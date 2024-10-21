@@ -201,7 +201,12 @@ export const makeVote = async (
   }
 }
 
-export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: number, sender: string, signer: TransactionSigner) => {
+export const withdrawPollShare = async (
+  appClient: WecoopDaoClient,
+  pollId: number,
+  sender: string,
+  signer: TransactionSigner,
+): Promise<r> => {
   try {
     const result = await appClient.withdrawPollShare(
       { pollId: [pollId] },
@@ -217,6 +222,6 @@ export const withdrawPollShare = async (appClient: WecoopDaoClient, pollId: numb
 
     return result
   } catch (error) {
-    return error
+    return { status: 'error', error }
   }
 }
