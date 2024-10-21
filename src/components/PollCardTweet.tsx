@@ -51,8 +51,6 @@ export const PollCardTweet = ({ poll, onRenderComplete, activeUser }: PollCardPr
       onRenderComplete()
     }
 
-    console.log('active account', activeUser)
-
     // Calculate poll prize
     const asset = usableAssetsList.find((asset) => asset.assetId === poll.assetId)
     if (asset) {

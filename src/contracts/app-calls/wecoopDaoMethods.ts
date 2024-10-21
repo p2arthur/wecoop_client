@@ -155,7 +155,6 @@ export const makeVote = async (
     const platformMultiplier = 1
     const platformFeePrice = Math.floor(baseVotePrice! * platformMultiplier! * 10 ** assetDecimals)
 
-    console.log('poll deposit', platformFeePrice)
     //User pays 1.5 cents to the platform in order to vote
     const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
@@ -169,7 +168,6 @@ export const makeVote = async (
     const pollCreatorMultiplier = 2
     const pollCreatorPrice = Math.floor(baseVotePrice! * 10 ** pollCreatorMultiplier)
 
-    console.log('poll deposit', pollCreatorPrice)
     const pollCreatorPaymentTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
       suggestedParams: await algokit.getTransactionParams(undefined, algodClient),
