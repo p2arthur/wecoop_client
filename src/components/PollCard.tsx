@@ -227,7 +227,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                   <FaClock />
                 </div>
               )}
-              {checkVoted(activeAccount?.address!) ? (
+              {isVoted ? (
                 <div className="font-bold text-white bg-green-600 border-b-2 border-black dark:border-white p-1 rounded-md flex gap-1">
                   <p>Voted</p>
                   <FaThumbsUp />
