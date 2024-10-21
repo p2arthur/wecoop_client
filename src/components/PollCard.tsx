@@ -237,7 +237,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
             <div className="flex flex-col justify-between w-full flex-grow min-h-full" onClick={(e) => e.stopPropagation()}>
               <div className="flex flex-col gap-1 w-full flex-grow-0 min-h-full">
                 <div className="border-b-2 py-2 border-gray-300/30 flex flex-col justify-start h-full">
-                  <p className="tracking-wide break-words w-full font-bold h-24">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
+                  <p className="tracking-wide break-words w-full font-bold">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
                 </div>
                 <div className="flex w-full select-none">
                   <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
