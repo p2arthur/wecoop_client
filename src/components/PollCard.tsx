@@ -124,14 +124,14 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
       if (isClaimed) return
 
       try {
-        // claimPoll({ pollId, voterAddress: activeAccount.address! })
+        claimPoll({ pollId, voterAddress: activeAccount.address! })
+        await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
         toast('Claimed your participation prize successfully!', {
           position: 'top-right',
           className: 'black-background',
           bodyClassName: 'grow-font-size',
           progressClassName: 'fancy-progress-bar',
         })
-        await withdrawPollShare(appClient, pollId, activeAccount.address!, signer)
 
         setIsClaiming(false)
         setIsClaimed(true)
