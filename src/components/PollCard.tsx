@@ -356,7 +356,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                             ) : (
                               <div className="flex dark:text-white items-end gap-8 justify-between w-full">
                                 <p className="underline flex items-end gap-2 text-xl">
-                                  {Number(pollPrize.toFixed(2)) / poll.voters.length} x
+                                  {(pollPrize / poll.voters.length).toFixed(2)} x
                                   {usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name} -
                                   <div>${(prizeDollarValue / poll.voters.length).toFixed(2)}</div>
                                   <div className="rounded-full overflow-hidden w-8 h-8">
