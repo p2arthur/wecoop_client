@@ -23,6 +23,7 @@ import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMetho
 import { useCreatePost } from '../services/api/Posts'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
+import { main } from '../utils/upload-image/getWalletAuthHeaders'
 import { PostTypeSwitch } from './PostTypeSwitch'
 
 //----------
@@ -212,6 +213,14 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         progressClassName: 'fancy-progress-bar',
       })
     }
+  }
+
+  const handleCrustUpload = async () => {
+    const response = await fetch('/README.md')
+    const blob = await response.blob()
+    const file = new File([blob], 'README.md')
+
+    await main('mainnet', algod, file)
   }
 
   const handleSubmitPost = async (event: React.FormEvent) => {
@@ -415,6 +424,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           </div>
         </div>
       </div>
+      <button onClick={handleCrustUpload} type="button">
+        Upload
+      </button>
     </form>
   )
 }
