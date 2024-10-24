@@ -1,5 +1,6 @@
 import ProgressBar from '@ramonak/react-progress-bar'
 import { useWallet } from '@txnlab/use-wallet'
+import axios from 'axios'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useEffect, useState } from 'react'
 import CountUp from 'react-countup'
@@ -33,6 +34,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
   const { mutate: claimPoll } = useClaimPoll()
   const [isVoting, setIsVoting] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
+  const [prizeDollarValue, setPrizeDollarValue] = useState(0)
 
   const [currentVotes, setCurrentVotes] = useState({ yesVotes: poll.yesVotes, totalVotes: poll.totalVotes })
 
@@ -191,12 +193,18 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
   const appendPrizePoll = async () => {
     const assetDecimals = await getAssetDecimals(algod, poll.assetId!)
 
-    setPollPrize(poll.depositedAmount / 10 ** assetDecimals)
+    // Calculate pollPrize locally
+    const calculatedPollPrize = poll.depositedAmount / 10 ** assetDecimals
+    setPollPrize(calculatedPollPrize)
+
+    // Use the calculated value directly
+    const { data } = await axios.get(`https://free-api.vestige.fi/asset/${poll.assetId}/price`)
+    setPrizeDollarValue(calculatedPollPrize * data.USD)
   }
 
   useEffect(() => {
     appendPrizePoll()
-  }, [])
+  }, [poll.assetId])
 
   const handleTextPost = (text: string) => {
     const decodedText = decodeURIComponent(text)
@@ -306,7 +314,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                   <div className="flex w-full select-none">
                     <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
                       <span>Prize pool: </span>
-                      <CountUp end={Number(pollPrize)} duration={2} />{' '}
+                      <CountUp end={Number(pollPrize)} duration={2} />
                       <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
                         <img
                           className="h-full w-full"
@@ -314,6 +322,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                           alt=""
                         />
                       </div>
+                      <h2>- ~${prizeDollarValue.toFixed(2)}</h2>
                     </h2>
                   </div>
 
@@ -347,8 +356,9 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                             ) : (
                               <div className="flex dark:text-white items-end gap-8 justify-between w-full">
                                 <p className="underline flex items-end gap-2 text-xl">
-                                  {(poll.depositedAmount / poll.voters.length).toFixed(2)} x{' '}
-                                  {usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name}
+                                  {Number(pollPrize.toFixed(2)) / poll.voters.length} x
+                                  {usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name} -
+                                  <div>${(prizeDollarValue / poll.voters.length).toFixed(2)}</div>
                                   <div className="rounded-full overflow-hidden w-8 h-8">
                                     <img
                                       className="h-full w-full"
