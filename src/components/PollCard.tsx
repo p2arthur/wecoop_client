@@ -239,7 +239,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
             <div className="flex justify-end py-1 items-center h-8 gap-4">
               {poll.expiry_timestamp! * 1000 > Date.now() ? (
                 <div className="flex items-center gap-2 relative group">
-                  <div className="absolute top-1/3 translate-y-1/2 -left-1/2 bg-gray-100 border-2 px-2 border-black w-32 hidden group-hover:block">
+                  <div className="absolute top-1/3 translate-y-1/2 -left-1/2 dark:text-black bg-gray-100 border-2 px-2 border-black w-32 hidden group-hover:block">
                     {' '}
                     <h4>expires: {handleTimestamp(poll.expiry_timestamp)}</h4>
                   </div>
@@ -371,7 +371,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                                     ) : (
                                       <div
                                         onClick={handleClaimPoolShare}
-                                        className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center"
+                                        className="bg-white font-bold p-1 text-black rounded-md flex gap-2 items-center border-2 border-black dark:border-white"
                                       >
                                         <FaParachuteBox className="text-green-500" />
                                         <p className="">Claim now</p>
