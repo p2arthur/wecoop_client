@@ -4,6 +4,8 @@ import { User as UserInterface } from '../services/api/types'
 import useDarkMode from '../utils/getThemeMode'
 import ConnectWallet from './ConnectWallet'
 import ThemeSwitcher from './ThemeSwitcher'
+import { useWallet } from '@txnlab/use-wallet'
+import { Notifications } from './Notifications'
 
 interface NavBarProps {
   user: UserInterface
@@ -11,6 +13,7 @@ interface NavBarProps {
 
 const NavBar = ({ user }: NavBarProps) => {
   const { isOpen, openSidebar } = useMobileSidebar()
+  const { activeAccount } = useWallet()
   const { isDarkMode } = useDarkMode()
   return (
     <div className="px-2 py-0 py fixed z-40 bg-gray-100 dark:bg-gray-950 w-screen border-b-4 border-gray-900 flex justify-between items-center h-14">
@@ -22,9 +25,15 @@ const NavBar = ({ user }: NavBarProps) => {
         <a href="/about">
           <p className="font-bold text-md md:text-md underline hidden md:block">About us</p>
         </a>
+        {activeAccount && (
+          <div>
+            <Notifications walletAddress={activeAccount.address} />
+          </div>
+        )}
         <div className="hidden md:block">
           <ThemeSwitcher />
         </div>
+
         <ConnectWallet user={user} />
         <div onClick={openSidebar}>
           <MdOutlineMenu className="text-3xl md:hidden" />

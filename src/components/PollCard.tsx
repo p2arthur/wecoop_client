@@ -19,6 +19,7 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { PostInputOutletContext } from './PostInput'
+import { useMarkAsReadByPoll } from '../services/api/Notification'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -27,11 +28,14 @@ interface PollCardPropsInterface {
 
 const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
   const { algod, userData: user } = useOutletContext() as PostInputOutletContext
-  const [pollPrize, setPollPrize] = useState(0)
   const { activeAccount, signer } = useWallet()
   const { data: userData } = useGetUserInfo(poll.creator_address)
   const { mutate: createVote } = useCreateVote()
   const { mutate: claimPoll } = useClaimPoll()
+
+  const { mutate: markAsRedByPoll } = useMarkAsReadByPoll()
+
+  const [pollPrize, setPollPrize] = useState(0)
   const [isVoting, setIsVoting] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
   const [prizeDollarValue, setPrizeDollarValue] = useState(0)
@@ -154,6 +158,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
         throw new Error('Error claiming poll')
       } else {
         claimPoll({ pollId, voterAddress: activeAccount.address! })
+        markAsRedByPoll({ walletAddress: activeAccount.address!, pollId })
       }
       toast('Claimed your participation prize successfully!', {
         position: 'top-right',
