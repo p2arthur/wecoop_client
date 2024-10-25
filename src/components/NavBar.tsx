@@ -1,7 +1,6 @@
 import { MdOutlineMenu } from 'react-icons/md'
 import { useMobileSidebar } from '../context/Interface/MobileSidebar'
 import { User as UserInterface } from '../services/api/types'
-import useDarkMode from '../utils/getThemeMode'
 import ConnectWallet from './ConnectWallet'
 import ThemeSwitcher from './ThemeSwitcher'
 import { useWallet } from '@txnlab/use-wallet'
@@ -12,9 +11,8 @@ interface NavBarProps {
 }
 
 const NavBar = ({ user }: NavBarProps) => {
-  const { isOpen, openSidebar } = useMobileSidebar()
+  const { openSidebar } = useMobileSidebar()
   const { activeAccount } = useWallet()
-  const { isDarkMode } = useDarkMode()
   return (
     <div className="px-2 py-0 py fixed z-40 bg-gray-100 dark:bg-gray-950 w-screen border-b-4 border-gray-900 flex justify-between items-center h-14">
       <a className="flex gap-2 items-center" href="/feed">
@@ -35,7 +33,7 @@ const NavBar = ({ user }: NavBarProps) => {
         </div>
 
         <ConnectWallet user={user} />
-        <div onClick={openSidebar}>
+        <div onClick={() => openSidebar()}>
           <MdOutlineMenu className="text-3xl md:hidden" />
         </div>
       </div>

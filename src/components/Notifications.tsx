@@ -51,7 +51,7 @@ export const Notifications = ({ walletAddress }: NotificationsProps) => {
         {notificationsNotReaded?.length}
       </span>
       {isOpen ? (
-        <div className=" absolute  w-[400px] overflow-y-scroll h-[500px] border-2 top-10 flex flex-col gap-1 left-[-100px] bg-white border-gray-900 dark:border-gray-100 border-b-4">
+        <div className=" absolute w-[300px] md:w-[400px] overflow-y-scroll h-[500px] border-2 top-10 flex flex-col gap-1 md:left-[-100px] bg-white border-gray-900 dark:border-gray-100 border-b-4">
           {data
             ?.sort((a, b) => (a.read === b.read ? 0 : a.read ? 1 : -1))
             ?.map((notification) => (

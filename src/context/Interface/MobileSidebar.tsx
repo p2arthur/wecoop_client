@@ -37,7 +37,7 @@ const MobileSidebarProvider = ({ children }: IMobileSidebarProviderProps) => {
       openSidebar,
       closeSidebar,
     }),
-    [isOpen],
+    [isOpen, openSidebar, closeSidebar],
   )
 
   return <MobileSidebarContext.Provider value={sidebarProviderValues}>{children}</MobileSidebarContext.Provider>
