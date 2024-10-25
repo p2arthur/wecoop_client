@@ -1,5 +1,6 @@
 import algosdk from 'algosdk'
 import axios from 'axios'
+import * as algokit from '@algorandfoundation/algokit-utils'
 import nacl from 'tweetnacl'
 import { StorageOrderClient } from '../../contracts/image-upload/StorageOrderClient'
 
@@ -15,17 +16,17 @@ const getAuthHeader = async (account: algosdk.Account) => {
   return Buffer.from(authStr).toString('base64')
 }
 
-const uploadToIpfs = async (account: algosdk.Account) => {
+const uploadToIpfs = async (account: algosdk.Account, file: File) => {
   const headers = { Authorization: `Basic ${await getAuthHeader(account)}` }
 
   const apiEndpoint = 'https://gw-seattle.crustcloud.io:443/api/v0/add'
 
-  // Create a Blob object containing file data (for example, some text)
-  const fileContent = 'This is a dynamically generated file.'
-  const blob = new Blob([fileContent], { type: 'text/plain' })
+  // // Create a Blob object containing file data (for example, some text)
+  // const fileContent = 'This is a dynamically generated file.'
+  // const blob = new Blob([fileContent], { type: 'text/plain' })
 
-  // Convert Blob to File
-  const file = new File([blob], 'dynamic-file.txt', { type: 'text/plain' })
+  // // Convert Blob to File
+  // const file = new File([blob], 'dynamic-file.txt', { type: 'text/plain' })
 
   const formData = new FormData()
   formData.append('file', file, file.name)
@@ -87,11 +88,9 @@ async function placeOrder(
 }
 
 // Main function to be used on the frontend
-export async function main(network: 'testnet' | 'mainnet', algod: algosdk.Algodv2, file: File) {
-  const account: algosdk.Account = {
-    sk: Uint8Array.from(),
-    addr: import.meta.env.VITE_WECOOP_NOTIFICATIONS_ADDR,
-  }
+export async function main(network: 'testnet' | 'mainnet', algod: algosdk.Algodv2, file: File, account: algosdk.Account) {
+  algokit.Config.configure({ populateAppCallResources: true })
+
   const appClient = new StorageOrderClient(
     {
       sender: account,
@@ -103,7 +102,7 @@ export async function main(network: 'testnet' | 'mainnet', algod: algosdk.Algodv
 
   try {
     console.log('Uploading to IPFS...')
-    const { size, cid } = await uploadToIpfs(account)
+    const { size, cid } = await uploadToIpfs(account, file)
     console.log(`Uploaded to IPFS. CID: ${cid}, Size: ${size} bytes`)
 
     console.log('Getting price...')

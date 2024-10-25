@@ -18,12 +18,12 @@ import Counter from './Counter'
 
 //--------------
 import { useQueryClient } from '@tanstack/react-query'
+import { poolUtils, SupportedNetwork } from '@tinymanorg/tinyman-js-sdk'
 import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
-import { main } from '../utils/upload-image/getWalletAuthHeaders'
 import { PostTypeSwitch } from './PostTypeSwitch'
 
 //----------
@@ -216,11 +216,21 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   const handleCrustUpload = async () => {
-    const response = await fetch('/README.md')
-    const blob = await response.blob()
-    const file = new File([blob], 'README.md')
+    // const response = await fetch('/foto_minha.png')
+    // const blob = await response.blob()
+    // const file = new File([blob], 'foto_minha.png')
 
-    await main('mainnet', algod, file)
+    // await main('mainnet', algod, file, activeAccount?.address!, signer)
+
+    const poolInfo = await poolUtils.v2.getPoolInfo({
+      network: 'mainnet' as SupportedNetwork,
+      client: algod,
+      asset1ID: Number(796425061),
+      asset2ID: Number(31566704),
+    })
+
+    poolUtils.v2.getPoolsForPair
+    console.log(poolInfo)
   }
 
   const handleSubmitPost = async (event: React.FormEvent) => {
