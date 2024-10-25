@@ -39,7 +39,7 @@ const FollowButton = ({ walletAddress, isFollowing }: FollowButtonProps) => {
       setButtonState('success')
     } catch (error) {
       setButtonState(null)
-      console.error(error)
+      console.error('error', error)
     }
   }
 
