@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { RiCloseFill } from 'react-icons/ri'
 import { useMobileSidebar } from '../../context/Interface/MobileSidebar'
 import useDarkMode from '../../utils/getThemeMode'
@@ -10,6 +9,7 @@ import { useSearchParams } from 'react-router-dom'
 
 export default function MobileSidebar() {
   const { isOpen, closeSidebar } = useMobileSidebar()
+
   const { activeFeed, activeAssetId, handleFilterByAssetId, handleChangeFeed } = usePosts()
   const { activeAccount } = useWallet()
   const [params, setParams] = useSearchParams()
@@ -46,18 +46,6 @@ export default function MobileSidebar() {
       handleFilterByAssetId(newAssetId)
     }
   }
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
 
   return (
     <div className={`w-screen h-screen bg-black/50 fixed z-50 justify-end overflow-hidden ${isOpen ? 'flex' : 'hidden'}`}>
