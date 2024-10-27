@@ -373,15 +373,15 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <textarea
-            maxLength={postType === 'post' ? 300 : 300}
+            maxLength={300}
             value={inputText}
             onChange={handleChange}
             placeholder={postType === 'post' ? placeholder : 'Create your vote'}
             className={`w-full border-2  align-top text-start break-all whitespace-normal h-32 ${
-              postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-72'
+              postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
             } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
-          <div className="absolute right-5 bottom-2">{`${inputText.length}/${postType === 'post' ? 300 : 100}`}</div>
+          <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
           {postType === 'poll' && (
             <div className={'absolute right-5 top-2 text-center'}>
               <span>Expires in:</span>
