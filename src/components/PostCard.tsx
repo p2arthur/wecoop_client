@@ -16,7 +16,7 @@ import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useCreateLike, useCreateReply } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
-import { Daum, Reply as IReply, User } from '../services/api/types'
+import { Daum, FilePost, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -24,7 +24,7 @@ import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
 
 interface PostPropsInterface {
-  post: Daum | IReply
+  post: Daum | IReply | FilePost
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
 }
@@ -256,6 +256,14 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
             <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
+              <div className="w-full py-3">
+                {' '}
+                {post.file_1_cid ? (
+                  <div className="w-32 h-32">
+                    <img className="w-full h-full" src={`https://ipfs.algonode.xyz/ipfs/${post.file_1_cid}`} />
+                  </div>
+                ) : null}
+              </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
                   <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} />

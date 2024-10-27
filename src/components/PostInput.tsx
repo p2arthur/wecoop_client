@@ -8,7 +8,7 @@ import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { NotePrefix } from '../enums/notePrefix'
-import { User as UserInterface } from '../services/api/types'
+import { FilePost, User as UserInterface } from '../services/api/types'
 import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
@@ -18,12 +18,12 @@ import Counter from './Counter'
 
 //--------------
 import { useQueryClient } from '@tanstack/react-query'
-import { poolUtils, SupportedNetwork } from '@tinymanorg/tinyman-js-sdk'
 import { toast } from 'react-toastify'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
+import { pinToIpfs } from '../utils/upload-image/pinToIpfs'
 import { PostTypeSwitch } from './PostTypeSwitch'
 
 //----------
@@ -216,21 +216,44 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   const handleCrustUpload = async () => {
-    // const response = await fetch('/foto_minha.png')
-    // const blob = await response.blob()
-    // const file = new File([blob], 'foto_minha.png')
+    const response = await fetch('/foto_minha.png')
+    const blob = await response.blob()
+    const file = new File([blob], 'foto_minha.png')
 
-    // await main('mainnet', algod, file, activeAccount?.address!, signer)
+    try {
+      const filePostBackend = {
+        text: 'First ever file post',
+        creator_address: activeAccount?.address!,
+        timestamp: new Date().getDate(),
+        transaction_id: 'loading_id',
+        country: 'CA',
+        assetId: 1,
+        file_1_cid: '',
+        file_1_format: 'png',
+      }
 
-    const poolInfo = await poolUtils.v2.getPoolInfo({
-      network: 'mainnet' as SupportedNetwork,
-      client: algod,
-      asset1ID: Number(796425061),
-      asset2ID: Number(31566704),
-    })
+      const filePostFrontend: FilePost = {
+        text: 'First ever file post',
+        creator_address: activeAccount?.address!,
+        timestamp: new Date().getDate(),
+        transaction_id: 'loading_id',
+        country: 'CA',
+        assetId: 1,
+        file_1_cid: '',
+        file_1_format: 'png',
+        type: 'post',
+      }
 
-    poolUtils.v2.getPoolsForPair
-    console.log(poolInfo)
+      const cid = await pinToIpfs('mainnet', algod, file, { addr: activeAccount?.address!, signer }, filePostBackend)
+
+      Object.assign(filePostFrontend, { file_1_cid: cid })
+
+      console.log('filePost front end', filePostFrontend)
+
+      handleAddNewPost(filePostFrontend)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const handleSubmitPost = async (event: React.FormEvent) => {

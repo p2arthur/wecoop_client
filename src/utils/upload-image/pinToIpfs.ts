@@ -1,48 +1,9 @@
+import * as algokit from '@algorandfoundation/algokit-utils'
+import { SendTransactionFrom } from '@algorandfoundation/algokit-utils/types/transaction'
 import algosdk from 'algosdk'
 import axios from 'axios'
-import * as algokit from '@algorandfoundation/algokit-utils'
-import nacl from 'tweetnacl'
 import { StorageOrderClient } from '../../contracts/image-upload/StorageOrderClient'
-
-const getAuthHeader = async (account: algosdk.Account) => {
-  const sk32 = account.sk.slice(0, 32)
-  const signingKey = nacl.sign.keyPair.fromSeed(sk32)
-
-  const signature = nacl.sign(Buffer.from(account.addr), signingKey.secretKey)
-  const sigHex = Buffer.from(signature).toString('hex').slice(0, 128)
-
-  const authStr = `sub-${account.addr}:0x${sigHex}`
-
-  return Buffer.from(authStr).toString('base64')
-}
-
-const uploadToIpfs = async (account: algosdk.Account, file: File) => {
-  const headers = { Authorization: `Basic ${await getAuthHeader(account)}` }
-
-  const apiEndpoint = 'https://gw-seattle.crustcloud.io:443/api/v0/add'
-
-  // // Create a Blob object containing file data (for example, some text)
-  // const fileContent = 'This is a dynamically generated file.'
-  // const blob = new Blob([fileContent], { type: 'text/plain' })
-
-  // // Convert Blob to File
-  // const file = new File([blob], 'dynamic-file.txt', { type: 'text/plain' })
-
-  const formData = new FormData()
-  formData.append('file', file, file.name)
-
-  try {
-    const { data } = await axios.post(apiEndpoint, formData, {
-      headers: { ...headers },
-    })
-
-    const json: { Hash: string; Size: number } = data
-    return { cid: json.Hash, size: Number(json.Size) }
-  } catch (error) {
-    console.error('Failed to upload to IPFS:', error)
-    throw error
-  }
-}
+import { FilePost } from '../../services/api/types'
 
 async function getPrice(algod: algosdk.Algodv2, appClient: StorageOrderClient, size: number, isPermanent: boolean = false) {
   const result = await (await appClient.compose().getPrice({ size, is_permanent: isPermanent }).atc()).simulate(algod)
@@ -64,7 +25,7 @@ async function getOrderNode(algod: algosdk.Algodv2, appClient: StorageOrderClien
 async function placeOrder(
   algod: algosdk.Algodv2,
   appClient: StorageOrderClient,
-  account: algosdk.Account,
+  account: SendTransactionFrom,
   cid: string,
   size: number,
   price: number,
@@ -88,7 +49,13 @@ async function placeOrder(
 }
 
 // Main function to be used on the frontend
-export async function main(network: 'testnet' | 'mainnet', algod: algosdk.Algodv2, file: File, account: algosdk.Account) {
+export async function pinToIpfs(
+  network: 'testnet' | 'mainnet',
+  algod: algosdk.Algodv2,
+  file: File,
+  account: SendTransactionFrom,
+  filePost: FilePost,
+) {
   algokit.Config.configure({ populateAppCallResources: true })
 
   const appClient = new StorageOrderClient(
@@ -101,9 +68,12 @@ export async function main(network: 'testnet' | 'mainnet', algod: algosdk.Algodv
   )
 
   try {
-    console.log('Uploading to IPFS...')
-    const { size, cid } = await uploadToIpfs(account, file)
-    console.log(`Uploaded to IPFS. CID: ${cid}, Size: ${size} bytes`)
+    const { data } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ipfs-crust-factory/ipfs_factory`)
+
+    const { cid, size } = data
+    console.log('ipfs data', data)
+
+    if (!cid || !size) return
 
     console.log('Getting price...')
     const price = await getPrice(algod, appClient, size)
@@ -111,7 +81,13 @@ export async function main(network: 'testnet' | 'mainnet', algod: algosdk.Algodv
 
     console.log('Placing order...')
     await placeOrder(algod, appClient, account, cid, size, price, false)
+
+    const { data: filePostData } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/create-file-post`, filePost)
     console.log('Order placed successfully.')
+
+    console.log('posted to db', filePostData)
+
+    return cid
   } catch (error) {
     console.error('An error occurred:', error)
   }

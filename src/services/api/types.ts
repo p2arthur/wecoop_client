@@ -171,6 +171,10 @@ export interface Daum {
   voters?: Voter[]
   type: string
   transaction_id?: string
+  file_1_cid?: string
+  file_1_format?: string
+  file_2_cid?: string
+  file_2_format?: string
   replies?: Reply[]
   likes?: Like[]
 }
