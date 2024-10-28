@@ -3,6 +3,7 @@ import { Daum } from '../services/api/types'
 import LoaderSpinner from './LoaderSpinner'
 import VoteCard from './PollCard'
 import PostCard from './PostCard'
+import FilePostCard from './file-post/FilePostCard'
 
 interface FeedPropsInterface {
   postList: Daum[] | null | undefined
@@ -62,7 +63,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
         paginatedPosts.map((post, index) =>
           post.type === 'post' ? (
             <PostCard key={index} handleNewReply={handleNewReply} post={post} />
-          ) : (
+          ) : post.type === 'poll' ? (
             <VoteCard
               type={type === 'poll' ? 'poll' : 'feed'}
               key={index}
@@ -77,6 +78,8 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
                 ...post,
               }}
             />
+          ) : (
+            <FilePostCard key={index} handleNewReply={handleNewReply} post={post} />
           ),
         )}
 

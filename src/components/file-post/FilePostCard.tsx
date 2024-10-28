@@ -3,27 +3,25 @@ import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
-import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { FaMagnifyingGlass, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
-import { usePosts } from '../context/Posts/Posts'
-import { Like } from '../services/Like'
-import { Reply } from '../services/Reply'
-
 import { toast } from 'react-toastify'
-import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
-import { usableAssetsList } from '../data/usableAssetsList'
-import { useCreateLike, useCreateReply } from '../services/api/Posts'
-import { useGetUserInfo } from '../services/api/Users'
-import { Daum, FilePost, Reply as IReply, User } from '../services/api/types'
-import formatDateFromTimestamp from '../utils'
-import { ellipseAddress } from '../utils/ellipseAddress'
-import { getUserCountry } from '../utils/userUtils'
-import { ReplyInput } from './ReplyInput'
-import { ShareButton } from './ShareButton'
+import { usePosts } from '../../context/Posts/Posts'
+import { useUsableAsset } from '../../context/UsableAsset/UsableAssetContext'
+import { usableAssetsList } from '../../data/usableAssetsList'
+import { useCreateLike, useCreateReply } from '../../services/api/Posts'
+import { Daum } from '../../services/api/types'
+import { useGetUserInfo } from '../../services/api/Users'
+import { Like } from '../../services/Like'
+import { Reply } from '../../services/Reply'
+import { User } from '../../services/User'
+import formatDateFromTimestamp from '../../utils'
+import { ellipseAddress } from '../../utils/ellipseAddress'
+import { getUserCountry } from '../../utils/userUtils'
+import { ShareButton } from '../ShareButton'
 
-interface PostPropsInterface {
+interface FilePostPropsInterface {
   post: Daum | IReply | FilePost
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
@@ -75,7 +73,7 @@ export const handleTextPost = (text: string) => {
   })
 }
 
-const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
+const FilePostCard = ({ post, variant = 'default', handleNewReply }: FilePostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
   const { activeAccount } = useWallet()
@@ -89,6 +87,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   const [replyText, setReplyText] = useState('')
   const [openReplyInput, setOpenReplyInput] = useState(false)
   const [userCountry, setUserContry] = useState('')
+  const [viewImage1, setViewImage1] = useState(false)
 
   const { mutate: createLike } = useCreateLike()
 
@@ -199,6 +198,10 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
     window.location.href = `/post?id=${post.transaction_id}`
   }
 
+  const handleViewImage1 = () => {
+    setViewImage1(!viewImage1)
+  }
+
   return (
     <>
       <div>
@@ -256,7 +259,23 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
             <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
-              <div className="w-full py-3 "></div>
+              <div className="w-full py-3">
+                {' '}
+                {post.file_1_cid ? (
+                  <div className="w-36 h-36 relative">
+                    <div
+                      onClick={handleViewImage1}
+                      className={`w-full h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${
+                        viewImage1 ? 'hidden' : false
+                      }`}
+                    >
+                      <p>View image</p>
+                      <FaMagnifyingGlass />
+                    </div>
+                    <img className="w-full h-full" src={`https://ipfs.algonode.xyz/ipfs/${post.file_1_cid}`} />
+                  </div>
+                ) : null}
+              </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
                   <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} />
@@ -310,48 +329,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                   <p className="text-center">{handleTimestamp()}</p>
                 </div>
               </div>
-
-              {openReplyInput && (
-                <div className={'grid gap-4 h-full'} onClick={(e) => e.stopPropagation()}>
-                  <p className={'text-lg'}>replies</p>
-
-                  {post?.replies &&
-                    post?.replies?.length > 0 &&
-                    post.replies
-                      .sort((a, b) => {
-                        return a.timestamp! - b.timestamp!
-                      })
-                      .map((reply) => <PostCard post={reply} variant={'reply'} />)}
-                  {isLoadingReply && (
-                    <PostCard
-                      post={{
-                        text: `${encodeURIComponent(replyText)}`,
-                        creator_address: userData?.address || '',
-                        nfd: '',
-                        replies: [],
-                        likes: [],
-                        type: 'post',
-                        post_transaction_id: post.transaction_id,
-                        status: 'loading',
-                        country: userCountry,
-                        timestamp: new Date().getDate(),
-                        transaction_id: uuidv4(),
-                        assetId: 0,
-                      }}
-                      variant={'reply'}
-                    />
-                  )}
-
-                  {!isLoadingReply && (
-                    <ReplyInput
-                      handleChange={(e) => setReplyText(e.target.value)}
-                      placeholder={'Reply message...'}
-                      value={replyText}
-                      handleSubmit={handlePostReply}
-                    />
-                  )}
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -360,4 +337,4 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
   )
 }
 
-export default PostCard
+export default FilePostCard

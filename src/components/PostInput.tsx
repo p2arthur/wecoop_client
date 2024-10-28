@@ -71,6 +71,13 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const { mutate: createPost, isSuccess: isSuccessCreatePost } = useCreatePost()
   const [loadingSubmit, setLoadingSubmit] = useState(false)
 
+  //FIle upload
+  const [uploadFile, setUploadFile] = useState<File>()
+  const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return
+    setUploadFile(event.target.files[0])
+  }
+
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
   const [expiresCounter, setExpiresCounter] = useState(1)
@@ -216,16 +223,13 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   const handleCrustUpload = async () => {
-    const response = await fetch('/foto_minha.png')
-    const blob = await response.blob()
-    const file = new File([blob], 'foto_minha.png')
+    const response = uploadFile!
 
     try {
       const filePostBackend = {
-        text: 'First ever file post',
+        text: inputText,
         creator_address: activeAccount?.address!,
-        timestamp: new Date().getDate(),
-        transaction_id: 'loading_id',
+        timestamp: Math.floor(new Date().getTime() / 1000),
         country: 'CA',
         assetId: 1,
         file_1_cid: '',
@@ -233,10 +237,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       }
 
       const filePostFrontend: FilePost = {
-        text: 'First ever file post',
+        text: inputText,
         creator_address: activeAccount?.address!,
-        timestamp: new Date().getDate(),
-        transaction_id: 'loading_id',
+        timestamp: new Date(),
         country: 'CA',
         assetId: 1,
         file_1_cid: '',
@@ -244,7 +247,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         type: 'post',
       }
 
-      const cid = await pinToIpfs('mainnet', algod, file, { addr: activeAccount?.address!, signer }, filePostBackend)
+      const cid = await pinToIpfs('mainnet', algod, response, { addr: activeAccount?.address!, signer }, filePostBackend)
 
       Object.assign(filePostFrontend, { file_1_cid: cid })
 
@@ -381,6 +384,12 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
               postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
             } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
           />
+          <form action="">
+            <input onChange={handleFile} type="file" />
+            <button onClick={handleCrustUpload} type="button">
+              Upload
+            </button>
+          </form>
           <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
           {postType === 'poll' && (
             <div className={'absolute right-5 top-2 text-center'}>
@@ -457,9 +466,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           </div>
         </div>
       </div>
-      <button onClick={handleCrustUpload} type="button">
-        Upload
-      </button>
     </form>
   )
 }

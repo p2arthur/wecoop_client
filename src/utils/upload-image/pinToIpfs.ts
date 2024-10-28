@@ -58,6 +58,8 @@ export async function pinToIpfs(
 ) {
   algokit.Config.configure({ populateAppCallResources: true })
 
+  console.log('pinning')
+
   const appClient = new StorageOrderClient(
     {
       sender: account,
@@ -68,7 +70,10 @@ export async function pinToIpfs(
   )
 
   try {
-    const { data } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ipfs-crust-factory/ipfs_factory`)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const { data } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ipfs-crust-factory/ipfs_factory`, formData)
 
     const { cid, size } = data
     console.log('ipfs data', data)
@@ -81,6 +86,8 @@ export async function pinToIpfs(
 
     console.log('Placing order...')
     await placeOrder(algod, appClient, account, cid, size, price, false)
+
+    const filePostWithCid = Object.assign(filePost, { file_1_cid: cid })
 
     const { data: filePostData } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/create-file-post`, filePost)
     console.log('Order placed successfully.')
