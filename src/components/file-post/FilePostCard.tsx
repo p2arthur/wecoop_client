@@ -25,6 +25,7 @@ interface FilePostPropsInterface {
   post: Daum | IReply | FilePost
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
+  imagesVisible: boolean
 }
 
 interface PostInputPropsInterface {
@@ -73,7 +74,7 @@ export const handleTextPost = (text: string) => {
   })
 }
 
-const FilePostCard = ({ post, variant = 'default', handleNewReply }: FilePostPropsInterface) => {
+const FilePostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: FilePostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
   const { activeAccount } = useWallet()
@@ -86,8 +87,6 @@ const FilePostCard = ({ post, variant = 'default', handleNewReply }: FilePostPro
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [openReplyInput, setOpenReplyInput] = useState(false)
-  const [userCountry, setUserContry] = useState('')
-  const [viewImage1, setViewImage1] = useState(false)
 
   const { mutate: createLike } = useCreateLike()
 
@@ -262,11 +261,10 @@ const FilePostCard = ({ post, variant = 'default', handleNewReply }: FilePostPro
               <div className="w-full py-3">
                 {' '}
                 {post.file_1_cid ? (
-                  <div className="w-36 h-36 relative">
+                  <div className="w-56 h-56 relative">
                     <div
-                      onClick={handleViewImage1}
                       className={`w-full h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${
-                        viewImage1 ? 'hidden' : false
+                        imagesVisible ? 'hidden' : null
                       }`}
                     >
                       <p>View image</p>

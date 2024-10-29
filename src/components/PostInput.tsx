@@ -2,7 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk, { Transaction } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import React, { useEffect, useState } from 'react'
-import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
+import { FaArrowsRotate, FaCircleInfo, FaPhotoFilm } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
@@ -72,10 +72,16 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const [loadingSubmit, setLoadingSubmit] = useState(false)
 
   //FIle upload
-  const [uploadFile, setUploadFile] = useState<File>()
+  const [uploadFile1, setUploadFile1] = useState<File>()
+  const [uploadFile1Url, setUploadFile1Url] = useState<string>('')
   const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return
-    setUploadFile(event.target.files[0])
+
+    const file = event.target.files[0]
+    setUploadFile1(file)
+
+    const fileUrl = URL.createObjectURL(file)
+    setUploadFile1Url(fileUrl)
   }
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
@@ -223,7 +229,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   const handleCrustUpload = async () => {
-    const response = uploadFile!
+    const response = uploadFile1!
 
     try {
       const filePostBackend = {
@@ -263,6 +269,27 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     event.preventDefault()
     setLoadingSubmit(true)
     const country = await getUserCountry()
+
+    const postToAdd = {
+      text: inputText,
+      creator_address: userData.address,
+      status: 'loading',
+      timestamp: new Date().getDate(),
+      transaction_id: 'loading_id',
+      replies: [],
+      type: 'post',
+      country,
+      likes: [],
+      assetId: usableAsset.assetId,
+    }
+
+    if (uploadFile1) {
+      try {
+        handleCrustUpload()
+      } catch (error) {
+        throw Error
+      }
+    }
 
     try {
       handleAddNewPost({
@@ -375,22 +402,18 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     <form onSubmit={(e) => (postType === 'post' ? handleSubmitPost(e) : handleCreatePoll(e))}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
-          <textarea
-            maxLength={300}
-            value={inputText}
-            onChange={handleChange}
-            placeholder={postType === 'post' ? placeholder : 'Create your vote'}
-            className={`w-full border-2  align-top text-start break-all whitespace-normal h-32 ${
-              postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
-            } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
-          />
-          <form action="">
-            <input onChange={handleFile} type="file" />
-            <button onClick={handleCrustUpload} type="button">
-              Upload
-            </button>
-          </form>
-          <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
+          <div className="relative">
+            <textarea
+              maxLength={300}
+              value={inputText}
+              onChange={handleChange}
+              placeholder={postType === 'post' ? placeholder : 'Create your vote'}
+              className={`w-full border-2  align-top text-start break-all whitespace-normal h-32 ${
+                postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
+              } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
+            />
+            <div className="absolute bottom-2 right-2">{`${inputText.length}/300`}</div>
+          </div>
           {postType === 'poll' && (
             <div className={'absolute right-5 top-2 text-center'}>
               <span>Expires in:</span>
@@ -404,35 +427,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           )}
         </div>
 
-        <div className="grid items-start  grid-cols-2 md:block gap-4  w-full justify-end">
-          <div className={'flex justify-end items-center gap-4'}>
-            <div className={'relative'}>
-              <div
-                onMouseEnter={() => {
-                  setOpenTooltip(true)
-                }}
-                onMouseLeave={() => setOpenTooltip(false)}
-                onClick={() => setOpenTooltip(!openTooltip)}
-              >
-                <FaCircleInfo />{' '}
-              </div>
-              {openTooltip && (
-                <div
-                  className={
-                    'absolute translate-x-1/2 top-8 w-48 right-0 border-2 border-gray-900\n z-50 bg-white' +
-                    'p-1  bg-white font-bold\n' +
-                    'hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-sm md:text-md'
-                  }
-                >
-                  <p className={'text-red-600 text-center'}>
-                    Note: All posts and interactions are permanently recorded on the Algorand blockchain.
-                  </p>
-                </div>
-              )}
-            </div>
-            <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
-          </div>
-          <div className={'grid justify-items-end md:flex md:justify-end md:mt-4 gap-4 md:items-center'}>
+        <div className="">
+          <div className={'flex-col space-y-2'}>
             {postType === 'poll' && (
               <div className={'flex items-center gap-2'}>
                 <span>Prize pool:</span>
@@ -446,23 +442,76 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
                 />
               </div>
             )}
-            {postTypeProp !== 'poll' && <PostTypeSwitch />}
-            <CoinDropdown
-              usableAsset={usableAsset}
-              handleAssetSelect={handleAssetSelect}
-              setSelectorOpen={setSelectorOpen}
-              selectedAsset={selectedAsset}
-              selectorOpen={selectorOpen}
-            />
-            {activeAccount?.address &&
-            inputText !== '' &&
-            inputText.length <= 300 &&
-            userData.balance[selectedAsset.assetId] > 0.1 &&
-            !loadingSubmit ? (
-              <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
-            ) : (
-              <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
-            )}
+            <div className="flex justify-end items-center gap-4">
+              {postType != 'poll' && (
+                <div className="h-8 md:h-12 flex justify-end w-20 md:w-full">
+                  {!uploadFile1 ? (
+                    <label htmlFor="file_1_input" className="h-full w-16 cursor-pointer">
+                      <div className="flex w-8 md:w-12 h-full items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
+                        <FaPhotoFilm />
+                      </div>{' '}
+                    </label>
+                  ) : (
+                    <img src={uploadFile1Url} />
+                  )}
+
+                  <input onChange={handleFile} type="file" className="hidden" id="file_1_input" name="file_1_input" />
+                  <label htmlFor="file_1_input" className="h-full w-16 cursor-pointer">
+                    <div className="flex w-8 md:w-12 h-full items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
+                      <FaPhotoFilm />
+                    </div>{' '}
+                  </label>
+                  <input onChange={handleFile} type="file" className="hidden" id="file_1_input" name="file_1_input" />
+                </div>
+              )}
+
+              {postTypeProp !== 'poll' && <PostTypeSwitch />}
+              <CoinDropdown
+                usableAsset={usableAsset}
+                handleAssetSelect={handleAssetSelect}
+                setSelectorOpen={setSelectorOpen}
+                selectedAsset={selectedAsset}
+                selectorOpen={selectorOpen}
+              />
+            </div>
+            <div className="flex w-full justify-end gap-4">
+              <div className={'flex justify-end items-center gap-4'}>
+                <div className={'relative'}>
+                  <div
+                    onMouseEnter={() => {
+                      setOpenTooltip(true)
+                    }}
+                    onMouseLeave={() => setOpenTooltip(false)}
+                    onClick={() => setOpenTooltip(!openTooltip)}
+                  >
+                    <FaCircleInfo />{' '}
+                  </div>
+                  {openTooltip && (
+                    <div
+                      className={
+                        'absolute translate-x-1/2 top-8 w-48 right-0 border-2 border-gray-900\n z-50 bg-white' +
+                        'p-1  bg-white font-bold\n' +
+                        'hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-sm md:text-md'
+                      }
+                    >
+                      <p className={'text-red-600 text-center'}>
+                        Note: All posts and interactions are permanently recorded on the Algorand blockchain.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {activeAccount?.address &&
+              inputText !== '' &&
+              inputText.length <= 300 &&
+              userData.balance[selectedAsset.assetId] > 0.1 &&
+              !loadingSubmit ? (
+                <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
+              ) : (
+                <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
+              )}
+              <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
+            </div>
           </div>
         </div>
       </div>
