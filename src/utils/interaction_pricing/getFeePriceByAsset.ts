@@ -33,8 +33,12 @@ export const getFeePriceByAsset = async (assetId: number, decimals: number, type
 
   //FIxin fee bugs
   const a200Id = 1682662165
+  const oraId = 1284444444
+
   if (assetId === a200Id) {
     return feePrice / 1000
+  } else if (assetId === oraId) {
+    return feePrice * 100
   } else {
     return feePrice
   }
