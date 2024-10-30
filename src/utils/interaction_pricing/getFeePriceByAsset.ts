@@ -25,11 +25,17 @@ export const getFeePriceByAsset = async (assetId: number, decimals: number, type
 
   const { data } = await axios.get(`https://free-api.vestige.fi/asset/${assetId}/price`)
 
+  console.log('data', data, 'decimals', decimals)
+
   let assetUsdPrice = data['USD']
 
-  if (decimals == 3) assetUsdPrice = assetUsdPrice * 1000
+  const feePrice = (basePrice * type) / assetUsdPrice
 
-  const feePrice = (basePrice / assetUsdPrice) * type
-
-  return feePrice
+  //FIxin fee bugs
+  const a200Id = 1682662165
+  if (assetId === a200Id) {
+    return feePrice / 1000
+  } else {
+    return feePrice
+  }
 }
