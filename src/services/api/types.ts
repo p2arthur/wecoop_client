@@ -111,6 +111,10 @@ export interface Reply {
   nfd?: string
   likes: Like[]
   replies: Reply[]
+  file_1_cid?: string
+  file_1_format?: string
+  file_2_cid?: string
+  file_2_format?: string
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number | null
   isTopPost?: boolean

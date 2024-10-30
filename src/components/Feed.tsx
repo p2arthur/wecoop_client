@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FaArrowUp, FaEye, FaEyeSlash } from 'react-icons/fa'
 import { Daum } from '../services/api/types'
-import FilePostCard from './file-post/FilePostCard'
 import LoaderSpinner from './LoaderSpinner'
 import VoteCard from './PollCard'
 import PostCard from './PostCard'
@@ -100,9 +99,9 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
       {paginatedPosts &&
         paginatedPosts.length > 0 &&
         paginatedPosts.map((post, index) =>
-          post.type === 'post' ? (
-            <PostCard key={index} handleNewReply={handleNewReply} post={post} />
-          ) : post.type === 'poll' ? (
+          post.type === 'post' || post.type === 'filepost' ? (
+            <PostCard key={index} imagesVisible={viewImages} handleNewReply={handleNewReply} post={post} />
+          ) : (
             <VoteCard
               type={type === 'poll' ? 'poll' : 'feed'}
               key={index}
@@ -117,8 +116,6 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
                 ...post,
               }}
             />
-          ) : (
-            <FilePostCard imagesVisible={viewImages} key={index} handleNewReply={handleNewReply} post={post} />
           ),
         )}
 

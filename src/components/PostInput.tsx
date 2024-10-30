@@ -25,6 +25,7 @@ import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
 import { pinToIpfs } from '../utils/upload-image/pinToIpfs'
 import { PostTypeSwitch } from './PostTypeSwitch'
+import { FileUploaded } from './FileUploaded'
 
 //----------
 
@@ -71,17 +72,18 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const { mutate: createPost, isSuccess: isSuccessCreatePost } = useCreatePost()
   const [loadingSubmit, setLoadingSubmit] = useState(false)
 
-  //FIle upload
-  const [uploadFile1, setUploadFile1] = useState<File>()
-  const [uploadFile1Url, setUploadFile1Url] = useState<string>('')
-  const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files) return
+  const [isDraggingWithImage, setIsDraggingWithImage] = useState(false)
 
-    const file = event.target.files[0]
-    setUploadFile1(file)
+  //FIle upload
+  const [uploadFile, setUploadFile] = useState<File>()
+  const [uploadFileUrl, setUploadFileUrl] = useState<string>('')
+  const handleFile = (file: File) => {
+    if (!file) return
+
+    setUploadFile(file)
 
     const fileUrl = URL.createObjectURL(file)
-    setUploadFile1Url(fileUrl)
+    setUploadFileUrl(fileUrl)
   }
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
@@ -228,16 +230,16 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     }
   }
 
-  const handleCrustUpload = async () => {
-    const response = uploadFile1!
+  const handleCrustUpload = async (country: string) => {
+    const response = uploadFile!
 
     try {
       const filePostBackend = {
         text: inputText,
         creator_address: activeAccount?.address!,
         timestamp: Math.floor(new Date().getTime() / 1000),
-        country: 'CA',
-        assetId: 1,
+        country: country,
+        assetId: usableAsset.assetId,
         file_1_cid: '',
         file_1_format: 'png',
       }
@@ -245,9 +247,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       const filePostFrontend: FilePost = {
         text: inputText,
         creator_address: activeAccount?.address!,
-        timestamp: new Date(),
-        country: 'CA',
-        assetId: 1,
+        timestamp: Math.floor(new Date().getTime() / 1000),
+        country: country,
+        assetId: usableAsset.assetId,
         file_1_cid: '',
         file_1_format: 'png',
         type: 'post',
@@ -260,6 +262,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       console.log('filePost front end', filePostFrontend)
 
       handleAddNewPost(filePostFrontend)
+      setInputText('')
+      setUploadFile(undefined)
+      setUploadFileUrl('')
     } catch (error) {
       console.error(error)
     }
@@ -283,9 +288,10 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       assetId: usableAsset.assetId,
     }
 
-    if (uploadFile1) {
+    if (uploadFile) {
       try {
-        handleCrustUpload()
+        handleCrustUpload(country)
+        return
       } catch (error) {
         throw Error
       }
@@ -383,6 +389,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
       handleDeleteLoadingPost('loading_id')
       setLoadingSubmit(false)
+      setInputText('')
     } catch (error) {
       console.error(error)
       setTimeout(() => {
@@ -408,9 +415,28 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
               value={inputText}
               onChange={handleChange}
               placeholder={postType === 'post' ? placeholder : 'Create your vote'}
-              className={`w-full border-2  align-top text-start break-all whitespace-normal h-32 ${
+              className={`w-full  border-2  align-top text-start break-all whitespace-normal h-32 ${
                 postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
-              } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
+              }
+              ${isDraggingWithImage && 'border-dashed border-4 dark:border-gray-600 border-gray-900'}
+              resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
+              onDragOver={(e) => {
+                e.preventDefault()
+
+                setIsDraggingWithImage(true)
+              }} // Permite o arrasto
+              onDragLeave={(e) => {
+                e.preventDefault()
+                setIsDraggingWithImage(false)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                setIsDraggingWithImage(false)
+                console.log('e.dataTransfer.files', e.dataTransfer.files)
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                  handleFile(e.dataTransfer.files[0]) // Chama handleFile com o arquivo arrastado
+                }
+              }}
             />
             <div className="absolute bottom-2 right-2">{`${inputText.length}/300`}</div>
           </div>
@@ -427,6 +453,16 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           )}
         </div>
 
+        {uploadFile && (
+          <FileUploaded
+            url={uploadFileUrl}
+            handleRemoveFile={() => {
+              setUploadFile(undefined)
+              setUploadFileUrl('')
+            }}
+          />
+        )}
+
         <div className="">
           <div className={'flex-col space-y-2'}>
             {postType === 'poll' && (
@@ -442,30 +478,35 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
                 />
               </div>
             )}
-            <div className="flex justify-end items-center gap-4">
-              {postType != 'poll' && (
-                <div className="h-8 md:h-12 flex justify-end w-20 md:w-full">
-                  {!uploadFile1 ? (
-                    <label htmlFor="file_1_input" className="h-full w-16 cursor-pointer">
-                      <div className="flex w-8 md:w-12 h-full items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
-                        <FaPhotoFilm />
-                      </div>{' '}
-                    </label>
-                  ) : (
-                    <img src={uploadFile1Url} />
-                  )}
-
-                  <input onChange={handleFile} type="file" className="hidden" id="file_1_input" name="file_1_input" />
-                  <label htmlFor="file_1_input" className="h-full w-16 cursor-pointer">
-                    <div className="flex w-8 md:w-12 h-full items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
-                      <FaPhotoFilm />
-                    </div>{' '}
-                  </label>
-                  <input onChange={handleFile} type="file" className="hidden" id="file_1_input" name="file_1_input" />
-                </div>
-              )}
-
+            <div className="flex items-center gap-2">
               {postTypeProp !== 'poll' && <PostTypeSwitch />}
+              {postType != 'poll' && (
+                <>
+                  <input
+                    onChange={(e) => {
+                      handleFile(e.target.files![0])
+                    }}
+                    type="file"
+                    className="hidden"
+                    id="file_1_input"
+                    name="file_1_input"
+                  />
+                  <label htmlFor="file_1_input" className="h-full cursor-pointer">
+                    <div className="flex w-8 md:w-8 md:h-8 h-full cursor-pointer items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
+                      <FaPhotoFilm />
+                    </div>
+                  </label>
+                  <input
+                    onChange={(e) => {
+                      handleFile(e.target.files![0])
+                    }}
+                    type="file"
+                    className="hidden"
+                    id="file_1_input"
+                    name="file_1_input"
+                  />
+                </>
+              )}
               <CoinDropdown
                 usableAsset={usableAsset}
                 handleAssetSelect={handleAssetSelect}

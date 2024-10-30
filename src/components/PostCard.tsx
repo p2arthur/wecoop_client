@@ -3,7 +3,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
-import { FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
+import { FaMagnifyingGlass, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
 import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
@@ -16,7 +16,7 @@ import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useCreateLike, useCreateReply } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
-import { Daum, FilePost, Reply as IReply, User } from '../services/api/types'
+import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
@@ -24,9 +24,10 @@ import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
 
 interface PostPropsInterface {
-  post: Daum | IReply | FilePost
+  post: Daum | IReply
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
+  imagesVisible: boolean
 }
 
 interface PostInputPropsInterface {
@@ -75,7 +76,7 @@ export const handleTextPost = (text: string) => {
   })
 }
 
-const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterface) => {
+const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: PostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
   const { activeAccount } = useWallet()
@@ -225,8 +226,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
         ) : (
           <div
             onClick={handleGoToPostPage}
-            // TODO add isTopPost
-            // post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900 dark:border-gray-300/30'
             className={`flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer bg-white dark:bg-gray-900`}
           >
             <div className="flex items-center justify-between">
@@ -237,7 +236,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
                     {userData?.nfd?.name ? userData?.nfd?.name.replace('.algo', '').toUpperCase() : ellipseAddress(post.creator_address)}{' '}
-                    {<img />}
                   </h2>
                 </a>
               </div>
@@ -256,7 +254,20 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
 
             <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
-              <div className="w-full py-3 "></div>
+
+              {post.file_1_cid ? (
+                <div className="relative flex  py-3">
+                  <div
+                    className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${
+                      imagesVisible ? 'hidden' : ''
+                    }`}
+                  >
+                    <p>View image</p>
+                    <FaMagnifyingGlass />
+                  </div>
+                  <img className="w-[400px] h-auto rounded-2xl" src={`https://ipfs.algonode.xyz/ipfs/${post.file_1_cid}`} />
+                </div>
+              ) : null}
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
                   <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} />
@@ -307,7 +318,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply }: PostPropsInterf
                       <p className="text-center">{post.country}</p>
                     </div>
                   ) : null}
-                  <p className="text-center">{handleTimestamp()}</p>
+                  <p className="text-center text-[12px]">{handleTimestamp()}</p>
                 </div>
               </div>
 
