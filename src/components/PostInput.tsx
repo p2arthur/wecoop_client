@@ -24,8 +24,8 @@ import { useCreatePost } from '../services/api/Posts'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
 import { pinToIpfs } from '../utils/upload-image/pinToIpfs'
-import { PostTypeSwitch } from './PostTypeSwitch'
 import { FileUploaded } from './FileUploaded'
+import { PostTypeSwitch } from './PostTypeSwitch'
 
 //----------
 
@@ -99,6 +99,23 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     setPrizePool(Number(prizePool))
   }
 
+  const defineAction = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    let formAction: Promise<void>
+    console.log(postType)
+
+    if (postType === 'poll' && !uploadFile) {
+      formAction = handleCreatePoll()
+    }
+    if (postType === 'post' && !uploadFile) {
+      formAction = handleSubmitPost()
+    }
+    if (uploadFile) {
+      formAction = handleCreateFilePost()
+    }
+  }
+
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -144,10 +161,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     setInputText(text)
   }
 
-  const handleCreatePoll = async (event: React.FormEvent) => {
+  const handleCreatePoll = async () => {
     try {
       setLoadingSubmit(true)
-      event.preventDefault()
       toast('Creating a poll - processing and creating your wecoop poll', {
         position: 'top-right',
         theme: 'dark',
@@ -270,8 +286,13 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     }
   }
 
-  const handleSubmitPost = async (event: React.FormEvent) => {
-    event.preventDefault()
+  const handleCreateFilePost = async () => {
+    const country = await getUserCountry()
+
+    await handleCrustUpload(country)
+  }
+
+  const handleSubmitPost = async () => {
     setLoadingSubmit(true)
     const country = await getUserCountry()
 
@@ -286,15 +307,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       country,
       likes: [],
       assetId: usableAsset.assetId,
-    }
-
-    if (uploadFile) {
-      try {
-        handleCrustUpload(country)
-        return
-      } catch (error) {
-        throw Error
-      }
     }
 
     try {
@@ -406,7 +418,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   return (
-    <form onSubmit={(e) => (postType === 'post' ? handleSubmitPost(e) : handleCreatePoll(e))}>
+    <form onSubmit={(e) => defineAction(e)}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
           <div className="relative">

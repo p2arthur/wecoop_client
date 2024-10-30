@@ -17,6 +17,7 @@ export enum InteractionPrices {
 }
 
 export enum InteractionMultipliers {
+  FilePost = 4,
   Post = 2,
   Reply = 1.5,
   Like = 1,
