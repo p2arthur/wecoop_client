@@ -1,7 +1,10 @@
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { Fees } from '../enums/Fees'
+import { UsableAssetInterface } from '../context/UsableAsset/UsableAssetContext'
+import { InteractionMultipliers } from '../enums/Fees'
 import { NotePrefix } from '../enums/notePrefix'
+import { getFeePriceByAsset } from '../utils/interaction_pricing/getFeePriceByAsset'
+import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
 import { Transaction } from './Transaction'
 
@@ -10,16 +13,23 @@ interface LikeProps {
   creatorAddress: string
   transactionId: string
   address: string
-  token: number
+  usableAsset: UsableAssetInterface
 }
 
 export class Like {
   constructor(private client: AlgodClient) {}
 
-  public async handlePostLike({ event, creatorAddress, transactionId, address, token }: LikeProps) {
+  public async handlePostLike({ event, creatorAddress, transactionId, address, usableAsset }: LikeProps) {
     const transactionService = new Transaction(this.client)
-    const wecoopFee = Fees.LikeWecoopFee
-    const creatorFee = Fees.LikeUserFee
+
+    // Calculate the fee price based on the asset
+    const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Like)
+
+    // Split the fee by interaction type
+    const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: 'like' })
+
+    const wecoopFee = Math.floor(splitFee.platformFee * 10 ** usableAsset.decimals)
+    const creatorFee = Math.floor(splitFee.creatorFee * 10 ** usableAsset.decimals)
     const wecoopWalletAddress = import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string
 
     event.preventDefault()
@@ -31,7 +41,7 @@ export class Like {
       creatorAddress,
       creatorFee,
       `WeCoop - ${address} just liked your post`,
-      token,
+      usableAsset.assetId,
     )
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]

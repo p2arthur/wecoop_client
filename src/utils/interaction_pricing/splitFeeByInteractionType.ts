@@ -16,8 +16,11 @@ export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterf
       break
 
     case 'like':
+      platformFee = totalFee / 3 // Integer division for platform fee
+      creatorFee = totalFee - platformFee // The remaining goes to creator
+      break
     case 'reply':
-      platformFee = Math.floor(totalFee / 3) // Integer division for platform fee
+      platformFee = totalFee / 3 // Integer division for platform fee
       creatorFee = totalFee - platformFee // The remaining goes to creator
       break
 

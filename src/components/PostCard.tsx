@@ -112,7 +112,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
         creatorAddress: post.creator_address,
         address: activeAccount?.address || '',
         transactionId: post.transaction_id as string,
-        token: usableAsset.assetId,
+        usableAsset: usableAsset,
       })
 
       const signedTransactions = await signTransactions(encodedGroupedTransactions)
