@@ -1,10 +1,18 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
-import { TransactionSigner } from 'algosdk'
-import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
+import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
 import { User } from '../../services/User'
+import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
+import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopFilePostClient } from '../clients/WecoopFilePostClient'
 
-export const createAppClient = (senderAddress: string, signer: TransactionSigner, algod: AlgodClient) => {
+const algodServer = getAlgodConfigFromViteEnvironment().server
+const algodToken = getAlgodConfigFromViteEnvironment().token
+const algodPort = getAlgodConfigFromViteEnvironment().port
+
+const algod = new algosdk.Algodv2(algodToken as AlgodTokenHeader, algodServer, algodPort)
+
+export const createAppClient = (senderAddress: string, signer: TransactionSigner) => {
+  console.log('sender', senderAddress, signer)
   const wecoopFilePostAppId = Number(import.meta.env.VITE_WECOOP_FILEPOST_APP_ID)
 
   const appClient = new WecoopFilePostClient(
@@ -19,20 +27,56 @@ export const createAppClient = (senderAddress: string, signer: TransactionSigner
   return appClient
 }
 
-const createFilePost = async (
-  appClient: WecoopFilePostClient,
+export const createOnChainFilePost = async (
   sender: string,
-  signer: TransactionSigner,
-  amount: number,
-  expires_in: number,
   assetId: number,
-  filePostText: string,
-  filePostId: number,
-  creator_address: string,
-  country: string,
-  depositedAmount: number,
-  activeAccount: User,
   cid: string,
+  signer: TransactionSigner,
+  expires_in?: number,
+  filePostText?: string,
+  filePostId?: number,
+  creator_address?: string,
+  country?: string,
+  depositedAmount?: number,
+  activeAccount?: User,
 ) => {
-  const result = await appClient.createFilePost()
+  const appClient = createAppClient(sender, signer)
+
+  const { appAddress } = await appClient.appClient.getAppReference()
+
+  const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: appAddress,
+    amount: Number(algokit.algos(0.00447)),
+    suggestedParams: await algod.getTransactionParams().do(),
+  })
+
+  // Calculate the fee price based on the asset
+  const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.FilePost)
+
+  const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: appAddress,
+    assetIndex: Number(assetId!),
+    amount: feePrice!,
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+  })
+
+  try {
+    const result = await appClient.createFilePost({
+      mbrTxn,
+      axfer,
+      fileFormat: 'png',
+      country: 'CA',
+      cid,
+      text: 'This is the first ever file post made from the wecoop interface lets see how it goes because its interacting with the contract',
+    })
+
+    console.log('result of interacting with contract', result)
+
+    return result
+  } catch (error) {
+    console.error('result of interacting with contract', error)
+    throw new Error('Error creating file post on contract')
+  }
 }

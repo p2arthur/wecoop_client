@@ -19,6 +19,7 @@ import Counter from './Counter'
 //--------------
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { createOnChainFilePost } from '../contracts/app-calls/filePostMethods'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
@@ -281,6 +282,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       setInputText('')
       setUploadFile(undefined)
       setUploadFileUrl('')
+      return cid
     } catch (error) {
       console.error(error)
     }
@@ -288,8 +290,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
   const handleCreateFilePost = async () => {
     const country = await getUserCountry()
-
-    await handleCrustUpload(country)
+    // const cid = await handleCrustUpload(country)
+    await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, 'cid', signer)
   }
 
   const handleSubmitPost = async () => {
@@ -363,19 +365,16 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         })
       } else {
         // Calculate the fee price based on the asset
-        const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Post)
+        const feePrice = await getFeePriceByAsset(usableAsset.assetId, InteractionMultipliers.Post)
 
         // Split the fee by interaction type
         const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: 'post' })
-
-        // Example calculation to ensure platformFee is used as an integer
-        const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
 
         // Asset transfer transaction (ASA)
         transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
           from: userData.address,
           to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-          amount: finalFeeForTransaction, // Amount of asset to transfer
+          amount: splitFee.platformFee, // Amount of asset to transfer
           assetIndex: usableAsset.assetId, // ASA (Asset ID)
           note: new Uint8Array(Buffer.from(note)), // Encode note
           suggestedParams: suggestedParams, // Use suggested transaction params

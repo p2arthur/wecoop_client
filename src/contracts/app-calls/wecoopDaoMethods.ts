@@ -1,4 +1,5 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
+import { AppCallTransactionResult, AppCallTransactionResultOfType } from '@algorandfoundation/algokit-utils/types/app'
 import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import axios from 'axios'
@@ -6,9 +7,9 @@ import { User } from '../../services/api/types'
 import { captureVoteCard } from '../../utils/captureComponentImage'
 import { getAssetDecimals } from '../../utils/getAssetDecimals'
 import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
+import { splitFeeByInteractionType } from '../../utils/interaction_pricing/splitFeeByInteractionType'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopDaoClient } from '../clients/WecoopDaoClient'
-import { AppCallTransactionResult, AppCallTransactionResultOfType } from '@algorandfoundation/algokit-utils/types/app'
 
 const algodServer = getAlgodConfigFromViteEnvironment().server
 const algodToken = getAlgodConfigFromViteEnvironment().token
@@ -64,14 +65,12 @@ export const makePoll = async (
     assetIndex: assetId,
   })
 
-  const assetDecimals = await getAssetDecimals(algod, assetId)
-
-  const amountToDeposit = await getFeePriceByAsset(assetId, assetDecimals, InteractionMultipliers.CreatePoll)
+  const amountToDeposit = await getFeePriceByAsset(assetId, InteractionMultipliers.CreatePoll)
 
   const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
-    amount: Math.floor(Number(amountToDeposit) * 1000000),
+    amount: amountToDeposit!,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
     assetIndex: assetId,
   })
@@ -146,38 +145,36 @@ export const makeVote = async (
       suggestedParams: suggestedParams,
     })
 
-    const baseVotePrice = await getFeePriceByAsset(asset, assetDecimals, InteractionMultipliers.VotePoll)
-
     const pollDepositMultiplier = 2
-    const pollDepositPrice = Math.floor(baseVotePrice! * pollDepositMultiplier * 10 ** assetDecimals)
+    // Calculate the fee price based on the asset
+    const feePrice = await getFeePriceByAsset(asset, InteractionMultipliers.CreatePoll)
 
     const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
       suggestedParams: suggestedParams,
       to: appAddress,
-      amount: pollDepositPrice,
+      amount: feePrice!,
       assetIndex: asset,
     })
 
-    const platformMultiplier = 1
-    const platformFeePrice = Math.floor(baseVotePrice! * platformMultiplier * 10 ** assetDecimals)
+    const fees = splitFeeByInteractionType({ totalFee: feePrice!, type: 'create-poll' })
 
+    console.log('fee price ', fees)
     const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
       suggestedParams: suggestedParams,
       to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
-      amount: platformFeePrice!,
+      amount: fees.platformFee,
       assetIndex: asset,
     })
 
     const pollCreatorMultiplier = 2
-    const pollCreatorPrice = Math.floor(baseVotePrice! * 10 ** pollCreatorMultiplier)
 
     const pollCreatorPaymentTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
       suggestedParams: suggestedParams,
       to: pollCreator,
-      amount: pollCreatorPrice,
+      amount: fees.creatorFee,
       assetIndex: asset,
     })
 
