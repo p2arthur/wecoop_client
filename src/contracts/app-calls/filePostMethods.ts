@@ -1,6 +1,5 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
-import { User } from '../../services/User'
 import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
 import { WecoopFilePostClient } from '../clients/WecoopFilePostClient'
@@ -32,13 +31,8 @@ export const createOnChainFilePost = async (
   assetId: number,
   cid: string,
   signer: TransactionSigner,
-  expires_in?: number,
-  filePostText?: string,
-  filePostId?: number,
-  creator_address?: string,
-  country?: string,
-  depositedAmount?: number,
-  activeAccount?: User,
+  country: string,
+  filePostText: string,
 ) => {
   const appClient = createAppClient(sender, signer)
 
@@ -67,9 +61,9 @@ export const createOnChainFilePost = async (
       mbrTxn,
       axfer,
       fileFormat: 'png',
-      country: 'CA',
+      country: country,
       cid,
-      text: 'This is the first ever file post made from the wecoop interface lets see how it goes because its interacting with the contract',
+      text: filePostText,
     })
 
     console.log('result of interacting with contract', result)

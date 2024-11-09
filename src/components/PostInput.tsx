@@ -291,7 +291,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const handleCreateFilePost = async () => {
     const country = await getUserCountry()
     // const cid = await handleCrustUpload(country)
-    await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, 'cid', signer)
+    await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, 'cid', signer, country, inputText), 
   }
 
   const handleSubmitPost = async () => {
