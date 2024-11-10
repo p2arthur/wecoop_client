@@ -89,11 +89,6 @@ export async function pinToIpfs(
 
     const filePostWithCid = Object.assign(filePost, { file_1_cid: cid })
 
-    const { data: filePostData } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/create-file-post`, filePost)
-    console.log('Order placed successfully.')
-
-    console.log('posted to db', filePostData)
-
     return cid
   } catch (error) {
     console.error('An error occurred:', error)

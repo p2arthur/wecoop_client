@@ -147,7 +147,7 @@ export const makeVote = async (
 
     const pollDepositMultiplier = 2
     // Calculate the fee price based on the asset
-    const feePrice = await getFeePriceByAsset(asset, InteractionMultipliers.CreatePoll)
+    const feePrice = await getFeePriceByAsset(asset, InteractionMultipliers.VotePoll)
 
     const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,

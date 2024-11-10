@@ -44,6 +44,6 @@ export const getFeePriceByAsset = async (assetId: number, type: InteractionMulti
   } else if (assetId === oraId) {
     return Math.floor(feePrice * 100)
   } else {
-    return Math.floor(feePrice) * 10 ** decimals
+    return Math.floor(feePrice) * 10 ** decimals!
   }
 }

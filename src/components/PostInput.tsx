@@ -18,6 +18,7 @@ import Counter from './Counter'
 
 //--------------
 import { useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { toast } from 'react-toastify'
 import { createOnChainFilePost } from '../contracts/app-calls/filePostMethods'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
@@ -275,14 +276,11 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       const cid = await pinToIpfs('mainnet', algod, response, { addr: activeAccount?.address!, signer }, filePostBackend)
 
       Object.assign(filePostFrontend, { file_1_cid: cid })
+      Object.assign(filePostBackend, { file_1_cid: cid })
 
       console.log('filePost front end', filePostFrontend)
 
-      handleAddNewPost(filePostFrontend)
-      setInputText('')
-      setUploadFile(undefined)
-      setUploadFileUrl('')
-      return cid
+      return filePostBackend
     } catch (error) {
       console.error(error)
     }
@@ -290,8 +288,34 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
   const handleCreateFilePost = async () => {
     const country = await getUserCountry()
-    // const cid = await handleCrustUpload(country)
-    await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, 'cid', signer, country, inputText), 
+    try {
+      const filePost = await handleCrustUpload(country)
+
+      const filePostFront = { ...filePost, type: 'post' }
+
+      await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, filePost?.file_1_cid!, signer, country, inputText)
+      const { data: filePostData } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/create-file-post`, filePost)
+      console.log('Order placed successfully.', filePostData)
+      handleAddNewPost(filePostFront)
+      setInputText('')
+      setUploadFile(undefined)
+      setUploadFileUrl('')
+
+      toast('Created post with image successfully', {
+        position: 'bottom-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+    } catch (error) {
+      toast('Failed to create file post', {
+        position: 'bottom-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+      console.error('error', error)
+    }
   }
 
   const handleSubmitPost = async () => {
