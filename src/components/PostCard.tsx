@@ -23,6 +23,7 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
+import ImageWithLoading from './ImageWithLoading/ImageWithLoading'
 
 interface PostPropsInterface {
   post: Daum | IReply
@@ -141,6 +142,10 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
     } catch (error) {
       console.error('error liking file post', error)
     }
+  }
+
+  const handleFilePostReply = async () => {
+    console.log('post', post)
   }
 
   const defineLikeAction = async (event: React.FormEvent) => {
@@ -300,7 +305,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                     <p>View image</p>
                     <FaMagnifyingGlass />
                   </div>
-                  <img className="w-[400px] h-auto rounded-2xl" src={`https://ipfs.algonode.xyz/ipfs/${post.file_1_cid}`} />
+                  <ImageWithLoading cid={post.file_1_cid} />
                 </div>
               ) : null}
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
@@ -394,7 +399,9 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                       handleChange={(e) => setReplyText(e.target.value)}
                       placeholder={'Reply message...'}
                       value={replyText}
-                      handleSubmit={handlePostReply}
+                      handleSubmit={() => {
+                        !post.file_1_cid ? handlePostReply() : handleFilePostReply()
+                      }}
                     />
                   )}
                 </div>
