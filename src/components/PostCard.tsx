@@ -135,8 +135,12 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
     event.preventDefault()
 
     console.log('post id', post.filepost_id)
-
-    const result = likeOnChainFilePost(activeAccount?.address!, usableAsset.assetId, signer, Number(post.filepost_id!))
+    try {
+      const result = await likeOnChainFilePost(activeAccount?.address!, usableAsset.assetId, signer, post)
+      console.log('result of liking a file post', result)
+    } catch (error) {
+      console.error('error liking file post', error)
+    }
   }
 
   const defineLikeAction = async (event: React.FormEvent) => {

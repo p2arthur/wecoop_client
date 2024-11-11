@@ -1,6 +1,7 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
 import axios from 'axios'
+import { Daum } from '../../services/api/types'
 import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
 import { splitFeeByInteractionType } from '../../utils/interaction_pricing/splitFeeByInteractionType'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
@@ -90,7 +91,7 @@ export const likeOnChainFilePost = async (
   assetId: number,
 
   signer: TransactionSigner,
-  postId: number,
+  post: Daum,
 ) => {
   const appClient = createAppClient(sender, signer)
 
@@ -111,7 +112,7 @@ export const likeOnChainFilePost = async (
   const platformAlgoFee = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: sender,
     to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
-    amount: 100,
+    amount: Number(algokit.algos(0.1)),
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
 
@@ -125,11 +126,13 @@ export const likeOnChainFilePost = async (
 
   const creatorFee = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
-    to: appAddress,
+    to: post.creator_address,
     assetIndex: Number(assetId!),
     amount: splitFee.creatorFee!,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
+
+  console.log('post', post)
 
   try {
     const result = await appClient.likeFilePost({
@@ -137,7 +140,7 @@ export const likeOnChainFilePost = async (
       platformAlgoFeeTxn: platformAlgoFee,
       creatorPayTxn: creatorFee,
       platformCommunityFeeTxn: platformFee,
-      filePostId: [postId],
+      filePostId: [post.filepost_id!],
     })
 
     console.log('result of liking a file post', result)
