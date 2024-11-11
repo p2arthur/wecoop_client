@@ -293,9 +293,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
       const filePostFront = { ...filePost, type: 'post' }
 
-      await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, filePost?.file_1_cid!, signer, country, inputText)
-      const { data: filePostData } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/create-file-post`, filePost)
-      console.log('Order placed successfully.', filePostData)
+      await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, filePost?.file_1_cid!, signer, country, filePost)
       handleAddNewPost(filePostFront)
       setInputText('')
       setUploadFile(undefined)

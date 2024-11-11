@@ -1,5 +1,6 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import algosdk, { AlgodTokenHeader, TransactionSigner } from 'algosdk'
+import axios from 'axios'
 import { getFeePriceByAsset, InteractionMultipliers } from '../../utils/interaction_pricing/getFeePriceByAsset'
 import { splitFeeByInteractionType } from '../../utils/interaction_pricing/splitFeeByInteractionType'
 import { getAlgodConfigFromViteEnvironment } from '../../utils/network/getAlgoClientConfigs'
@@ -33,9 +34,11 @@ export const createOnChainFilePost = async (
   cid: string,
   signer: TransactionSigner,
   country: string,
-  filePostText: string,
+  filePost: any,
 ) => {
   const appClient = createAppClient(sender, signer)
+
+  const { totalFilePosts } = await appClient.appClient.getGlobalState()
 
   const { appAddress } = await appClient.appClient.getAppReference()
 
@@ -57,6 +60,10 @@ export const createOnChainFilePost = async (
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
 
+  const filePostWithId = { ...filePost, filepost_id: Number(totalFilePosts.value) + 1 }
+
+  console.log('filepostwithid', filePostWithId)
+
   try {
     const result = await appClient.createFilePost({
       mbrTxn,
@@ -64,8 +71,10 @@ export const createOnChainFilePost = async (
       fileFormat: 'png',
       country: country,
       cid,
-      text: filePostText,
+      text: filePost.text,
     })
+
+    const { data: filePostData } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/create-file-post`, filePostWithId)
 
     console.log('result of interacting with contract', result)
 
@@ -76,7 +85,7 @@ export const createOnChainFilePost = async (
   }
 }
 
-const likeOnChainFilePost = async (
+export const likeOnChainFilePost = async (
   sender: string,
   assetId: number,
 
@@ -113,6 +122,7 @@ const likeOnChainFilePost = async (
     amount: splitFee.platformFee!,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
+
   const creatorFee = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: appAddress,

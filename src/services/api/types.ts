@@ -181,6 +181,7 @@ export interface Daum {
   file_2_format?: string
   replies?: Reply[]
   likes?: Like[]
+  filepost_id?: number
 }
 
 export interface Id {
@@ -207,6 +208,7 @@ export interface Reply {
   timestamp: number | null
   country: string
   assetId: number | null
+  filepost_id: number
 }
 
 export interface Id3 {

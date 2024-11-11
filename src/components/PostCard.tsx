@@ -13,6 +13,7 @@ import { Reply } from '../services/Reply'
 
 import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
+import { likeOnChainFilePost } from '../contracts/app-calls/filePostMethods'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useCreateLike, useCreateReply } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
@@ -79,7 +80,7 @@ export const handleTextPost = (text: string) => {
 const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: PostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
-  const { activeAccount } = useWallet()
+  const { activeAccount, signer } = useWallet()
   const { sendTransactions, signTransactions } = useWallet()
   const { data: userData } = useGetUserInfo(post.creator_address)
   const { algod } = useOutletContext() as PostInputPropsInterface
@@ -130,16 +131,19 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
     }
   }
 
-  const handleFilePostLike = async () => {
-    console.log('post', post)
-    console.log('file post like')
+  const handleFilePostLike = async (event: React.FormEvent) => {
+    event.preventDefault()
+
+    console.log('post id', post.filepost_id)
+
+    const result = likeOnChainFilePost(activeAccount?.address!, usableAsset.assetId, signer, Number(post.filepost_id!))
   }
 
   const defineLikeAction = async (event: React.FormEvent) => {
     let action
 
     if (post.file_1_cid) {
-      await handleFilePostLike()
+      await handleFilePostLike(event)
     } else if (!post.file_1_cid) {
       await handleDefaultPostLike(event)
     }
