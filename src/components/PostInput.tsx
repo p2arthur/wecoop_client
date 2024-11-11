@@ -18,7 +18,6 @@ import Counter from './Counter'
 
 //--------------
 import { useQueryClient } from '@tanstack/react-query'
-import axios from 'axios'
 import { toast } from 'react-toastify'
 import { createOnChainFilePost } from '../contracts/app-calls/filePostMethods'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
@@ -73,6 +72,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
   const { mutate: createPost, isSuccess: isSuccessCreatePost } = useCreatePost()
   const [loadingSubmit, setLoadingSubmit] = useState(false)
+  const [loadingText, setLoadingText] = useState('')
 
   const [isDraggingWithImage, setIsDraggingWithImage] = useState(false)
 
@@ -249,9 +249,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   const handleCrustUpload = async (country: string) => {
-    const response = uploadFile!
-
     try {
+      const response = uploadFile!
+
       const filePostBackend = {
         text: inputText,
         creator_address: activeAccount?.address!,
@@ -273,31 +273,47 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         type: 'post',
       }
 
-      const cid = await pinToIpfs('mainnet', algod, response, { addr: activeAccount?.address!, signer }, filePostBackend)
+      const cid = await pinToIpfs(
+        'mainnet',
+        algod,
+        response,
+        {
+          addr: activeAccount?.address!,
+          signer,
+        },
+        filePostBackend,
+        (text) => setLoadingText(text),
+      )
 
       Object.assign(filePostFrontend, { file_1_cid: cid })
       Object.assign(filePostBackend, { file_1_cid: cid })
 
-      console.log('filePost front end', filePostFrontend)
-
       return filePostBackend
     } catch (error) {
       console.error(error)
+      setLoadingText('Failed to upload image to Crust Network')
+      return error
     }
   }
 
   const handleCreateFilePost = async () => {
     const country = await getUserCountry()
     try {
+      setLoadingText('Uploading image to IPFS Network...')
+      setLoadingSubmit(true)
       const filePost = await handleCrustUpload(country)
 
       const filePostFront = { ...filePost, type: 'post' }
 
+      setLoadingText('Creating file post on-chain, accept all transactions...')
       await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, filePost?.file_1_cid!, signer, country, filePost)
+      setLoadingText('File post created successfully...')
       handleAddNewPost(filePostFront)
+      setLoadingSubmit(false)
       setInputText('')
       setUploadFile(undefined)
       setUploadFileUrl('')
+      setLoadingText('')
 
       toast('Created post with image successfully', {
         position: 'bottom-right',
@@ -312,6 +328,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         bodyClassName: 'grow-font-size',
         progressClassName: 'fancy-progress-bar',
       })
+      setLoadingText('Failed to create file post')
       console.error('error', error)
     }
   }
@@ -487,13 +504,16 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         </div>
 
         {uploadFile && (
-          <FileUploaded
-            url={uploadFileUrl}
-            handleRemoveFile={() => {
-              setUploadFile(undefined)
-              setUploadFileUrl('')
-            }}
-          />
+          <>
+            <FileUploaded
+              url={uploadFileUrl}
+              loadingText={loadingText}
+              handleRemoveFile={() => {
+                setUploadFile(undefined)
+                setUploadFileUrl('')
+              }}
+            />
+          </>
         )}
 
         <div className="">

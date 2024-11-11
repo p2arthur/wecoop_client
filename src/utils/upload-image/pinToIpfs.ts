@@ -4,6 +4,7 @@ import algosdk from 'algosdk'
 import axios from 'axios'
 import { StorageOrderClient } from '../../contracts/image-upload/StorageOrderClient'
 import { FilePost } from '../../services/api/types'
+import { toast } from 'react-toastify'
 
 async function getPrice(algod: algosdk.Algodv2, appClient: StorageOrderClient, size: number, isPermanent: boolean = false) {
   const result = await (await appClient.compose().getPrice({ size, is_permanent: isPermanent }).atc()).simulate(algod)
@@ -55,10 +56,11 @@ export async function pinToIpfs(
   file: File,
   account: SendTransactionFrom,
   filePost: FilePost,
+  handleLoadingText: (text: string) => void,
 ) {
   algokit.Config.configure({ populateAppCallResources: true })
 
-  console.log('pinning')
+  handleLoadingText('Pinning to ipfs...')
 
   const appClient = new StorageOrderClient(
     {
@@ -76,15 +78,14 @@ export async function pinToIpfs(
     const { data } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ipfs-crust-factory/ipfs_factory`, formData)
 
     const { cid, size } = data
-    console.log('ipfs data', data)
 
     if (!cid || !size) return
 
-    console.log('Getting price...')
+    handleLoadingText('Getting price...')
     const price = await getPrice(algod, appClient, size)
-    console.log(`Price for storage: ${price} microAlgos`)
+    toast(`Price for storage: ${price} microAlgos`)
 
-    console.log('Placing order...')
+    handleLoadingText('Placing order...')
     await placeOrder(algod, appClient, account, cid, size, price, false)
 
     const filePostWithCid = Object.assign(filePost, { file_1_cid: cid })
