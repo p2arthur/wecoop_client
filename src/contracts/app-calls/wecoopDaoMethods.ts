@@ -132,6 +132,7 @@ export const makeVote = async (
   asset: number,
   inFavor: boolean,
   pollCreator: string,
+  pollDepositPrice: number,
 ): Promise<WithdrawPollShareResult> => {
   try {
     const { appAddress } = await appClient.appClient.getAppReference()
@@ -157,7 +158,7 @@ export const makeVote = async (
       assetIndex: asset,
     })
 
-    const fees = splitFeeByInteractionType({ totalFee: feePrice!, type: 'create-poll' })
+    const fees = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.CreatePoll })
 
     console.log('fee price ', fees)
     const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
