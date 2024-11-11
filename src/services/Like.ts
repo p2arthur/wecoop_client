@@ -1,9 +1,8 @@
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { UsableAssetInterface } from '../context/UsableAsset/UsableAssetContext'
-import { InteractionMultipliers } from '../enums/Fees'
 import { NotePrefix } from '../enums/notePrefix'
-import { getFeePriceByAsset } from '../utils/interaction_pricing/getFeePriceByAsset'
+import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
 import { Transaction } from './Transaction'
@@ -23,23 +22,26 @@ export class Like {
     const transactionService = new Transaction(this.client)
 
     // Calculate the fee price based on the asset
-    const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Like)
+    const feePrice = await getFeePriceByAsset(usableAsset.assetId, InteractionMultipliers.Post)
 
     // Split the fee by interaction type
-    const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: 'like' })
+    const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.Like })
 
-    const wecoopFee = Math.floor(splitFee.platformFee * 10 ** usableAsset.decimals)
-    const creatorFee = Math.floor(splitFee.creatorFee * 10 ** usableAsset.decimals)
     const wecoopWalletAddress = import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string
 
     event.preventDefault()
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopLike}${country}:${transactionId}`
-    const scoopFeeTransaction = await transactionService.createTransaction(address, wecoopWalletAddress, wecoopFee, note)
+    const scoopFeeTransaction = await transactionService.createTransaction(
+      address,
+      wecoopWalletAddress,
+      Math.floor(splitFee.platformFee),
+      note,
+    )
     const postCreatorFee = await transactionService.createTransaction(
       address,
       creatorAddress,
-      creatorFee,
+      Math.floor(splitFee.creatorFee),
       `WeCoop - ${address} just liked your post`,
       usableAsset.assetId,
     )

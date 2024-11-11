@@ -8,6 +8,7 @@ export enum InteractionMultipliers {
   CreatePoll = 10,
   VotePoll = 0.5,
   FilePost = 11,
+  FilePostLike = 2,
 }
 
 export interface InteractionFee {
@@ -33,7 +34,9 @@ export const getFeePriceByAsset = async (assetId: number, type: InteractionMulti
 
   const assetUsdPrice = data['USD']
 
-  const feePrice = (basePrice * type) / assetUsdPrice
+  console.log('basePrice', basePrice, assetUsdPrice, 'type', type)
+
+  const feePrice = (basePrice / assetUsdPrice) * type
 
   //FIxin fee bugs
   const a200Id = 1682662165

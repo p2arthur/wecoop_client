@@ -103,10 +103,10 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
-  const handlePostLike = async (event: React.FormEvent) => {
-    try {
-      setIsLoadingLike(true)
+  const handleDefaultPostLike = async (event: React.FormEvent) => {
+    console.log('default post like')
 
+    try {
       const encodedGroupedTransactions = await likeService.handlePostLike({
         event,
         creatorAddress: post.creator_address,
@@ -125,6 +125,33 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
         transaction_id: like.id,
         post_transaction_id: post.transaction_id as string,
       })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleFilePostLike = async () => {
+    console.log('post', post)
+    console.log('file post like')
+  }
+
+  const defineLikeAction = async (event: React.FormEvent) => {
+    let action
+
+    if (post.file_1_cid) {
+      await handleFilePostLike()
+    } else if (!post.file_1_cid) {
+      await handleDefaultPostLike(event)
+    }
+
+    return action
+  }
+
+  const handlePostLike = async (event: React.FormEvent) => {
+    try {
+      setIsLoadingLike(true)
+
+      const likeAction = defineLikeAction(event)
 
       setIsLoadingLike(false)
     } catch (error) {
@@ -332,9 +359,10 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                       .sort((a, b) => {
                         return a.timestamp! - b.timestamp!
                       })
-                      .map((reply) => <PostCard post={reply} variant={'reply'} />)}
+                      .map((reply) => <PostCard imagesVisible={false} post={reply} variant={'reply'} />)}
                   {isLoadingReply && (
                     <PostCard
+                      imagesVisible={false}
                       post={{
                         text: `${encodeURIComponent(replyText)}`,
                         creator_address: userData?.address || '',
