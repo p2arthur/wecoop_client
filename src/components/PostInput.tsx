@@ -392,7 +392,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         const feePrice = await getFeePriceByAsset(usableAsset.assetId, InteractionMultipliers.Post)
 
         // Split the fee by interaction type
-        const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: 'post' })
+        const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.Post })
 
         // Asset transfer transaction (ASA)
         transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
