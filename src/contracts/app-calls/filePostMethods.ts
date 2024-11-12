@@ -145,6 +145,10 @@ export const likeOnChainFilePost = async (
       creatorPayTxn: creatorFee,
     })
 
+    const filePostLikeData = { creator_address: sender, filepost_id: post.filepost_id! }
+
+    await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/like`, filePostLikeData)
+
     console.log('result of liking a file post', result)
   } catch (error) {
     console.error('error creating like', error)
