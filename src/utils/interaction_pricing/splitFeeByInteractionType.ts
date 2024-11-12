@@ -29,7 +29,7 @@ export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterf
   }
 
   return {
-    platformFee,
-    creatorFee,
+    platformFee: Math.floor(platformFee),
+    creatorFee: Math.floor(creatorFee),
   }
 }

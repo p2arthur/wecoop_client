@@ -100,14 +100,14 @@ export const likeOnChainFilePost = async (
   const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: sender,
     to: appAddress,
-    amount: Number(algokit.algos(0.02)),
+    amount: Number(algokit.algos(0.2)),
     suggestedParams: await algod.getTransactionParams().do(),
   })
 
   // Calculate the fee price based on the asset
   const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.FilePost)
 
-  const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.FilePostLike })
+  const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.Like })
 
   const platformAlgoFee = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: sender,
@@ -120,15 +120,17 @@ export const likeOnChainFilePost = async (
     from: sender,
     to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
     assetIndex: Number(assetId!),
-    amount: splitFee.platformFee!,
+    amount: splitFee.platformFee,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
+
+  console.log('assetId', assetId)
 
   const creatorFee = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: post.creator_address,
     assetIndex: Number(assetId!),
-    amount: splitFee.creatorFee!,
+    amount: splitFee.creatorFee,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
 
@@ -137,10 +139,10 @@ export const likeOnChainFilePost = async (
   try {
     const result = await appClient.likeFilePost({
       mbrTxn,
-      platformAlgoFeeTxn: platformAlgoFee,
-      creatorPayTxn: creatorFee,
-      platformCommunityFeeTxn: platformFee,
       filePostId: [post.filepost_id!],
+      platformAlgoFeeTxn: platformAlgoFee,
+      platformCommunityFeeTxn: platformFee,
+      creatorPayTxn: creatorFee,
     })
 
     console.log('result of liking a file post', result)
