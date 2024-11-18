@@ -13,7 +13,7 @@ import { Reply } from '../services/Reply'
 
 import { toast } from 'react-toastify'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
-import { likeOnChainFilePost } from '../contracts/app-calls/filePostMethods'
+import { likeOnChainFilePost, replyOnChainPost } from '../contracts/app-calls/filePostMethods'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { useCreateLike, useCreateReply } from '../services/api/Posts'
 import { useGetUserInfo } from '../services/api/Users'
@@ -21,9 +21,9 @@ import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
+import ImageWithLoading from './ImageWithLoading/ImageWithLoading'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
-import ImageWithLoading from './ImageWithLoading/ImageWithLoading'
 
 interface PostPropsInterface {
   post: Daum | IReply
@@ -145,7 +145,17 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   }
 
   const handleFilePostReply = async () => {
+    const country = await getUserCountry()
+    setUserContry(country)
     console.log('post', post)
+    const result = await replyOnChainPost(
+      activeAccount?.address!,
+      country,
+      usableAsset.assetId!,
+      signer,
+      post,
+      encodeURIComponent(replyText),
+    )
   }
 
   const defineLikeAction = async (event: React.FormEvent) => {
@@ -178,56 +188,60 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   }
 
   const handlePostReply = async () => {
-    try {
-      setIsLoadingReply(true)
-      const country = await getUserCountry()
-      setUserContry(country)
+    setIsLoadingReply(true)
+    const country = await getUserCountry()
+    setUserContry(country)
 
-      const parentReplyId = post.transaction_id as string
-      const encodedGroupedTransactions = await replieservice.handlePostReply({
-        creatorAddress: userData?.address || '',
-        address: activeAccount?.address || '',
-        transactionId: post.transaction_id as string,
-        text: encodeURIComponent(replyText),
-        assetId: usableAsset.assetId,
-      })
-      const signedTransactions = await signTransactions(encodedGroupedTransactions)
-      const waitRoundsToConfirm = 4
+    if (post.file_1_cid) {
+      handleFilePostReply()
+    } else {
+      try {
+        const parentReplyId = post.transaction_id as string
+        const encodedGroupedTransactions = await replieservice.handlePostReply({
+          creatorAddress: userData?.address || '',
+          address: activeAccount?.address || '',
+          transactionId: post.transaction_id as string,
+          text: encodeURIComponent(replyText),
+          assetId: usableAsset.assetId,
+        })
+        const signedTransactions = await signTransactions(encodedGroupedTransactions)
+        const waitRoundsToConfirm = 4
 
-      const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+        const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-      const acceptedReply: Daum = {
-        creator_address: activeAccount?.address || '',
-        text: encodeURIComponent(replyText),
-        status: 'accepted',
-        transaction_id: id,
-        likes: [],
-        country,
-        timestamp: Math.floor(new Date().getTime() / 1000),
-        replies: [],
-        type: 'post',
-        assetId: usableAsset.assetId,
+        const acceptedReply: Daum = {
+          creator_address: activeAccount?.address || '',
+          text: encodeURIComponent(replyText),
+          status: 'accepted',
+          transaction_id: id,
+          likes: [],
+          country,
+          timestamp: Math.floor(new Date().getTime() / 1000),
+          replies: [],
+          type: 'post',
+          assetId: usableAsset.assetId,
+        }
+
+        handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+        createReply({
+          creator_address: activeAccount?.address || '',
+          transaction_id: id,
+          post_transaction_id: parentReplyId,
+          text: encodeURIComponent(replyText),
+          timestamp: Math.floor(new Date().getTime() / 1000),
+          country,
+          assetId: usableAsset.assetId,
+        })
+        setReplyText('')
+        setIsLoadingReply(false)
+      } catch (error) {
+        toast('Error sending reply', {
+          position: 'bottom-right',
+          theme: 'dark',
+        })
+        setReplyText('')
+        setIsLoadingReply(false)
       }
-
-      handleNewReply && handleNewReply(acceptedReply, parentReplyId)
-      createReply({
-        creator_address: activeAccount?.address || '',
-        transaction_id: id,
-        post_transaction_id: parentReplyId,
-        text: encodeURIComponent(replyText),
-        timestamp: Math.floor(new Date().getTime() / 1000),
-        country,
-        assetId: usableAsset.assetId,
-      })
-      setReplyText('')
-      setIsLoadingReply(false)
-    } catch (error) {
-      toast('Error sending reply', {
-        position: 'bottom-right',
-        theme: 'dark',
-      })
-      setReplyText('')
-      setIsLoadingReply(false)
     }
   }
 

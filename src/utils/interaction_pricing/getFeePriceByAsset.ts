@@ -9,6 +9,7 @@ export enum InteractionMultipliers {
   VotePoll = 0.5,
   FilePost = 11,
   FilePostLike = 2,
+  FilePostReply = 3,
 }
 
 export interface InteractionFee {

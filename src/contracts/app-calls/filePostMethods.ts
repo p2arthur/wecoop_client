@@ -86,13 +86,7 @@ export const createOnChainFilePost = async (
   }
 }
 
-export const likeOnChainFilePost = async (
-  sender: string,
-  assetId: number,
-
-  signer: TransactionSigner,
-  post: Daum,
-) => {
+export const likeOnChainFilePost = async (sender: string, assetId: number, signer: TransactionSigner, post: Daum) => {
   const appClient = createAppClient(sender, signer)
 
   const { appAddress } = await appClient.appClient.getAppReference()
@@ -105,7 +99,7 @@ export const likeOnChainFilePost = async (
   })
 
   // Calculate the fee price based on the asset
-  const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.FilePost)
+  const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.FilePostLike)
 
   const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.Like })
 
@@ -153,5 +147,80 @@ export const likeOnChainFilePost = async (
   } catch (error) {
     console.error('error creating like', error)
     throw new Error(String(error))
+  }
+}
+
+export const replyOnChainPost = async (
+  sender: string,
+  country: string,
+  assetId: number,
+  signer: TransactionSigner,
+  post: Daum,
+  text: string,
+) => {
+  const appClient = createAppClient(sender, signer)
+
+  const { appAddress } = await appClient.appClient.getAppReference()
+
+  const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: appAddress,
+    amount: Number(algokit.algos(0.2)),
+    suggestedParams: await algod.getTransactionParams().do(),
+  })
+
+  // Calculate the fee price based on the asset
+  const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.FilePostReply)
+
+  const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.Like })
+
+  const platformAlgoFee = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
+    amount: Number(algokit.algos(0.1)),
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+  })
+
+  const platformFee = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS,
+    assetIndex: Number(assetId!),
+    amount: splitFee.platformFee,
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+  })
+
+  console.log('assetId', assetId)
+
+  const creatorFee = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: post.creator_address,
+    assetIndex: Number(assetId!),
+    amount: splitFee.creatorFee,
+    suggestedParams: await algokit.getTransactionParams(undefined, algod),
+  })
+  try {
+    const result = await appClient.replyFilePost({
+      mbrTxn,
+      creatorPayTxn: creatorFee,
+      platformCommunityFeeTxn: platformFee,
+      platformAlgoFeeTxn: platformAlgoFee,
+      text: 'asdasddsadassdaadssdadasadsdas',
+      filePostId: [post.filepost_id!],
+      country: 'CA',
+      assetId: post.assetId!,
+    })
+
+    const filepostReplyData = {
+      creator_address: sender,
+      text: text,
+      timestamp: Math.floor(new Date().getTime() / 1000),
+      country: country,
+      assetId,
+      filepost_id: post.filepost_id,
+    }
+
+    await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/reply`, filepostReplyData)
+  } catch (error) {
+    throw new Error('Error replying to file post')
   }
 }
