@@ -135,7 +135,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
     event.preventDefault()
 
     try {
-      const result = await likeOnChainFilePost(activeAccount?.address!, usableAsset.assetId, signer, post)
+      const result = await likeOnChainFilePost(activeAccount?.address!, usableAsset.assetId, signer, post as Daum)
 
       setIsLoadingLike(false)
     } catch (error) {
