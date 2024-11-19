@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { usableAssetsList } from '../../data/usableAssetsList'
 
 export enum InteractionMultipliers {
   Post = 2,
@@ -6,6 +7,9 @@ export enum InteractionMultipliers {
   Like = 1,
   CreatePoll = 10,
   VotePoll = 0.5,
+  FilePost = 11,
+  FilePostLike = 2,
+  FilePostReply = 3,
 }
 
 export interface InteractionFee {
@@ -13,11 +17,13 @@ export interface InteractionFee {
   creatorFee: number
 }
 
-export const getFeePriceByAsset = async (assetId: number, decimals: number, type: InteractionMultipliers): Promise<number | null> => {
+export const getFeePriceByAsset = async (assetId: number, type: number): Promise<number | null> => {
   // Define a base price for the asset (for example purposes)
   const basePrice = import.meta.env.VITE_WECOOP_BASE_PRICE
 
-  let priceApiUrl = `https://free-api.vestige.fi/asset/${assetId}/price`
+  const decimals = usableAssetsList.find((asset) => asset.assetId == assetId)?.decimals
+
+  const priceApiUrl = `https://free-api.vestige.fi/asset/${assetId}/price`
 
   if (assetId === 0) {
     return null
@@ -25,11 +31,19 @@ export const getFeePriceByAsset = async (assetId: number, decimals: number, type
 
   const { data } = await axios.get(`https://free-api.vestige.fi/asset/${assetId}/price`)
 
-  let assetUsdPrice = data['USD']
-
-  if (decimals == 3) assetUsdPrice = assetUsdPrice * 1000
+  const assetUsdPrice = data['USD']
 
   const feePrice = (basePrice / assetUsdPrice) * type
 
-  return feePrice
+  //FIxin fee bugs
+  const a200Id = 1682662165
+  const oraId = 1284444444
+
+  if (assetId === a200Id) {
+    return Math.floor(feePrice / 1000)
+  } else if (assetId === oraId) {
+    return Math.floor(feePrice * 100)
+  } else {
+    return Math.floor(feePrice) * 10 ** decimals!
+  }
 }

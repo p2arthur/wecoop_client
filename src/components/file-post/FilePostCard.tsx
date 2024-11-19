@@ -4,29 +4,24 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
 import { FaMagnifyingGlass, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
-import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
-import { usePosts } from '../context/Posts/Posts'
-import { Like } from '../services/Like'
-import { Reply } from '../services/Reply'
-
 import { toast } from 'react-toastify'
-import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
-import { likeOnChainFilePost, replyOnChainPost } from '../contracts/app-calls/filePostMethods'
-import { usableAssetsList } from '../data/usableAssetsList'
-import { useCreateLike, useCreateReply } from '../services/api/Posts'
-import { useGetUserInfo } from '../services/api/Users'
-import { Daum, Reply as IReply, User } from '../services/api/types'
-import formatDateFromTimestamp from '../utils'
-import { ellipseAddress } from '../utils/ellipseAddress'
-import { getUserCountry } from '../utils/userUtils'
-import ImageWithLoading from './ImageWithLoading/ImageWithLoading'
-import { ReplyInput } from './ReplyInput'
-import { ShareButton } from './ShareButton'
+import { usePosts } from '../../context/Posts/Posts'
+import { useUsableAsset } from '../../context/UsableAsset/UsableAssetContext'
+import { usableAssetsList } from '../../data/usableAssetsList'
+import { useCreateLike, useCreateReply } from '../../services/api/Posts'
+import { Daum, FilePost } from '../../services/api/types'
+import { useGetUserInfo } from '../../services/api/Users'
+import { Like } from '../../services/Like'
+import { Reply } from '../../services/Reply'
+import { User } from '../../services/User'
+import formatDateFromTimestamp from '../../utils'
+import { ellipseAddress } from '../../utils/ellipseAddress'
+import { getUserCountry } from '../../utils/userUtils'
+import { ShareButton } from '../ShareButton'
 
-interface PostPropsInterface {
-  post: Daum | IReply
+interface FilePostPropsInterface {
+  post: FilePost
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
   imagesVisible: boolean
@@ -78,10 +73,10 @@ export const handleTextPost = (text: string) => {
   })
 }
 
-const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: PostPropsInterface) => {
+const FilePostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: FilePostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
-  const { activeAccount, signer } = useWallet()
+  const { activeAccount } = useWallet()
   const { sendTransactions, signTransactions } = useWallet()
   const { data: userData } = useGetUserInfo(post.creator_address)
   const { algod } = useOutletContext() as PostInputPropsInterface
@@ -91,7 +86,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   const [isLoadingReply, setIsLoadingReply] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [openReplyInput, setOpenReplyInput] = useState(false)
-  const [userCountry, setUserContry] = useState('')
 
   const { mutate: createLike } = useCreateLike()
 
@@ -105,13 +99,15 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
     return `data:image/svg+xml;utf8,${encodeURIComponent(minidenticon(creatorAddress))}`
   }
 
-  const handleDefaultPostLike = async (event: React.FormEvent) => {
+  const handlePostLike = async (event: React.FormEvent) => {
     try {
+      setIsLoadingLike(true)
+
       const encodedGroupedTransactions = await likeService.handlePostLike({
         event,
         creatorAddress: post.creator_address,
         address: activeAccount?.address || '',
-        transactionId: post.transaction_id as string,
+        transactionId: String(post.filepost_id),
         usableAsset: usableAsset,
       })
 
@@ -119,65 +115,12 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
       const waitRoundsToConfirm = 4
 
       const like = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
+      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, String(post.filepost_id))
       createLike({
         creator_address: userData?.address || '',
         transaction_id: like.id,
-        post_transaction_id: post.transaction_id as string,
+        post_transaction_id: String(post.filepost_id),
       })
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const handleFilePostLike = async (event: React.FormEvent) => {
-    setIsLoadingLike(true)
-    event.preventDefault()
-
-    try {
-      const result = await likeOnChainFilePost(activeAccount?.address!, usableAsset.assetId, signer, post as Daum)
-
-      setIsLoadingLike(false)
-    } catch (error) {
-      setIsLoadingLike(false)
-      console.error('error liking file post', error)
-    }
-  }
-
-  const handleFilePostReply = async () => {
-    setIsLoadingReply(true)
-    const country = await getUserCountry()
-    setUserContry(country)
-
-    const result = await replyOnChainPost(
-      activeAccount?.address!,
-      country,
-      usableAsset.assetId!,
-      signer,
-      post as Daum,
-      encodeURIComponent(replyText),
-    )
-
-    setIsLoadingReply(false)
-  }
-
-  const defineLikeAction = async (event: React.FormEvent) => {
-    let action
-
-    if (post.file_1_cid) {
-      await handleFilePostLike(event)
-    } else if (!post.file_1_cid) {
-      await handleDefaultPostLike(event)
-    }
-
-    return action
-  }
-
-  const handlePostLike = async (event: React.FormEvent) => {
-    try {
-      setIsLoadingLike(true)
-
-      const likeAction = defineLikeAction(event)
 
       setIsLoadingLike(false)
     } catch (error) {
@@ -191,60 +134,56 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   }
 
   const handlePostReply = async () => {
-    setIsLoadingReply(true)
-    const country = await getUserCountry()
-    setUserContry(country)
+    try {
+      setIsLoadingReply(true)
+      const country = await getUserCountry()
+      // setUserContry(country)
 
-    if (post.file_1_cid) {
-      handleFilePostReply()
-    } else {
-      try {
-        const parentReplyId = post.transaction_id as string
-        const encodedGroupedTransactions = await replieservice.handlePostReply({
-          creatorAddress: userData?.address || '',
-          address: activeAccount?.address || '',
-          transactionId: post.transaction_id as string,
-          text: encodeURIComponent(replyText),
-          assetId: usableAsset.assetId,
-        })
-        const signedTransactions = await signTransactions(encodedGroupedTransactions)
-        const waitRoundsToConfirm = 4
+      const parentReplyId = String(post.filepost_id)
+      const encodedGroupedTransactions = await replieservice.handlePostReply({
+        creatorAddress: userData?.address || '',
+        address: activeAccount?.address || '',
+        transactionId: String(post.filepost_id),
+        text: encodeURIComponent(replyText),
+        assetId: usableAsset.assetId,
+      })
+      const signedTransactions = await signTransactions(encodedGroupedTransactions)
+      const waitRoundsToConfirm = 4
 
-        const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      const { id } = await sendTransactions(signedTransactions, waitRoundsToConfirm)
 
-        const acceptedReply: Daum = {
-          creator_address: activeAccount?.address || '',
-          text: encodeURIComponent(replyText),
-          status: 'accepted',
-          transaction_id: id,
-          likes: [],
-          country,
-          timestamp: Math.floor(new Date().getTime() / 1000),
-          replies: [],
-          type: 'post',
-          assetId: usableAsset.assetId,
-        }
-
-        handleNewReply && handleNewReply(acceptedReply, parentReplyId)
-        createReply({
-          creator_address: activeAccount?.address || '',
-          transaction_id: id,
-          post_transaction_id: parentReplyId,
-          text: encodeURIComponent(replyText),
-          timestamp: Math.floor(new Date().getTime() / 1000),
-          country,
-          assetId: usableAsset.assetId,
-        })
-        setReplyText('')
-        setIsLoadingReply(false)
-      } catch (error) {
-        toast('Error sending reply', {
-          position: 'bottom-right',
-          theme: 'dark',
-        })
-        setReplyText('')
-        setIsLoadingReply(false)
+      const acceptedReply: Daum = {
+        creator_address: activeAccount?.address || '',
+        text: encodeURIComponent(replyText),
+        status: 'accepted',
+        transaction_id: id,
+        likes: [],
+        country,
+        timestamp: Math.floor(new Date().getTime() / 1000),
+        replies: [],
+        type: 'post',
+        assetId: usableAsset.assetId,
       }
+
+      handleNewReply && handleNewReply(acceptedReply, parentReplyId)
+      createReply({
+        creator_address: activeAccount?.address || '',
+        transaction_id: id,
+        post_transaction_id: parentReplyId,
+        text: encodeURIComponent(replyText),
+        timestamp: Math.floor(new Date().getTime() / 1000),
+        country,
+        assetId: usableAsset.assetId,
+      })
+      setReplyText('')
+      setIsLoadingReply(false)
+    } catch (error) {
+      toast('Error sending reply', {
+        position: 'bottom-right',
+        theme: 'dark',
+      })
+      setReplyText('')
+      setIsLoadingReply(false)
     }
   }
 
@@ -254,15 +193,19 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   }
 
   const handleGoToPostPage = () => {
-    window.location.href = `/post?id=${post.transaction_id}`
+    window.location.href = `/post?id=${post.filepost_id}`
   }
+
+  // const handleViewImage1 = () => {
+  //   setViewImage1(!viewImage1)
+  // }
 
   return (
     <>
       <div>
         {post.status === 'loading' ? (
           <div
-            key={post.transaction_id}
+            key={post.filepost_id}
             className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
           >
             <div className="flex flex-col">
@@ -283,6 +226,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
         ) : (
           <div
             onClick={handleGoToPostPage}
+            // TODO add isTopPost
+            // post.isTopPost ? ' border-fuchsia-500 dark:border-fuchsia-500 border-4' : ' border-2 border-gray-900 dark:border-gray-300/30'
             className={`flex flex-col gap-3 p-4 hover:bg-gray-100 h-content  transition-all duration-75 cursor-pointer bg-white dark:bg-gray-900`}
           >
             <div className="flex items-center justify-between">
@@ -293,6 +238,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                 <a href={`/profile/${post.creator_address}`}>
                   <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
                     {userData?.nfd?.name ? userData?.nfd?.name.replace('.algo', '').toUpperCase() : ellipseAddress(post.creator_address)}{' '}
+                    {<img />}
                   </h2>
                 </a>
               </div>
@@ -311,20 +257,22 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
 
             <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
-
-              {post.file_1_cid ? (
-                <div className="relative flex  py-3">
-                  <div
-                    className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${
-                      imagesVisible ? 'hidden' : ''
-                    }`}
-                  >
-                    <p>View image</p>
-                    <FaMagnifyingGlass />
+              <div className="w-full py-3">
+                {' '}
+                {post.file_1_cid ? (
+                  <div className="w-56 h-56 relative">
+                    <div
+                      className={`w-full h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${
+                        imagesVisible ? 'hidden' : null
+                      }`}
+                    >
+                      <p>View image</p>
+                      <FaMagnifyingGlass />
+                    </div>
+                    <img className="w-full h-full" src={`https://ipfs.algonode.xyz/ipfs/${post.file_1_cid}`} />
                   </div>
-                  <ImageWithLoading cid={post.file_1_cid} />
-                </div>
-              ) : null}
+                ) : null}
+              </div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
                   <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} />
@@ -355,16 +303,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                       </>
                     )}
                   </div>
-                  <button
-                    className={
-                      'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'
-                    }
-                  >
-                    <a target="_blank" href={`https://allo.info/tx/${post.transaction_id}`}>
-                      <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
-                    </a>
-                  </button>
-                  <ShareButton id={post.transaction_id || ''} />
+                  <ShareButton id={String(post.filepost_id) || ''} />
                 </div>
                 <div className="flex flex-col md:gap-2 md:hidden">
                   {post.country ? (
@@ -375,54 +314,9 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                       <p className="text-center">{post.country}</p>
                     </div>
                   ) : null}
-                  <p className="text-center text-[12px]">{handleTimestamp()}</p>
+                  <p className="text-center">{handleTimestamp()}</p>
                 </div>
               </div>
-
-              {openReplyInput && (
-                <div className={'grid gap-4 h-full'} onClick={(e) => e.stopPropagation()}>
-                  <p className={'text-lg'}>replies</p>
-
-                  {post?.replies &&
-                    post?.replies?.length > 0 &&
-                    post.replies
-                      .sort((a, b) => {
-                        return a.timestamp! - b.timestamp!
-                      })
-                      .map((reply) => <PostCard imagesVisible={false} post={reply} variant={'reply'} />)}
-                  {isLoadingReply && (
-                    <PostCard
-                      imagesVisible={false}
-                      post={{
-                        text: `${encodeURIComponent(replyText)}`,
-                        creator_address: userData?.address || '',
-                        nfd: '',
-                        replies: [],
-                        likes: [],
-                        type: 'post',
-                        post_transaction_id: post.transaction_id,
-                        status: 'loading',
-                        country: userCountry,
-                        timestamp: new Date().getDate(),
-                        transaction_id: uuidv4(),
-                        assetId: 0,
-                      }}
-                      variant={'reply'}
-                    />
-                  )}
-
-                  {!isLoadingReply && (
-                    <ReplyInput
-                      handleChange={(e) => setReplyText(e.target.value)}
-                      placeholder={'Reply message...'}
-                      value={replyText}
-                      handleSubmit={() => {
-                        !post.file_1_cid ? handlePostReply() : handleFilePostReply()
-                      }}
-                    />
-                  )}
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -431,4 +325,4 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   )
 }
 
-export default PostCard
+export default FilePostCard

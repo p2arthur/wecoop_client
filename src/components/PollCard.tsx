@@ -11,6 +11,7 @@ import { toast } from 'react-toastify'
 import { createAppClient, makeVote, withdrawPollShare } from '../contracts/app-calls/wecoopDaoMethods'
 import { WecoopDaoClient } from '../contracts/clients/WecoopDaoClient'
 import { usableAssetsList } from '../data/usableAssetsList'
+import { useMarkAsReadByPoll } from '../services/api/Notification'
 import { useClaimPoll, useCreateVote } from '../services/api/Posts'
 import { PollRequest } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
@@ -19,7 +20,6 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { PostInputOutletContext } from './PostInput'
-import { useMarkAsReadByPoll } from '../services/api/Notification'
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -71,7 +71,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
       if (!assetId) return
 
       const assetDecimals = await getAssetDecimals(algod, assetId)
-      const assetVotePrice = await getFeePriceByAsset(assetId, assetDecimals, InteractionMultipliers.VotePoll)
+      const assetVotePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.VotePoll)
 
       if (assetVotePrice && !hasSufficientFunds(user.balance[assetId], assetVotePrice)) {
         showToast('You do not have enough funds to vote')
@@ -81,7 +81,17 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
       if (!daoAssetId) return
 
       // Attempt to make the vote and await confirmation
-      const result = await makeVote(appClient, algod, pollId, activeAccount.address, signer, daoAssetId, inFavor, pollCreator)
+      const result = await makeVote(
+        appClient,
+        algod,
+        pollId,
+        activeAccount.address,
+        signer,
+        daoAssetId,
+        inFavor,
+        pollCreator,
+        poll.depositedAmount,
+      )
 
       if (result.status === 'success') {
         updateVoteCounts(inFavor)

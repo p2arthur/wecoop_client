@@ -71,9 +71,7 @@ const Feed = () => {
       </div>
 
       <div className="p-2 overflow-y-scroll md:overflow-y-hidden border-2 max-w-full md:max-w-[60%] w-full border-gray-950 dark:border-gray-800 flex flex-col gap-5 h-screen">
-        <div className=" bg-gray">
-          <PostInput />
-        </div>
+        <div className=" bg-gray"></div>
         <div className="md:overflow-y-hidden  h-full">
           <FeedComponent postList={postList} isLoading={isLoading} handleNewReply={handleNewReply} />
         </div>

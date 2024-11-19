@@ -111,9 +111,29 @@ export interface Reply {
   nfd?: string
   likes: Like[]
   replies: Reply[]
+  file_1_cid?: string
+  file_1_format?: string
+  file_2_cid?: string
+  file_2_format?: string
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number | null
   isTopPost?: boolean
+  type?: string
+}
+
+export interface FilePost {
+  creator_address: string
+  text: string
+  timestamp: number | null
+  country: string
+  assetId: number | null
+  file_1_cid?: string
+  file_1_format?: string
+  replies?: Reply[]
+  likes?: Like[]
+  filepost_id?: number
+  type: string
+  status?: string
 }
 
 export interface ReplyResponse {
@@ -171,8 +191,13 @@ export interface Daum {
   voters?: Voter[]
   type: string
   transaction_id?: string
+  file_1_cid?: string
+  file_1_format?: string
+  file_2_cid?: string
+  file_2_format?: string
   replies?: Reply[]
   likes?: Like[]
+  filepost_id?: number
 }
 
 export interface Id {
@@ -199,6 +224,7 @@ export interface Reply {
   timestamp: number | null
   country: string
   assetId: number | null
+  filepost_id: number
 }
 
 export interface Id3 {

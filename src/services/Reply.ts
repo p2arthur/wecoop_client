@@ -21,9 +21,9 @@ export class Reply {
   public async handlePostReply({ creatorAddress, transactionId, address, text, assetId }: ReplyProps) {
     const transactionService = new Transaction(this.client)
 
-    const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.Reply, InteractionMultipliers.Reply)
+    const feePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.Reply)
 
-    const splitFee = splitFeeByInteractionType({ totalFee: feePrice || 0.1, type: 'reply' })
+    const splitFee = splitFeeByInteractionType({ totalFee: feePrice || 0.1, type: InteractionMultipliers.Reply })
 
     const finalPlatformFee = Math.floor(splitFee.platformFee * 1000 * 1000)
     const finalUserFee = Math.floor(splitFee.creatorFee * 1000 * 1000)

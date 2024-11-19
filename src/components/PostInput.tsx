@@ -2,13 +2,13 @@ import { useWallet } from '@txnlab/use-wallet'
 import algosdk, { Transaction } from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import React, { useEffect, useState } from 'react'
-import { FaArrowsRotate, FaCircleInfo } from 'react-icons/fa6'
+import { FaArrowsRotate, FaCircleInfo, FaPhotoFilm } from 'react-icons/fa6'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { usePosts } from '../context/Posts/Posts'
 import { useUsableAsset } from '../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { NotePrefix } from '../enums/notePrefix'
-import { User as UserInterface } from '../services/api/types'
+import { FilePost, User as UserInterface } from '../services/api/types'
 import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
@@ -19,10 +19,13 @@ import Counter from './Counter'
 //--------------
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { createOnChainFilePost } from '../contracts/app-calls/filePostMethods'
 import { createAppClient, makePoll } from '../contracts/app-calls/wecoopDaoMethods'
 import { useCreatePost } from '../services/api/Posts'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getOptedIn } from '../utils/getOptedIn'
+import { pinToIpfs } from '../utils/upload-image/pinToIpfs'
+import { FileUploaded } from './FileUploaded'
 import { PostTypeSwitch } from './PostTypeSwitch'
 
 //----------
@@ -69,6 +72,21 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const [placeholderSelected] = useState(placeholderPhrases[Math.floor(Math.random() * placeholderPhrases.length)])
   const { mutate: createPost, isSuccess: isSuccessCreatePost } = useCreatePost()
   const [loadingSubmit, setLoadingSubmit] = useState(false)
+  const [loadingText, setLoadingText] = useState('')
+
+  const [isDraggingWithImage, setIsDraggingWithImage] = useState(false)
+
+  //FIle upload
+  const [uploadFile, setUploadFile] = useState<File>()
+  const [uploadFileUrl, setUploadFileUrl] = useState<string>('')
+  const handleFile = (file: File) => {
+    if (!file) return
+
+    setUploadFile(file)
+
+    const fileUrl = URL.createObjectURL(file)
+    setUploadFileUrl(fileUrl)
+  }
 
   const { usableAsset, setUsableAsset } = useUsableAsset()
 
@@ -81,6 +99,22 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const handleSetPrizePool = (event: React.ChangeEvent<HTMLInputElement>) => {
     const prizePool = event.target.value
     setPrizePool(Number(prizePool))
+  }
+
+  const defineAction = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    let formAction: Promise<void>
+
+    if (postType === 'poll' && !uploadFile) {
+      formAction = handleCreatePoll()
+    }
+    if (postType === 'post' && !uploadFile) {
+      formAction = handleSubmitPost()
+    }
+    if (uploadFile) {
+      formAction = handleCreateFilePost()
+    }
   }
 
   const queryClient = useQueryClient()
@@ -128,10 +162,9 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     setInputText(text)
   }
 
-  const handleCreatePoll = async (event: React.FormEvent) => {
+  const handleCreatePoll = async () => {
     try {
       setLoadingSubmit(true)
-      event.preventDefault()
       toast('Creating a poll - processing and creating your wecoop poll', {
         position: 'top-right',
         theme: 'dark',
@@ -214,10 +247,113 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     }
   }
 
-  const handleSubmitPost = async (event: React.FormEvent) => {
-    event.preventDefault()
+  const handleCrustUpload = async (country: string): Promise<FilePost | undefined> => {
+    const filePostBackend = {
+      text: inputText,
+      creator_address: activeAccount?.address!,
+      timestamp: Math.floor(new Date().getTime() / 1000),
+      country: country,
+      assetId: usableAsset.assetId,
+      file_1_cid: '',
+      file_1_format: 'png',
+    }
+
+    try {
+      const response = uploadFile!
+
+      const filePostFrontend: FilePost = {
+        text: inputText,
+        creator_address: activeAccount?.address || '',
+        timestamp: Math.floor(new Date().getTime() / 1000),
+        country: country,
+        assetId: usableAsset.assetId,
+        file_1_cid: '',
+        file_1_format: 'png',
+        type: 'post',
+      }
+
+      const cid = await pinToIpfs(
+        'mainnet',
+        algod,
+        response,
+        {
+          addr: activeAccount?.address!,
+          signer,
+        },
+        activeAccount?.address!,
+        filePostBackend,
+        (text) => setLoadingText(text),
+      )
+
+      Object.assign(filePostFrontend, { file_1_cid: cid })
+      Object.assign(filePostBackend, { file_1_cid: cid })
+
+      handleAddNewPost(filePostFrontend)
+
+      return filePostBackend as FilePost
+    } catch (error) {
+      console.error(error)
+      setLoadingText('Failed to upload image to Crust Network')
+      return undefined
+    }
+  }
+
+  const handleCreateFilePost = async () => {
+    const country = await getUserCountry()
+
+    console.log('creating file post')
+
+    try {
+      setLoadingText('Uploading image to IPFS Network...')
+      setLoadingSubmit(true)
+      const filePost = await handleCrustUpload(country)
+
+      if (!filePost) return
+
+      setLoadingText('Creating file post on-chain, accept all transactions...')
+      await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, filePost?.file_1_cid!, signer, country, filePost)
+      setLoadingText('File post created successfully...')
+
+      setLoadingSubmit(false)
+      setInputText('')
+      setUploadFile(undefined)
+      setUploadFileUrl('')
+      setLoadingText('')
+
+      toast('Created post with image successfully', {
+        position: 'bottom-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+    } catch (error) {
+      toast('Failed to create file post', {
+        position: 'bottom-right',
+        className: 'black-background',
+        bodyClassName: 'grow-font-size',
+        progressClassName: 'fancy-progress-bar',
+      })
+      setLoadingText('Failed to create file post')
+      console.error('error', error)
+    }
+  }
+
+  const handleSubmitPost = async () => {
     setLoadingSubmit(true)
     const country = await getUserCountry()
+
+    const postToAdd = {
+      text: inputText,
+      creator_address: userData.address,
+      status: 'loading',
+      timestamp: new Date().getDate(),
+      transaction_id: 'loading_id',
+      replies: [],
+      type: 'post',
+      country,
+      likes: [],
+      assetId: usableAsset.assetId,
+    }
 
     try {
       handleAddNewPost({
@@ -273,19 +409,16 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         })
       } else {
         // Calculate the fee price based on the asset
-        const feePrice = await getFeePriceByAsset(usableAsset.assetId, usableAsset.decimals, InteractionMultipliers.Post)
+        const feePrice = await getFeePriceByAsset(usableAsset.assetId, InteractionMultipliers.Post)
 
         // Split the fee by interaction type
-        const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: 'post' })
-
-        // Example calculation to ensure platformFee is used as an integer
-        const finalFeeForTransaction = Math.floor(splitFee.platformFee * 1000 * 1000) // ensure this is an integer
+        const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.Post })
 
         // Asset transfer transaction (ASA)
         transaction = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
           from: userData.address,
           to: import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string,
-          amount: finalFeeForTransaction, // Amount of asset to transfer
+          amount: splitFee.platformFee, // Amount of asset to transfer
           assetIndex: usableAsset.assetId, // ASA (Asset ID)
           note: new Uint8Array(Buffer.from(note)), // Encode note
           suggestedParams: suggestedParams, // Use suggested transaction params
@@ -311,6 +444,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
 
       handleDeleteLoadingPost('loading_id')
       setLoadingSubmit(false)
+      setInputText('')
     } catch (error) {
       console.error(error)
       setTimeout(() => {
@@ -327,19 +461,40 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   return (
-    <form onSubmit={(e) => (postType === 'post' ? handleSubmitPost(e) : handleCreatePoll(e))}>
+    <form onSubmit={(e) => defineAction(e)}>
       <div className="p-2 border-2 border-gray-900 flex flex-col gap-3 items-end border-b-4 dark:border-gray-500 bg-gray-100 dark:bg-gray-900">
         <div className="w-full relative">
-          <textarea
-            maxLength={300}
-            value={inputText}
-            onChange={handleChange}
-            placeholder={postType === 'post' ? placeholder : 'Create your vote'}
-            className={`w-full border-2  align-top text-start break-all whitespace-normal h-32 ${
-              postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
-            } resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
-          />
-          <div className="absolute right-5 bottom-2">{`${inputText.length}/300`}</div>
+          <div className="relative">
+            <textarea
+              maxLength={300}
+              value={inputText}
+              onChange={handleChange}
+              placeholder={postType === 'post' ? placeholder : 'Create your vote'}
+              className={`w-full  border-2  align-top text-start break-all whitespace-normal h-32 ${
+                postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
+              }
+              ${isDraggingWithImage && 'border-dashed border-4 dark:border-gray-600 border-gray-900'}
+              resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
+              onDragOver={(e) => {
+                e.preventDefault()
+
+                setIsDraggingWithImage(true)
+              }} // Permite o arrasto
+              onDragLeave={(e) => {
+                e.preventDefault()
+                setIsDraggingWithImage(false)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                setIsDraggingWithImage(false)
+
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                  handleFile(e.dataTransfer.files[0]) // Chama handleFile com o arquivo arrastado
+                }
+              }}
+            />
+            <div className="absolute bottom-2 right-2">{`${inputText.length}/300`}</div>
+          </div>
           {postType === 'poll' && (
             <div className={'absolute right-5 top-2 text-center'}>
               <span>Expires in:</span>
@@ -353,35 +508,21 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           )}
         </div>
 
-        <div className="grid items-start  grid-cols-2 md:block gap-4  w-full justify-end">
-          <div className={'flex justify-end items-center gap-4'}>
-            <div className={'relative'}>
-              <div
-                onMouseEnter={() => {
-                  setOpenTooltip(true)
-                }}
-                onMouseLeave={() => setOpenTooltip(false)}
-                onClick={() => setOpenTooltip(!openTooltip)}
-              >
-                <FaCircleInfo />{' '}
-              </div>
-              {openTooltip && (
-                <div
-                  className={
-                    'absolute translate-x-1/2 top-8 w-48 right-0 border-2 border-gray-900\n z-50 bg-white' +
-                    'p-1  bg-white font-bold\n' +
-                    'hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-sm md:text-md'
-                  }
-                >
-                  <p className={'text-red-600 text-center'}>
-                    Note: All posts and interactions are permanently recorded on the Algorand blockchain.
-                  </p>
-                </div>
-              )}
-            </div>
-            <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
-          </div>
-          <div className={'grid justify-items-end md:flex md:justify-end md:mt-4 gap-4 md:items-center'}>
+        {uploadFile && (
+          <>
+            <FileUploaded
+              url={uploadFileUrl}
+              loadingText={loadingText}
+              handleRemoveFile={() => {
+                setUploadFile(undefined)
+                setUploadFileUrl('')
+              }}
+            />
+          </>
+        )}
+
+        <div className="">
+          <div className={'flex-col space-y-2'}>
             {postType === 'poll' && (
               <div className={'flex items-center gap-2'}>
                 <span>Prize pool:</span>
@@ -395,23 +536,81 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
                 />
               </div>
             )}
-            {postTypeProp !== 'poll' && <PostTypeSwitch />}
-            <CoinDropdown
-              usableAsset={usableAsset}
-              handleAssetSelect={handleAssetSelect}
-              setSelectorOpen={setSelectorOpen}
-              selectedAsset={selectedAsset}
-              selectorOpen={selectorOpen}
-            />
-            {activeAccount?.address &&
-            inputText !== '' &&
-            inputText.length <= 300 &&
-            userData.balance[selectedAsset.assetId] > 0.1 &&
-            !loadingSubmit ? (
-              <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
-            ) : (
-              <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
-            )}
+            <div className="flex items-center gap-2">
+              {postTypeProp !== 'poll' && <PostTypeSwitch />}
+              {postType != 'poll' && (
+                <>
+                  <input
+                    onChange={(e) => {
+                      handleFile(e.target.files![0])
+                    }}
+                    type="file"
+                    className="hidden"
+                    id="file_1_input"
+                    name="file_1_input"
+                  />
+                  <label htmlFor="file_1_input" className="h-full cursor-pointer">
+                    <div className="flex w-8 md:w-8 md:h-8 h-full cursor-pointer items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
+                      <FaPhotoFilm />
+                    </div>
+                  </label>
+                  <input
+                    onChange={(e) => {
+                      handleFile(e.target.files![0])
+                    }}
+                    type="file"
+                    className="hidden"
+                    id="file_1_input"
+                    name="file_1_input"
+                  />
+                </>
+              )}
+              <CoinDropdown
+                usableAsset={usableAsset}
+                handleAssetSelect={handleAssetSelect}
+                setSelectorOpen={setSelectorOpen}
+                selectedAsset={selectedAsset}
+                selectorOpen={selectorOpen}
+              />
+            </div>
+            <div className="flex w-full justify-end gap-4">
+              <div className={'flex justify-end items-center gap-4'}>
+                <div className={'relative'}>
+                  <div
+                    onMouseEnter={() => {
+                      setOpenTooltip(true)
+                    }}
+                    onMouseLeave={() => setOpenTooltip(false)}
+                    onClick={() => setOpenTooltip(!openTooltip)}
+                  >
+                    <FaCircleInfo />{' '}
+                  </div>
+                  {openTooltip && (
+                    <div
+                      className={
+                        'absolute translate-x-1/2 top-8 w-48 right-0 border-2 border-gray-900\n z-50 bg-white' +
+                        'p-1  bg-white font-bold\n' +
+                        'hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-sm md:text-md'
+                      }
+                    >
+                      <p className={'text-red-600 text-center'}>
+                        Note: All posts and interactions are permanently recorded on the Algorand blockchain.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {activeAccount?.address &&
+              inputText !== '' &&
+              inputText.length <= 300 &&
+              userData.balance[selectedAsset.assetId] > 0.1 &&
+              !loadingSubmit ? (
+                <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
+              ) : (
+                <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
+              )}
+              <Button buttonFunction={handleRefreshPosts} type={'button'} buttonText="Refresh" icon={<FaArrowsRotate />} />
+            </div>
           </div>
         </div>
       </div>

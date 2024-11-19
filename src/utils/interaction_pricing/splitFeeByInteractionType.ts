@@ -1,8 +1,8 @@
-import { InteractionInterface } from '../../types/Interactions'
+import { InteractionMultipliers } from './getFeePriceByAsset'
 
 interface SplitFeeArgsInterface {
   totalFee: number
-  type: InteractionInterface['type'] // Using the type from InteractionInterface
+  type: number // Using the type from InteractionInterface
 }
 
 export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterface) => {
@@ -10,14 +10,17 @@ export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterf
   let creatorFee = 0
 
   switch (type) {
-    case 'post':
+    case InteractionMultipliers.Post:
       platformFee = totalFee // 100% to platform (wecoop)
       creatorFee = 0
       break
 
-    case 'like':
-    case 'reply':
-      platformFee = Math.floor(totalFee / 3) // Integer division for platform fee
+    case InteractionMultipliers.Like:
+      platformFee = totalFee / 3 // Integer division for platform fee
+      creatorFee = totalFee - platformFee // The remaining goes to creator
+      break
+    case InteractionMultipliers.Reply:
+      platformFee = totalFee / 3 // Integer division for platform fee
       creatorFee = totalFee - platformFee // The remaining goes to creator
       break
 
@@ -26,7 +29,7 @@ export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterf
   }
 
   return {
-    platformFee,
-    creatorFee,
+    platformFee: Math.floor(platformFee),
+    creatorFee: Math.floor(creatorFee),
   }
 }

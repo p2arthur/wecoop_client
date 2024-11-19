@@ -1,7 +1,9 @@
 import algosdk from 'algosdk'
 import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
-import { Fees } from '../enums/Fees'
+import { UsableAssetInterface } from '../context/UsableAsset/UsableAssetContext'
 import { NotePrefix } from '../enums/notePrefix'
+import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
+import { splitFeeByInteractionType } from '../utils/interaction_pricing/splitFeeByInteractionType'
 import { getUserCountry } from '../utils/userUtils'
 import { Transaction } from './Transaction'
 
@@ -10,28 +12,38 @@ interface LikeProps {
   creatorAddress: string
   transactionId: string
   address: string
-  token: number
+  usableAsset: UsableAssetInterface
 }
 
 export class Like {
   constructor(private client: AlgodClient) {}
 
-  public async handlePostLike({ event, creatorAddress, transactionId, address, token }: LikeProps) {
+  public async handlePostLike({ event, creatorAddress, transactionId, address, usableAsset }: LikeProps) {
     const transactionService = new Transaction(this.client)
-    const wecoopFee = Fees.LikeWecoopFee
-    const creatorFee = Fees.LikeUserFee
+
+    // Calculate the fee price based on the asset
+    const feePrice = await getFeePriceByAsset(usableAsset.assetId, InteractionMultipliers.Post)
+
+    // Split the fee by interaction type
+    const splitFee = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.Like })
+
     const wecoopWalletAddress = import.meta.env.VITE_WECOOP_MAIN_ADDRESS as string
 
     event.preventDefault()
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopLike}${country}:${transactionId}`
-    const scoopFeeTransaction = await transactionService.createTransaction(address, wecoopWalletAddress, wecoopFee, note)
+    const scoopFeeTransaction = await transactionService.createTransaction(
+      address,
+      wecoopWalletAddress,
+      Math.floor(splitFee.platformFee),
+      note,
+    )
     const postCreatorFee = await transactionService.createTransaction(
       address,
       creatorAddress,
-      creatorFee,
+      Math.floor(splitFee.creatorFee),
       `WeCoop - ${address} just liked your post`,
-      token,
+      usableAsset.assetId,
     )
 
     const transactionsArray = [scoopFeeTransaction, postCreatorFee]

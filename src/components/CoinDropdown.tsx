@@ -37,7 +37,10 @@ export const CoinDropdown = ({ usableAsset, selectedAsset, setSelectorOpen, hand
           <FaAngleDown />
         </div>
         {selectorOpen && (
-          <ul className="absolute overflow-x-hidden bg-white dark:bg-gray-900 border-2 border-black  border-b-4 mt-2 w-56 dark:border-gray-500 -translate-x-1/2 left-3/4 md:left-1/2 z-10 max-h-64 overflow-y-auto select-none">
+          <ul
+            className="absolute overflow-x-hidden bg-white dark:bg-gray-900 border-2 border-black  border-b-4 mt-2 w-56 dark:border-gray-500 -translate-x-1/2 left-2/4 md:-left-0
+          z-50 max-h-64 overflow-y-auto select-none"
+          >
             {usableAssetsList.map((asset) => (
               <li
                 key={asset.assetId}

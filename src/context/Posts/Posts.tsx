@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useGetFeedByMongo, useGetPostByTransactionId } from '../../services/api/Posts'
-import { Daum, Like, Poll } from '../../services/api/types'
+import { Daum, FilePost, Like, Poll } from '../../services/api/types'
 
 export enum AssetId {
   coopCoin = 796425061,
@@ -17,7 +17,7 @@ export type FeedType = 'personalized' | 'global' | 'coinFeed'
 type IPostsContext = {
   postList: Daum[] | null
   handleGetPostByAddress(address: string): Daum | undefined
-  handleAddNewPost(post: Daum | Poll): void
+  handleAddNewPost(post: Daum | Poll | FilePost): void
   handleNewReply(newReply: Daum, transactionCreatorId: string): void
   handleNewLike(newLike: { creator_address: any }, transactionCreatorId: string): void
   handleDeleteLoadingPost(transactionCreatorId: string): void
@@ -126,7 +126,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
     }
   }
 
-  const handleAddNewPost = (post: Daum) => {
+  const handleAddNewPost = (post: Daum | FilePost) => {
     setPostList((prevPosts) => [post, ...(prevPosts || [])])
   }
 
