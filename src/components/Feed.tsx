@@ -43,8 +43,6 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
     feedContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  console.log('post list', postList)
-
   const paginatedPosts: Daum[] | undefined = postList?.slice(0, currentPage * postsPerPage)
 
   useEffect(() => {

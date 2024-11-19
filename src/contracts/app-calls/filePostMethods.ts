@@ -14,7 +14,6 @@ const algodPort = getAlgodConfigFromViteEnvironment().port
 const algod = new algosdk.Algodv2(algodToken as AlgodTokenHeader, algodServer, algodPort)
 
 export const createAppClient = (senderAddress: string, signer: TransactionSigner) => {
-  console.log('sender', senderAddress, signer)
   const wecoopFilePostAppId = Number(import.meta.env.VITE_WECOOP_FILEPOST_APP_ID)
 
   const appClient = new WecoopFilePostClient(
@@ -63,8 +62,6 @@ export const createOnChainFilePost = async (
 
   const filePostWithId = { ...filePost, filepost_id: Number(totalFilePosts.value) + 1 }
 
-  console.log('filepostwithid', filePostWithId)
-
   try {
     const result = await appClient.createFilePost({
       mbrTxn,
@@ -76,8 +73,6 @@ export const createOnChainFilePost = async (
     })
 
     const { data: filePostData } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/create-file-post`, filePostWithId)
-
-    console.log('result of interacting with contract', result)
 
     return result
   } catch (error) {
@@ -118,8 +113,6 @@ export const likeOnChainFilePost = async (sender: string, assetId: number, signe
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
 
-  console.log('assetId', assetId)
-
   const creatorFee = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,
     to: post.creator_address,
@@ -127,8 +120,6 @@ export const likeOnChainFilePost = async (sender: string, assetId: number, signe
     amount: splitFee.creatorFee,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
-
-  console.log('post', post)
 
   try {
     const result = await appClient.likeFilePost({
@@ -142,8 +133,6 @@ export const likeOnChainFilePost = async (sender: string, assetId: number, signe
     const filePostLikeData = { creator_address: sender, filepost_id: post.filepost_id! }
 
     await axios.post(`${import.meta.env.VITE_WECOOP_API}/file-post/like`, filePostLikeData)
-
-    console.log('result of liking a file post', result)
   } catch (error) {
     console.error('error creating like', error)
     throw new Error(String(error))
@@ -188,8 +177,6 @@ export const replyOnChainPost = async (
     amount: splitFee.platformFee,
     suggestedParams: await algokit.getTransactionParams(undefined, algod),
   })
-
-  console.log('assetId', assetId)
 
   const creatorFee = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: sender,

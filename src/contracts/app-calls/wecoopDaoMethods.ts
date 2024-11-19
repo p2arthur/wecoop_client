@@ -160,7 +160,6 @@ export const makeVote = async (
 
     const fees = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.CreatePoll })
 
-    console.log('fee price ', fees)
     const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
       suggestedParams: suggestedParams,

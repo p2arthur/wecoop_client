@@ -105,7 +105,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     e.preventDefault()
 
     let formAction: Promise<void>
-    console.log(postType)
 
     if (postType === 'poll' && !uploadFile) {
       formAction = handleCreatePoll()
@@ -482,7 +481,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
               onDrop={(e) => {
                 e.preventDefault()
                 setIsDraggingWithImage(false)
-                console.log('e.dataTransfer.files', e.dataTransfer.files)
+
                 if (e.dataTransfer.files && e.dataTransfer.files[0]) {
                   handleFile(e.dataTransfer.files[0]) // Chama handleFile com o arquivo arrastado
                 }

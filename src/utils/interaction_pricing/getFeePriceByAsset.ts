@@ -31,11 +31,7 @@ export const getFeePriceByAsset = async (assetId: number, type: InteractionMulti
 
   const { data } = await axios.get(`https://free-api.vestige.fi/asset/${assetId}/price`)
 
-  console.log('data', data, 'decimals', decimals)
-
   const assetUsdPrice = data['USD']
-
-  console.log('basePrice', basePrice, assetUsdPrice, 'type', type)
 
   const feePrice = (basePrice / assetUsdPrice) * type
 

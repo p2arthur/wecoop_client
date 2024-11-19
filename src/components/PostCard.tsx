@@ -106,8 +106,6 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   }
 
   const handleDefaultPostLike = async (event: React.FormEvent) => {
-    console.log('default post like')
-
     try {
       const encodedGroupedTransactions = await likeService.handlePostLike({
         event,
@@ -133,21 +131,24 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
   }
 
   const handleFilePostLike = async (event: React.FormEvent) => {
+    setIsLoadingLike(true)
     event.preventDefault()
 
-    console.log('post id', post.filepost_id)
     try {
       const result = await likeOnChainFilePost(activeAccount?.address!, usableAsset.assetId, signer, post)
-      console.log('result of liking a file post', result)
+
+      setIsLoadingLike(false)
     } catch (error) {
+      setIsLoadingLike(false)
       console.error('error liking file post', error)
     }
   }
 
   const handleFilePostReply = async () => {
+    setIsLoadingReply(true)
     const country = await getUserCountry()
     setUserContry(country)
-    console.log('post', post)
+
     const result = await replyOnChainPost(
       activeAccount?.address!,
       country,
@@ -156,6 +157,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
       post,
       encodeURIComponent(replyText),
     )
+
+    setIsLoadingReply(false)
   }
 
   const defineLikeAction = async (event: React.FormEvent) => {
