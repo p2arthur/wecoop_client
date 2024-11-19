@@ -4,14 +4,13 @@ import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod'
 import { minidenticon } from 'minidenticons'
 import { Fragment, useState } from 'react'
 import { FaMagnifyingGlass, FaRegMessage, FaRegThumbsUp, FaSpinner } from 'react-icons/fa6'
-import { MdTravelExplore } from 'react-icons/md'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { usePosts } from '../../context/Posts/Posts'
 import { useUsableAsset } from '../../context/UsableAsset/UsableAssetContext'
 import { usableAssetsList } from '../../data/usableAssetsList'
 import { useCreateLike, useCreateReply } from '../../services/api/Posts'
-import { Daum } from '../../services/api/types'
+import { Daum, FilePost } from '../../services/api/types'
 import { useGetUserInfo } from '../../services/api/Users'
 import { Like } from '../../services/Like'
 import { Reply } from '../../services/Reply'
@@ -22,7 +21,7 @@ import { getUserCountry } from '../../utils/userUtils'
 import { ShareButton } from '../ShareButton'
 
 interface FilePostPropsInterface {
-  post: Daum | IReply | FilePost
+  post: FilePost
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
   imagesVisible: boolean
@@ -108,19 +107,19 @@ const FilePostCard = ({ post, variant = 'default', handleNewReply, imagesVisible
         event,
         creatorAddress: post.creator_address,
         address: activeAccount?.address || '',
-        transactionId: post.transaction_id as string,
-        token: usableAsset.assetId,
+        transactionId: String(post.filepost_id),
+        usableAsset: usableAsset,
       })
 
       const signedTransactions = await signTransactions(encodedGroupedTransactions)
       const waitRoundsToConfirm = 4
 
       const like = await sendTransactions(signedTransactions, waitRoundsToConfirm)
-      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
+      handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, String(post.filepost_id))
       createLike({
         creator_address: userData?.address || '',
         transaction_id: like.id,
-        post_transaction_id: post.transaction_id as string,
+        post_transaction_id: String(post.filepost_id),
       })
 
       setIsLoadingLike(false)
@@ -138,13 +137,13 @@ const FilePostCard = ({ post, variant = 'default', handleNewReply, imagesVisible
     try {
       setIsLoadingReply(true)
       const country = await getUserCountry()
-      setUserContry(country)
+      // setUserContry(country)
 
-      const parentReplyId = post.transaction_id as string
+      const parentReplyId = String(post.filepost_id)
       const encodedGroupedTransactions = await replieservice.handlePostReply({
         creatorAddress: userData?.address || '',
         address: activeAccount?.address || '',
-        transactionId: post.transaction_id as string,
+        transactionId: String(post.filepost_id),
         text: encodeURIComponent(replyText),
         assetId: usableAsset.assetId,
       })
@@ -194,19 +193,19 @@ const FilePostCard = ({ post, variant = 'default', handleNewReply, imagesVisible
   }
 
   const handleGoToPostPage = () => {
-    window.location.href = `/post?id=${post.transaction_id}`
+    window.location.href = `/post?id=${post.filepost_id}`
   }
 
-  const handleViewImage1 = () => {
-    setViewImage1(!viewImage1)
-  }
+  // const handleViewImage1 = () => {
+  //   setViewImage1(!viewImage1)
+  // }
 
   return (
     <>
       <div>
         {post.status === 'loading' ? (
           <div
-            key={post.transaction_id}
+            key={post.filepost_id}
             className="border-2 opacity-80 animate-pulse border-gray-900 flex p-2 hover:bg-gray-100 transition-all duration-75 cursor-pointer justify-between"
           >
             <div className="flex flex-col">
@@ -304,16 +303,7 @@ const FilePostCard = ({ post, variant = 'default', handleNewReply, imagesVisible
                       </>
                     )}
                   </div>
-                  <button
-                    className={
-                      'cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center'
-                    }
-                  >
-                    <a target="_blank" href={`https://allo.info/tx/${post.transaction_id}`}>
-                      <MdTravelExplore className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
-                    </a>
-                  </button>
-                  <ShareButton id={post.transaction_id || ''} />
+                  <ShareButton id={String(post.filepost_id) || ''} />
                 </div>
                 <div className="flex flex-col md:gap-2 md:hidden">
                   {post.country ? (

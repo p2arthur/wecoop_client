@@ -17,7 +17,7 @@ export interface InteractionFee {
   creatorFee: number
 }
 
-export const getFeePriceByAsset = async (assetId: number, type: InteractionMultipliers): Promise<number | null> => {
+export const getFeePriceByAsset = async (assetId: number, type: number): Promise<number | null> => {
   // Define a base price for the asset (for example purposes)
   const basePrice = import.meta.env.VITE_WECOOP_BASE_PRICE
 

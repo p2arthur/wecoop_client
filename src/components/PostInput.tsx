@@ -247,23 +247,23 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
     }
   }
 
-  const handleCrustUpload = async (country: string) => {
+  const handleCrustUpload = async (country: string): Promise<FilePost | undefined> => {
+    const filePostBackend = {
+      text: inputText,
+      creator_address: activeAccount?.address!,
+      timestamp: Math.floor(new Date().getTime() / 1000),
+      country: country,
+      assetId: usableAsset.assetId,
+      file_1_cid: '',
+      file_1_format: 'png',
+    }
+
     try {
       const response = uploadFile!
 
-      const filePostBackend = {
-        text: inputText,
-        creator_address: activeAccount?.address!,
-        timestamp: Math.floor(new Date().getTime() / 1000),
-        country: country,
-        assetId: usableAsset.assetId,
-        file_1_cid: '',
-        file_1_format: 'png',
-      }
-
       const filePostFrontend: FilePost = {
         text: inputText,
-        creator_address: activeAccount?.address!,
+        creator_address: activeAccount?.address || '',
         timestamp: Math.floor(new Date().getTime() / 1000),
         country: country,
         assetId: usableAsset.assetId,
@@ -280,6 +280,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
           addr: activeAccount?.address!,
           signer,
         },
+        activeAccount?.address!,
         filePostBackend,
         (text) => setLoadingText(text),
       )
@@ -287,27 +288,32 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       Object.assign(filePostFrontend, { file_1_cid: cid })
       Object.assign(filePostBackend, { file_1_cid: cid })
 
-      return filePostBackend
+      handleAddNewPost(filePostFrontend)
+
+      return filePostBackend as FilePost
     } catch (error) {
       console.error(error)
       setLoadingText('Failed to upload image to Crust Network')
-      return error
+      return undefined
     }
   }
 
   const handleCreateFilePost = async () => {
     const country = await getUserCountry()
+
+    console.log('creating file post')
+
     try {
       setLoadingText('Uploading image to IPFS Network...')
       setLoadingSubmit(true)
       const filePost = await handleCrustUpload(country)
 
-      const filePostFront = { ...filePost, type: 'post' }
+      if (!filePost) return
 
       setLoadingText('Creating file post on-chain, accept all transactions...')
       await createOnChainFilePost(activeAccount?.address!, usableAsset.assetId, filePost?.file_1_cid!, signer, country, filePost)
       setLoadingText('File post created successfully...')
-      handleAddNewPost(filePostFront)
+
       setLoadingSubmit(false)
       setInputText('')
       setUploadFile(undefined)

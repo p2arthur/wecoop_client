@@ -118,6 +118,22 @@ export interface Reply {
   status: 'accepted' | 'loading' | 'rejected' | string | null
   assetId: number | null
   isTopPost?: boolean
+  type?: string
+}
+
+export interface FilePost {
+  creator_address: string
+  text: string
+  timestamp: number | null
+  country: string
+  assetId: number | null
+  file_1_cid?: string
+  file_1_format?: string
+  replies?: Reply[]
+  likes?: Like[]
+  filepost_id?: number
+  type: string
+  status?: string
 }
 
 export interface ReplyResponse {

@@ -2,9 +2,9 @@ import * as algokit from '@algorandfoundation/algokit-utils'
 import { SendTransactionFrom } from '@algorandfoundation/algokit-utils/types/transaction'
 import algosdk from 'algosdk'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import { StorageOrderClient } from '../../contracts/image-upload/StorageOrderClient'
 import { FilePost } from '../../services/api/types'
-import { toast } from 'react-toastify'
 
 async function getPrice(algod: algosdk.Algodv2, appClient: StorageOrderClient, size: number, isPermanent: boolean = false) {
   const result = await (await appClient.compose().getPrice({ size, is_permanent: isPermanent }).atc()).simulate(algod)
@@ -26,7 +26,7 @@ async function getOrderNode(algod: algosdk.Algodv2, appClient: StorageOrderClien
 async function placeOrder(
   algod: algosdk.Algodv2,
   appClient: StorageOrderClient,
-  account: SendTransactionFrom,
+  address: string,
   cid: string,
   size: number,
   price: number,
@@ -34,7 +34,7 @@ async function placeOrder(
 ) {
   const merchant = await getOrderNode(algod, appClient)
   const seed = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: account.addr,
+    from: address,
     to: (await appClient.appClient.getAppReference()).appAddress,
     amount: price,
     suggestedParams: await algod.getTransactionParams().do(),
@@ -55,7 +55,8 @@ export async function pinToIpfs(
   algod: algosdk.Algodv2,
   file: File,
   account: SendTransactionFrom,
-  filePost: FilePost,
+  address: string,
+  filePost: Omit<FilePost, 'type'>,
   handleLoadingText: (text: string) => void,
 ) {
   algokit.Config.configure({ populateAppCallResources: true })
@@ -86,7 +87,7 @@ export async function pinToIpfs(
     toast(`Price for storage: ${price} microAlgos`)
 
     handleLoadingText('Placing order...')
-    await placeOrder(algod, appClient, account, cid, size, price, false)
+    await placeOrder(algod, appClient, address, cid, size, price, false)
 
     const filePostWithCid = Object.assign(filePost, { file_1_cid: cid })
 

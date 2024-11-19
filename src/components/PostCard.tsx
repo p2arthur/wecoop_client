@@ -154,7 +154,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
       country,
       usableAsset.assetId!,
       signer,
-      post,
+      post as Daum,
       encodeURIComponent(replyText),
     )
 

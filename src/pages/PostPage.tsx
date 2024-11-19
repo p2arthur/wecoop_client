@@ -30,7 +30,7 @@ const PostPage = () => {
           <p>Loading...</p>
         </div>
       ) : postWithUpdatedReplies ? (
-        <PostCard post={postWithUpdatedReplies} handleNewReply={handleNewReply} />
+        <PostCard imagesVisible={true} post={postWithUpdatedReplies} handleNewReply={handleNewReply} />
       ) : (
         <div className="flex justify-center items-center h-96">
           <p>Post not found</p>

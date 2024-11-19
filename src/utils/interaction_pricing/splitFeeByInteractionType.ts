@@ -2,7 +2,7 @@ import { InteractionMultipliers } from './getFeePriceByAsset'
 
 interface SplitFeeArgsInterface {
   totalFee: number
-  type: InteractionMultipliers // Using the type from InteractionInterface
+  type: number // Using the type from InteractionInterface
 }
 
 export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterface) => {
