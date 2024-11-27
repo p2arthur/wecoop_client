@@ -23,7 +23,7 @@ const ImageWithLoading: React.FC<ImageWithLoadingProps> = ({ cid }) => {
       )}
       <img
         className={`w-full h-auto rounded-2xl ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
-        src={`https://gateway.pinata.cloud/ipfs/${cid}`}
+        src={`https://ipfs.algonode.xyz/ipfs/${cid}`}
         onLoad={handleImageLoad}
         alt="IPFS content"
       />
