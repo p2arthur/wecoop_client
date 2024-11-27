@@ -118,6 +118,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
       const signedTransactions = await signTransactions(encodedGroupedTransactions)
       const waitRoundsToConfirm = 4
 
+      try {
+        const like = await sendTransactions(signedTransactions, waitRoundsToConfirm)
+      } catch (error) {
+        console.error('error', error)
+      }
       const like = await sendTransactions(signedTransactions, waitRoundsToConfirm)
       handleNewLike && handleNewLike({ creator_address: userData?.address || '' }, post.transaction_id as string)
       createLike({
