@@ -21,6 +21,7 @@ import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
+import DecodingText from './DecodeText'
 import ImageWithLoading from './ImageWithLoading/ImageWithLoading'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
@@ -296,9 +297,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                   <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt="" />
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
-                  <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
-                    {userData?.nfd?.name ? userData?.nfd?.name.replace('.algo', '').toUpperCase() : ellipseAddress(post.creator_address)}{' '}
-                  </h2>
+                  <DecodingText
+                    finalText={ellipseAddress(post.creator_address)}
+                    speed={100}
+                    initialText={userData?.nfd?.name?.replace('.algo', '').toUpperCase()}
+                    className='font-bold text-lg md:text-xl h-full underline hover:text-blue-500' />
                 </a>
               </div>
               <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
@@ -320,9 +323,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
               {post.file_1_cid ? (
                 <div className="relative flex  py-3">
                   <div
-                    className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${
-                      imagesVisible ? 'hidden' : ''
-                    }`}
+                    className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${imagesVisible ? 'hidden' : ''
+                      }`}
                   >
                     <p>View image</p>
                     <FaMagnifyingGlass />
