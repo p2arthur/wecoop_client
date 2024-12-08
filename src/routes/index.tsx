@@ -4,15 +4,15 @@ import { useEffect, useState } from 'react'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import NavBar from '../components/NavBar'
 import Whitepaper from '../pages/About'
-import FeedPage from '../pages/FeedPage'
 import Feed from '../pages/Feed'
+import FeedPage from '../pages/FeedPage'
+import { Home } from '../pages/Home'
+import { PollFeed } from '../pages/PollFeed'
 import PostPage from '../pages/PostPage'
 import ProfilePage from '../pages/ProfilePage'
 import { User } from '../services/User'
 import { User as UserInterface } from '../services/api/types'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
-import { Home } from '../pages/Home'
-import { PollFeed } from '../pages/PollFeed'
 
 export const Router = () => {
   const { activeAccount } = useWallet()

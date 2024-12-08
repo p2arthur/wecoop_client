@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
+import { FaShareNodes } from 'react-icons/fa6'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import packageJson from '../../../package.json'
 import { AssetId, FeedType, usePosts } from '../../context/Posts/Posts'
 import { usableAssetsList } from '../../data/usableAssetsList'
-import { FaShareNodes } from 'react-icons/fa6'
-import { toast } from 'react-toastify'
-import { useNavigate } from 'react-router-dom'
 
 interface IMenuFeed {
   hasFeedPosts: boolean
