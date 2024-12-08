@@ -1076,16 +1076,6 @@
   dependencies:
     "@tanstack/query-core" "5.14.1"
 
-"@tinymanorg/tinyman-js-sdk@^4.0.5":
-  version "4.0.5"
-  resolved "https://registry.npmjs.org/@tinymanorg/tinyman-js-sdk/-/tinyman-js-sdk-4.0.5.tgz"
-  integrity sha512-OQ9snq/iMprqnRMJANPYntMnNZ9s5qKqd5ZfHb+JWdlPryoTxiWEMoRnsuqlvHI9MTRZvyfaRcAiOODQPj3a3Q==
-  dependencies:
-    algosdk "^2.8.0"
-    base64-js "^1.5.1"
-    multiformats "^13.2.1"
-    uuid "^10.0.0"
-
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
   resolved "https://registry.npmjs.org/@tsconfig/node10/-/node10-1.0.9.tgz"

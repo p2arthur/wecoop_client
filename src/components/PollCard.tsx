@@ -73,11 +73,11 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
       const assetDecimals = await getAssetDecimals(algod, assetId)
       const assetVotePrice = await getFeePriceByAsset(assetId, InteractionMultipliers.VotePoll)
 
-      if (assetVotePrice && !hasSufficientFunds(user.balance[assetId], assetVotePrice)) {
-        showToast('You do not have enough funds to vote')
-        setIsVoting(false)
-        return
-      }
+      // if (assetVotePrice && !hasSufficientFunds(user.balance[assetId], assetVotePrice)) {
+      //   showToast('You do not have enough funds to vote')
+      //   setIsVoting(false)
+      //   return
+      // }
       if (!daoAssetId) return
 
       // Attempt to make the vote and await confirmation
@@ -93,13 +93,9 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
         poll.depositedAmount,
       )
 
-      if (result.status === 'success') {
-        updateVoteCounts(inFavor)
-        createVoteRecord(pollId, activeAccount.address)
-        finalizeVoting(true, 'Your vote into the wecoop poll was accepted')
-      } else {
-        throw new Error('Transaction failed or not confirmed')
-      }
+      updateVoteCounts(inFavor)
+      createVoteRecord(pollId, activeAccount.address)
+      finalizeVoting(true, 'Your vote into the wecoop poll was accepted')
     } catch (error) {
       finalizeVoting(false, 'Your vote failed, try again later')
     }
