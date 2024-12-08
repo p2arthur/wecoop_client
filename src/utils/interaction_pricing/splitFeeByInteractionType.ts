@@ -9,6 +9,8 @@ export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterf
   let platformFee = 0
   let creatorFee = 0
 
+  console.log('type', type)
+
   switch (type) {
     case InteractionMultipliers.Post:
       platformFee = totalFee // 100% to platform (wecoop)
@@ -23,10 +25,17 @@ export const splitFeeByInteractionType = ({ totalFee, type }: SplitFeeArgsInterf
       platformFee = totalFee / 3 // Integer division for platform fee
       creatorFee = totalFee - platformFee // The remaining goes to creator
       break
+    case InteractionMultipliers.VotePoll:
+      console.log('vote poll')
+      platformFee = totalFee / 3 // Integer division for platform fee
+      creatorFee = totalFee - platformFee // The remaining goes to creator
+      break
 
     default:
       throw new Error('Invalid interaction type')
   }
+
+  console.log('Platform fee', platformFee, 'creator fee', creatorFee)
 
   return {
     platformFee: Math.floor(platformFee),

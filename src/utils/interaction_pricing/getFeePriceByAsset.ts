@@ -6,7 +6,7 @@ export enum InteractionMultipliers {
   Reply = 1.5,
   Like = 1,
   CreatePoll = 10,
-  VotePoll = 0.5,
+  VotePoll = 1.7,
   FilePost = 11,
   FilePostLike = 2,
   FilePostReply = 3,
@@ -18,32 +18,38 @@ export interface InteractionFee {
 }
 
 export const getFeePriceByAsset = async (assetId: number, type: number): Promise<number | null> => {
-  // Define a base price for the asset (for example purposes)
-  const basePrice = import.meta.env.VITE_WECOOP_BASE_PRICE
+  try {
+    // Define a base price for the asset (for example purposes)
+    const basePrice = import.meta.env.VITE_WECOOP_BASE_PRICE
 
-  const decimals = usableAssetsList.find((asset) => asset.assetId == assetId)?.decimals
+    const decimals = usableAssetsList.find((asset) => asset.assetId == assetId)?.decimals
 
-  const priceApiUrl = `https://free-api.vestige.fi/asset/${assetId}/price`
+    const priceApiUrl = `https://free-api.vestige.fi/asset/${assetId}/price`
 
-  if (assetId === 0) {
-    return null
-  }
+    if (assetId === 0) {
+      return null
+    }
 
-  const { data } = await axios.get(`https://free-api.vestige.fi/asset/${assetId}/price`)
+    const { data } = await axios.get(priceApiUrl)
 
-  const assetUsdPrice = data['USD']
+    const assetUsdPrice = data['USD']
 
-  const feePrice = (basePrice / assetUsdPrice) * type
+    const feePrice = (basePrice / assetUsdPrice) * type
 
-  //FIxin fee bugs
-  const a200Id = 1682662165
-  const oraId = 1284444444
+    //FIxin fee bugs
+    const a200Id = 1682662165
+    const oraId = 1284444444
 
-  if (assetId === a200Id) {
-    return Math.floor(feePrice / 1000)
-  } else if (assetId === oraId) {
-    return Math.floor(feePrice * 100)
-  } else {
-    return Math.floor(feePrice) * 10 ** decimals!
+    if (assetId === a200Id) {
+      return Math.floor(feePrice / 1000)
+    } else if (assetId === oraId) {
+      return Math.floor(feePrice * 100)
+    } else {
+      console.log('Fee price', feePrice)
+      return Math.floor(feePrice * 10 ** decimals!)
+    }
+  } catch (error) {
+    console.error('error')
+    return 0
   }
 }

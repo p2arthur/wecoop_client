@@ -133,20 +133,23 @@ export const makeVote = async (
   inFavor: boolean,
   pollCreator: string,
   pollDepositPrice: number,
-): Promise<WithdrawPollShareResult> => {
+): Promise<void> => {
   try {
+    console.log('Casting vote')
     const { appAddress } = await appClient.appClient.getAppReference()
     const suggestedParams = await algokit.getTransactionParams(undefined, algod)
     const assetDecimals = await getAssetDecimals(algodClient, asset)
 
+    console.log('params', suggestedParams)
     const mbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: sender,
       to: appAddress,
-      amount: 3_450,
+      amount: 4_450,
       suggestedParams: suggestedParams,
     })
 
-    const pollDepositMultiplier = 2
+    console.log('asset', asset)
+
     // Calculate the fee price based on the asset
     const feePrice = await getFeePriceByAsset(asset, InteractionMultipliers.VotePoll)
 
@@ -158,7 +161,11 @@ export const makeVote = async (
       assetIndex: asset,
     })
 
-    const fees = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.CreatePoll })
+    console.log('fee price !*E*@#!#&!@&#', feePrice)
+
+    const fees = splitFeeByInteractionType({ totalFee: feePrice!, type: InteractionMultipliers.VotePoll })
+
+    console.log('total fee', fees)
 
     const platformFeeTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: sender,
@@ -186,10 +193,6 @@ export const makeVote = async (
       deposited_amount: pollDepositPrice,
     }
 
-    // Dynamic axios request to register vote data
-    await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/vote`, voteData)
-
-    // Executa a transação no Algorand
     const result = await appClient.makeVote(
       {
         pollId: [pollId],
@@ -202,35 +205,29 @@ export const makeVote = async (
       { sender: { addr: sender, signer } },
     )
 
-    // Verifique a confirmação da transação antes de retornar sucesso
-    const confirmed = await waitForTransactionConfirmation(algodClient, result.transaction.txID())
-    if (confirmed) {
-      return { status: 'success', result }
-    } else {
-      throw new Error('Transaction not confirmed')
-    }
+    await axios.post(`${import.meta.env.VITE_WECOOP_API}/polls/vote`, voteData)
   } catch (error) {
-    return { status: 'error', error }
+    throw new Error('Error')
   }
 }
 
-// Função para verificar a confirmação da transação
-const waitForTransactionConfirmation = async (algodClient: AlgodClient, txId: string) => {
-  try {
-    const timeout = 60000 // 60 segundos de espera máxima
-    const start = Date.now()
-    while (Date.now() - start < timeout) {
-      const response = await algodClient.pendingTransactionInformation(txId).do()
-      if (response && response['confirmed-round']) {
-        return true
-      }
-      await new Promise((resolve) => setTimeout(resolve, 2000)) // Espera 2 segundos antes de tentar de novo
-    }
-    return false // Não confirmou a transação dentro do tempo limite
-  } catch (err) {
-    return false // Erro ao verificar a confirmação
-  }
-}
+// // Função para verificar a confirmação da transação
+// const waitForTransactionConfirmation = async (algodClient: AlgodClient, txId: string) => {
+//   try {
+//     const timeout = 60000 // 60 segundos de espera máxima
+//     const start = Date.now()
+//     while (Date.now() - start < timeout) {
+//       const response = await algodClient.pendingTransactionInformation(txId).do()
+//       if (response && response['confirmed-round']) {
+//         return true
+//       }
+//       await new Promise((resolve) => setTimeout(resolve, 2000)) // Espera 2 segundos antes de tentar de novo
+//     }
+//     return false // Não confirmou a transação dentro do tempo limite
+//   } catch (err) {
+//     return false // Erro ao verificar a confirmação
+//   }
+// }
 
 export const withdrawPollShare = async (
   appClient: WecoopDaoClient,
