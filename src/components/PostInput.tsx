@@ -248,6 +248,10 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   }
 
   const handleCrustUpload = async (country: string): Promise<FilePost | undefined> => {
+    const fileType = uploadFile?.type
+
+    console.log('file type', fileType)
+
     const filePostBackend = {
       text: inputText,
       creator_address: activeAccount?.address!,
@@ -255,7 +259,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
       country: country,
       assetId: usableAsset.assetId,
       file_1_cid: '',
-      file_1_format: 'png',
+      file_1_format: fileType,
     }
 
     try {
@@ -268,7 +272,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
         country: country,
         assetId: usableAsset.assetId,
         file_1_cid: '',
-        file_1_format: 'png',
+        file_1_format: fileType,
         type: 'post',
       }
 
