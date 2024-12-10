@@ -62,6 +62,7 @@ export async function pinToIpfs(
   algokit.Config.configure({ populateAppCallResources: true })
 
   handleLoadingText('Pinning to ipfs...')
+  console.log('pinning to ipfs')
 
   const appClient = new StorageOrderClient(
     {
@@ -76,7 +77,11 @@ export async function pinToIpfs(
     const formData = new FormData()
     formData.append('file', file)
 
+    console.log('file', file)
+
     const { data } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ipfs-crust-factory/ipfs_factory`, formData)
+
+    console.log('ipfs data', data)
 
     const { cid, size } = data
 

@@ -250,8 +250,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const handleCrustUpload = async (country: string): Promise<FilePost | undefined> => {
     const fileType = uploadFile?.type
 
-    console.log('file type', fileType)
-
     const filePostBackend = {
       text: inputText,
       creator_address: activeAccount?.address!,
