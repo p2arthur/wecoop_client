@@ -21,7 +21,7 @@ import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
-import ImageWithLoading from './ImageWithLoading/ImageWithLoading'
+import FileWithLoading from './FileWithLoading/FileWithLoading'
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
 
@@ -317,17 +317,16 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
             <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
               <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
 
-              {post.file_1_cid ? (
+              {post.file_1_cid && post.file_1_format ? (
                 <div className="relative flex  py-3">
                   <div
-                    className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${
-                      imagesVisible ? 'hidden' : ''
-                    }`}
+                    className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${imagesVisible ? 'hidden' : ''
+                      }`}
                   >
                     <p>View image</p>
                     <FaMagnifyingGlass />
                   </div>
-                  <ImageWithLoading cid={post.file_1_cid} />
+                  <FileWithLoading cid={post.file_1_cid} format={post.file_1_format} />
                 </div>
               ) : null}
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
