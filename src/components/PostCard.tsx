@@ -21,8 +21,8 @@ import { Daum, Reply as IReply, User } from '../services/api/types'
 import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
-import FileWithLoading from './FileWithLoading/FileWithLoading'
 import DecodingText from './DecodeText'
+import FileWithLoading from './FileWithLoading/FileWithLoading'
 
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
@@ -59,7 +59,7 @@ export const handleTextPost = (text: string) => {
     if (urlRegex.test(part)) {
       return (
         <Fragment key={index}>
-          <a href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">
+          <a href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-300 underline break-all">
             {part}
           </a>
         </Fragment>
@@ -318,30 +318,31 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
               </div>
             </div>
 
-            <div className="gap-2 w-full" onClick={(e) => e.stopPropagation()}>
-              <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
+            <div className="gap-2 w-full flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+              <div className="py-2 border-y-2 border-gray-500/10">
+                <p className="tracking-wide break-words w-full">{post?.text?.length > 0 && handleTextPost(post.text)}</p>
 
-              {post.file_1_cid && post.file_1_format ? (
-                <div className="relative flex  py-3">
-                  <div
-                    className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${imagesVisible ? 'hidden' : ''
-                      }`}
-                  >
-                    <p>View image</p>
-                    <FaMagnifyingGlass />
+                {post.file_1_cid && post.file_1_format ? (
+                  <div className="relative flex  py-3">
+                    <div
+                      className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${imagesVisible ? 'hidden' : ''
+                        }`}
+                    >
+                      <p>View image</p>
+                      <FaMagnifyingGlass />
+                    </div>
+                    <FileWithLoading cid={post.file_1_cid} format={post.file_1_format} />
                   </div>
-                  <FileWithLoading cid={post.file_1_cid} format={post.file_1_format} />
-                </div>
-              ) : null}
+                ) : null}</div>
               <div className={'flex w-full items-center gap-1 text-md justify-between md:justify-end'}>
                 <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
-                  <img className="h-6 w-6 rounded-full" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} />
+                  <div className="flex items-center gap-2"><h3 className="hidden">Created with ${currentPostUsableAsset?.name}</h3><img className="h-10 w-10 rounded-full" src={currentPostUsableAsset?.image} alt={`${post.assetId}-icon`} /></div>
                   {variant === 'default' && (
                     <button
                       className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                       onClick={() => setOpenReplyInput(!openReplyInput)}
                     >
-                      <FaRegMessage className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
+                      <FaRegMessage className="text-2xl group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500" />
                       <p className="text-md group-hover:text-gray-100 dark:group-hover:text-gray-900 hover:text-blue-500">
                         {post?.replies?.length}
                       </p>
@@ -357,7 +358,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                           className="cursor-pointer rounded-lg gap-1 p-1 hover:bg-gray-900 dark:hover:bg-gray-100 group transition-all flex items-center justify-center"
                           onClick={handlePostLike}
                         >
-                          <FaRegThumbsUp className="text-lg group-hover:text-gray-100 dark:group-hover:text-gray-900" />
+                          <FaRegThumbsUp className="text-2xl group-hover:text-gray-100 dark:group-hover:text-gray-900" />
                           {<p className="group-hover:text-gray-100 dark:group-hover:text-gray-900">{post?.likes?.length}</p>}
                         </button>
                       </>

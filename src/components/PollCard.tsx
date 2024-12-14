@@ -250,9 +250,8 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
       <div className="bg-red-300 h-full" id={`vote-card-${poll.pollId}`}>
         {poll.status === 'accepted' || poll.status === 'loading' ? (
           <div
-            className={` ${poll.status === 'loading' ? 'animate-pulse opacity-70' : null} ${
-              type === 'poll' ? 'min-h-[350px]' : ''
-            }  relative border-4 border-yellow-400 h-full gap-2 flex flex-col p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
+            className={` ${poll.status === 'loading' ? 'animate-pulse opacity-70' : null} ${type === 'poll' ? 'min-h-[350px]' : ''
+              }  relative border-4 border-yellow-400 h-full gap-2 flex flex-col p-4 hover:bg-gray-100 h-content transition-all duration-75 cursor-pointer dark:border-yellow-700 bg-white dark:bg-gray-900`}
           >
             {/* Overlay Loading Spinner if still loading */}
             <div className="flex justify-end py-1 items-center h-8 gap-4">
@@ -322,24 +321,28 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                   <p className="tracking-wide break-words w-full font-bold">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
                 </div>
                 <div className="h-full flex flex-col justify-end">
-                  <div className="flex w-full select-none">
+                  <div className="flex w-full select-none py-2">
                     <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
-                      <span>Prize pool: </span>
-                      <CountUp end={Number(pollPrize)} duration={2} />
-                      <div className="rounded-full overflow-hidden animate-bounce w-8 h-8">
-                        <img
-                          className="h-full w-full"
-                          src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
-                          alt=""
-                        />
+                      <span>Prize pool 💰: </span>
+                      <div className="flex border-b-2 items-center gap-2">
+                        <CountUp className='text-3xl' end={Number(pollPrize)} duration={2} />
+                        <h3>{usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name}</h3>
+                        <div className="rounded-full overflow-hidden animate-bounce w-10 h-10">
+                          <img
+                            className="h-full w-full"
+                            src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
+                            alt=""
+                          />
+
+                        </div>
                       </div>
-                      <h2>- ~${prizeDollarValue.toFixed(2)}</h2>
+                      <h2 className="text-3xl">- ~${prizeDollarValue.toFixed(2)}</h2>
                     </h2>
                   </div>
 
                   {isVoted ||
-                  (activeAccount?.address && checkIsCreator(activeAccount?.address)) ||
-                  poll.expiry_timestamp! * 1000 < Date.now() ? (
+                    (activeAccount?.address && checkIsCreator(activeAccount?.address)) ||
+                    poll.expiry_timestamp! * 1000 < Date.now() ? (
                     <div className={'w-full relative flex flex-col gap-3'}>
                       <ProgressBar
                         className={'w-full '}
@@ -408,10 +411,10 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                     </div>
                   ) : null}
                   {activeAccount?.address &&
-                  !checkVoted(activeAccount.address) &&
-                  !isVoted &&
-                  poll.expiry_timestamp * 1000 > Date.now() &&
-                  !checkIsCreator(activeAccount.address) ? (
+                    !checkVoted(activeAccount.address) &&
+                    !isVoted &&
+                    poll.expiry_timestamp * 1000 > Date.now() &&
+                    !checkIsCreator(activeAccount.address) ? (
                     <div className={'w-full flex justify-center items-center gap-6'}>
                       {isVoting ? (
                         <div className="flex gap-2 items-center text-center h-10 mt-2 px-2 border-b-4 text-white border-gray-900 dark:border-white bg-yellow-500 dark:bg-yellow-500 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold">
