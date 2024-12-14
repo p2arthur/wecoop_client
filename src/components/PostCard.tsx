@@ -22,6 +22,8 @@ import formatDateFromTimestamp from '../utils'
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { getUserCountry } from '../utils/userUtils'
 import FileWithLoading from './FileWithLoading/FileWithLoading'
+import DecodingText from './DecodeText'
+
 import { ReplyInput } from './ReplyInput'
 import { ShareButton } from './ShareButton'
 
@@ -296,9 +298,11 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                   <img className="w-full bg-cover" src={userData?.nfd?.avatar || generateIdIcon(post.creator_address!)} alt="" />
                 </div>
                 <a href={`/profile/${post.creator_address}`}>
-                  <h2 className="font-bold text-lg md:text-xl h-full underline hover:text-blue-500">
-                    {userData?.nfd?.name ? userData?.nfd?.name.replace('.algo', '').toUpperCase() : ellipseAddress(post.creator_address)}{' '}
-                  </h2>
+                  <DecodingText
+                    finalText={ellipseAddress(post.creator_address)}
+                    speed={100}
+                    initialText={userData?.nfd?.name?.replace('.algo', '').toUpperCase()}
+                    className='font-bold text-lg md:text-xl h-full underline hover:text-blue-500' />
                 </a>
               </div>
               <div className="md:flex flex-col md:flex-row md:gap-2 hidden">
