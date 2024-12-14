@@ -472,9 +472,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
               value={inputText}
               onChange={handleChange}
               placeholder={postType === 'post' ? placeholder : 'Create your vote'}
-              className={`w-full  border-2  align-top text-start break-all whitespace-normal h-32 ${
-                postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
-              }
+              className={`w-full  border-2  align-top text-start break-all whitespace-normal h-32 ${postType === 'post' ? 'p-2' : 'py-2 pl-2 pr-[160px] md:pr-72'
+                }
               ${isDraggingWithImage && 'border-dashed border-4 dark:border-gray-600 border-gray-900'}
               resize-none z-20 focus:scale-101 focus:border-b-4 dark:border-gray-600 border-gray-900 focus:outline-gray-500`}
               onDragOver={(e) => {
@@ -552,8 +551,8 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
                     name="file_1_input"
                   />
                   <label htmlFor="file_1_input" className="h-full cursor-pointer">
-                    <div className="flex w-8 md:w-8 md:h-8 h-full cursor-pointer items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
-                      <FaPhotoFilm />
+                    <div className="flex w-10 md:w-10 md:h-10 h-full cursor-pointer items-center justify-center border-2 border-black hover:bg-black hover:text-white transition-all dark:border-white dark:hover:bg-white dark:hover:text-black">
+                      <FaPhotoFilm className="text-2xl" />
                     </div>
                   </label>
                   <input
@@ -585,7 +584,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
                     onMouseLeave={() => setOpenTooltip(false)}
                     onClick={() => setOpenTooltip(!openTooltip)}
                   >
-                    <FaCircleInfo />{' '}
+                    <FaCircleInfo className="text-2xl" />{' '}
                   </div>
                   {openTooltip && (
                     <div
@@ -603,10 +602,10 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
                 </div>
               </div>
               {activeAccount?.address &&
-              inputText !== '' &&
-              inputText.length <= 300 &&
-              userData.balance[selectedAsset.assetId] > 0.1 &&
-              !loadingSubmit ? (
+                inputText !== '' &&
+                inputText.length <= 300 &&
+                userData.balance[selectedAsset.assetId] > 0.1 &&
+                !loadingSubmit ? (
                 <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
               ) : (
                 <Button inactive={true} buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />

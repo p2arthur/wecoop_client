@@ -10,7 +10,7 @@ export const PostTypeSwitch = () => {
         handleChangePostType(postType === 'post' ? 'poll' : 'post')
       }}
     >
-      <span className={`text-sm ${postType === 'post' && 'font-bold'}`}>post</span>
+      <span className={`text-xl ${postType === 'post' && 'font-bold'}`}>post</span>
       <button
         type="button"
         onClick={() => {
@@ -18,10 +18,10 @@ export const PostTypeSwitch = () => {
         }}
         className="p-0.5 border-2 border-black switch-theme flex items-center "
       >
-        <span className={`w-2 h-2 ${postType === 'post' && 'bg-black'}`} />
-        <span className={`w-2 h-2 ${postType === 'poll' && 'bg-black'}`} />
+        <span className={`w-4 h-4 ${postType === 'post' && 'bg-black'}`} />
+        <span className={`w-4 h-4 ${postType === 'poll' && 'bg-black'}`} />
       </button>
-      <span className={`text-sm ${postType === 'poll' && 'font-bold'}`}>poll</span>
+      <span className={`text-xl ${postType === 'poll' && 'font-bold'}`}>poll</span>
     </div>
   )
 }
