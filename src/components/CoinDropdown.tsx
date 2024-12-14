@@ -26,20 +26,20 @@ export const CoinDropdown = ({ usableAsset, selectedAsset, setSelectorOpen, hand
           <div className="flex gap-2 items-center">
             <div className="rounded-full overflow-hidden border-b-4 border-black my-0.5 dark:border-white ">
               <img
-                className="w-5"
+                className="w-8"
                 src={usableAsset.image}
                 alt={usableAsset.name}
                 onError={(e) => (e.currentTarget.src = usableAsset.image)}
               />
             </div>
-            <span className="font-bold">{usableAsset.name}</span>
+            <span className="font-bold text-xl">{usableAsset.name}</span>
           </div>
           <FaAngleDown />
         </div>
         {selectorOpen && (
           <ul
-            className="absolute overflow-x-hidden bg-white dark:bg-gray-900 border-2 border-black  border-b-4 mt-2 w-56 dark:border-gray-500 -translate-x-1/2 left-2/4 md:-left-0
-          z-50 max-h-64 overflow-y-auto select-none"
+            className="absolute bg-white dark:bg-gray-900 border-2 border-black  border-b-4 mt-2 w-64 dark:border-gray-500 md:-left-0 z-50
+          max-h-64 overflow-y-auto select-none -translate-x-1/2"
           >
             {usableAssetsList.map((asset) => (
               <li
@@ -49,9 +49,9 @@ export const CoinDropdown = ({ usableAsset, selectedAsset, setSelectorOpen, hand
               >
                 <div className="flex gap-1 items-center">
                   <div className="rounded-full overflow-hidden border-b-4 border-black dark:border-white hover:scale-110">
-                    <img className="h-6 w-6" src={asset.image} alt={asset.name} onError={(e) => (e.currentTarget.src = asset.image)} />
+                    <img className="h-8 w-8" src={asset.image} alt={asset.name} onError={(e) => (e.currentTarget.src = asset.image)} />
                   </div>
-                  <span className="text-sm">{asset.name}</span>
+                  <span className="text-lg">{asset.name}</span>
                 </div>
                 <span className="text-sm">{userData.balance[asset.assetId] || 0}</span>
               </li>
