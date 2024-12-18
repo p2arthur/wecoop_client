@@ -6,8 +6,8 @@ import EmptyFeed from '../components/EmptyFeed'
 import FeedComponent from '../components/Feed'
 import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
+import { usePosts } from '../context/Posts/Posts'
 import { usableAssetsList } from '../data/usableAssetsList'
-import { useGetPostsByAddress } from '../services/api/Posts'
 import { Daum, User } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -21,6 +21,7 @@ const ProfilePage = () => {
   const { walletAddress } = useParams<{ walletAddress: string }>()
   const { activeAccount } = useWallet()
   const [user, setUser] = useState<User | null>(null)
+  const { handleGetPostByAddress, isLoading } = usePosts()
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [postsList, setPostsList] = useState<Daum[]>([])
   const [isFollowing, setIsFollowing] = useState<boolean>(false)
@@ -29,8 +30,6 @@ const ProfilePage = () => {
   const { data: userData, isLoading: isLoadingUser } = useGetUserInfo(walletAddress as string) as UserDataInterface
   // Get the current logged-in user data
   const { data: currentUserData, isLoading: isLoadingCurrentUser } = useGetUserInfo(activeAccount?.address as string)
-
-  const { data, isLoading } = useGetPostsByAddress(walletAddress as string)
 
   // Set user and currentUser separately
   useEffect(() => {
@@ -43,11 +42,10 @@ const ProfilePage = () => {
   }, [userData, currentUserData])
 
   useEffect(() => {
-    if (data) {
-      // @ts-ignore
-      setPostsList(updateRepliesStatus(data))
-    }
-  }, [data])
+    if (!user) return
+
+    setPostsList(handleGetPostByAddress(user.address) || [])
+  }, [user])
 
   useEffect(() => {
     if (currentUser && user) {
@@ -55,17 +53,6 @@ const ProfilePage = () => {
     }
   }, [currentUser, user])
 
-  const updateRepliesStatus = (posts: Daum[]): Daum[] => {
-    const updatedPosts = posts.map((post) => ({
-      ...post,
-      replies: post.replies?.map((reply) => ({
-        ...reply,
-        status: 'accepted',
-      })),
-    }))
-
-    return updatedPosts
-  }
 
   const getIsFollowing = (): void => {
     if (currentUser?.followTargets.includes(user?.address!)) {

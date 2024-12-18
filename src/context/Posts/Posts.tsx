@@ -16,7 +16,7 @@ export type FeedType = 'personalized' | 'global' | 'coinFeed'
 
 type IPostsContext = {
   postList: Daum[] | null
-  handleGetPostByAddress(address: string): Daum | undefined
+  handleGetPostByAddress(address: string): Daum[] | undefined
   handleAddNewPost(post: Daum | Poll | FilePost): void
   handleNewReply(newReply: Daum, transactionCreatorId: string): void
   handleNewLike(newLike: { creator_address: any }, transactionCreatorId: string): void
@@ -112,7 +112,7 @@ const PostsProvider = ({ children }: IPostsProviderProps) => {
   }
 
   const handleGetPostByAddress = (address: string) => {
-    return postList.find((post) => post.creator_address === address)
+    return postList.filter((post) => post.creator_address === address)
   }
 
   const handleGetPostByTransactionId = (transactionId: string) => {

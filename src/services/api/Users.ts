@@ -4,7 +4,7 @@ import { User } from './types'
 
 export const getUserInfo = async (address: string) => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/user/${address}`)
-
+  console.log("data:",data)
   return data.data
 }
 
