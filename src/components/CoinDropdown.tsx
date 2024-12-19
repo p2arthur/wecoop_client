@@ -26,13 +26,13 @@ export const CoinDropdown = ({ usableAsset, selectedAsset, setSelectorOpen, hand
           <div className="flex gap-2 items-center">
             <div className="rounded-full overflow-hidden border-b-4 border-black my-0.5 dark:border-white ">
               <img
-                className="w-8"
+                className="w-6 md:w-8"
                 src={usableAsset.image}
                 alt={usableAsset.name}
                 onError={(e) => (e.currentTarget.src = usableAsset.image)}
               />
             </div>
-            <span className="font-bold text-xl">{usableAsset.name}</span>
+            <span className="font-bold text-lg md:text-xl">{usableAsset.name}</span>
           </div>
           <FaAngleDown />
         </div>

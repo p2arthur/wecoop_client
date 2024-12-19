@@ -20,7 +20,7 @@ const Button = ({ buttonText, buttonFunction, icon, inactive, type, justify, ful
          p-1  bg-white font-bold
          ${justify && `justify-${justify}`}
         ${full ? 'w-full ' : 'w-auto'}
-          hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-lg md:text-xl`}
+          hover:bg-gray-200 active:bg-gray-300 flex items-center dark:border-gray-100 dark:text-gray-100 gap-2 border-b-4 active:border-b-transparent active:translate-y-px dark:border-b-4 dark:hover:bg-gray-800 dark:hover:text-gray-100 text-md md:text-xl`}
         onClick={buttonFunction}
         disabled={inactive}
       >
