@@ -20,6 +20,7 @@ import { ellipseAddress } from '../utils/ellipseAddress'
 import { getAssetDecimals } from '../utils/getAssetDecimals'
 import { getFeePriceByAsset, InteractionMultipliers } from '../utils/interaction_pricing/getFeePriceByAsset'
 import { PostInputOutletContext } from './PostInput'
+import Tooltip from "./Tooltip"
 
 interface PollCardPropsInterface {
   poll: PollRequest
@@ -213,6 +214,8 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
     setPrizeDollarValue(calculatedPollPrize * data.USD)
   }
 
+  const pollAsset = usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]
+
   useEffect(() => {
     appendPrizePoll()
   }, [poll.assetId])
@@ -321,23 +324,23 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                   <p className="tracking-wide break-words w-full font-bold">{poll?.text?.length > 0 && handleTextPost(poll.text)}</p>
                 </div>
                 <div className="h-full flex flex-col justify-end">
-                  <div className="flex w-full select-none py-2">
+                  <div className="flex flex-wrap md:flex-nowrap w-full select-none py-2">
                     <h2 className={'font-bold md:text-xl w-full flex gap-2 items-center border-top'}>
-                      <span>Prize pool 💰: </span>
-                      <div className="flex border-b-2 items-center gap-2">
-                        <CountUp className='text-3xl' end={Number(pollPrize)} duration={2} />
-                        <h3>{usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.name}</h3>
-                        <div className="rounded-full overflow-hidden animate-bounce w-10 h-10">
-                          <img
-                            className="h-full w-full"
-                            src={usableAssetsList.filter((asset) => asset.assetId == poll.assetId)[0]?.image}
-                            alt=""
-                          />
-
-                        </div>
-                      </div>
-                      <h2 className="text-3xl">- ~${prizeDollarValue.toFixed(2)}</h2>
+                      <span className="text-xl md:text-3xl flex items-center gap-1">Prize pool 💰</span><Tooltip tooltipText={`Vote to get a share of the $${pollAsset.name} prize pool. Claim you prize after the poll expires`} />
                     </h2>
+                    <div className="flex js border-b-2 items-center gap-4">
+                      <CountUp className='text-xl md:text-3xl font-bold' end={Number(pollPrize)} duration={2} />
+                      <h3 className="text-xl md:text-3xl underline">${pollAsset.name}</h3>
+                      <div className="rounded-full overflow-hidden animate-bounce w-10 h-10">
+                        <img
+                          className="h-full w-full"
+                          src={pollAsset.image}
+                          alt=""
+                        />
+
+                      </div>
+                      <h2 className="text-xl md:text-3xl">~${prizeDollarValue.toFixed(2)}</h2>
+                    </div>
                   </div>
 
                   {isVoted ||
@@ -423,7 +426,7 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                         </div>
                       ) : (
                         <>
-                          {user.balance[poll.assetId || 0] === 0 ? (
+                          {(user.balance[poll.assetId || 0]) ? (
                             <h1>Buy {usableAssetsList.find((asset) => asset.assetId === poll.assetId)?.name} to vote!</h1>
                           ) : (
                             <>

@@ -1,9 +1,9 @@
 import { Provider } from '@txnlab/use-wallet'
 import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Button from './Button'
 import { toast } from 'react-toastify'
 import { isMobileDevice } from '../utils/isMobile'
+import Button from './Button'
 
 interface DropDownOption {
   buttonText: string
@@ -52,7 +52,7 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
     if (options) {
       return options.map((option: Provider) => {
         return type === 'connect' ? (
-          <div className="bg-gray-100" key={option.metadata.name}>
+          <div className="bg-gray-100 text-xl" key={option.metadata.name}>
             <button
               className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
               onClick={option.connect}
