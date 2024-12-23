@@ -604,7 +604,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
               {activeAccount?.address &&
                 inputText !== '' &&
                 inputText.length <= 300 &&
-                userData.balance[selectedAsset.assetId] > 0.1 &&
                 !loadingSubmit ? (
                 <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
               ) : (

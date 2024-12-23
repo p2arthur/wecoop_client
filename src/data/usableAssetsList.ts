@@ -1,5 +1,20 @@
 export const usableAssetsList = [
-  { name: 'Coop', assetId: 796425061, image: 'https://asa-list.tinyman.org/assets/796425061/icon.png', decimals: 6 },
+  {
+    name: 'MONKO',
+    assetId: 2494786278,
+    image:
+      'https://algorand-wallet-mainnet.b-cdn.net/media/assets-logo-png/2024/12/04/352e3fde277741059ac13d07e5bded34.png?width=200&quality=70',
+    decimals: 6,
+  },
+  { name: 'COOP', assetId: 796425061, image: 'https://asa-list.tinyman.org/assets/796425061/icon.png', decimals: 6 },
+  {
+    name: 'DUGLY',
+    assetId: 2627778168,
+    image:
+      'https://vestige.fi/_next/image?url=https%3A%2F%2Frugninja.mypinata.cloud%2Fipfs%2FQmYHRCXnLtSCgoouwyDGtcagJ8UtpyV3fyu4AT8p284ruv&w=96&q=75',
+    decimals: 6,
+  },
+
   {
     name: 'A200',
     assetId: 1682662165,
