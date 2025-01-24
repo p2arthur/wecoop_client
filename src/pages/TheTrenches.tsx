@@ -1,14 +1,44 @@
 import { useWallet } from '@txnlab/use-wallet'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FaEye } from 'react-icons/fa'
+import Button from '../components/Button'
 import Footer from '../components/Footer'
 import { useTrenches } from '../context/the_trenches/TheTrenchesContext'
 
+interface Message {
+  sender: 'oracle' | 'user'
+  text: string
+}
+
 export default function TheTrenches() {
+  const chatContainerRef = useRef<HTMLDivElement>(null)
   const [oracleInputText, setOracleInputText] = useState('')
   const [agentName, setAgentName] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
   const { makeRagQuery, createUserAgent, trenchOracleState } = useTrenches()
   const { activeAccount } = useWallet()
+  const [isOracleLoading, setIsOracleLoading] = useState(false)
+  const [isAgentCreating, setIsAgentCreating] = useState(false)
+
+  // Auto scroll to bottom when messages change
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [messages])
+
+  // Set initial welcome message
+  useEffect(() => {
+    setMessages([{ sender: 'oracle', text: 'Welcome to the trenches. How may I assist you today?' }])
+  }, [])
+
+  // Watch for changes in trenchOracleState and update messages
+  useEffect(() => {
+    if (trenchOracleState.text && isOracleLoading) {
+      setMessages(prev => [...prev, { sender: 'oracle', text: trenchOracleState.text }])
+      setIsOracleLoading(false)
+    }
+  }, [trenchOracleState.text])
 
   const handleUserInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const userInput = event.target.value
@@ -21,16 +51,39 @@ export default function TheTrenches() {
 
   const handleAskOracle = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    makeRagQuery(oracleInputText)
+    if (!oracleInputText.trim()) return
+
+    setIsOracleLoading(true)
+
+    // Add user message to history
+    setMessages(prev => [...prev, { sender: 'user', text: oracleInputText }])
+
+    try {
+      // Make the API call
+      await makeRagQuery(oracleInputText)
+      // The oracle response will be handled by the useEffect above
+
+      // Clear input
+      setOracleInputText('')
+    } catch (error) {
+      setIsOracleLoading(false)
+      // Optionally add an error message to the chat
+      setMessages(prev => [...prev, { sender: 'oracle', text: 'Sorry, I encountered an error. Please try again.' }])
+    }
   }
   const handleCreateUserAgent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!activeAccount) return
-    createUserAgent(activeAccount.address, agentName)
+    setIsAgentCreating(true)
+    try {
+      await createUserAgent(activeAccount.address, agentName)
+    } finally {
+      setIsAgentCreating(false)
+    }
   }
 
   return (
-    <div className="w-full px-4 flex flex-col gap-4 py-20 dark:bg-gray-950 bg-gray-100">
+    <div className="w-full px-4 flex flex-col gap-4 py-20 dark:bg-gray-950 bg-gray-100 overflow-y-hidden">
       <div className="flex justify-center items-center gap-4">
         <div className="flex flex-col items-center">
           <h2 className="text-2xl">You're in</h2>
@@ -42,42 +95,79 @@ export default function TheTrenches() {
       </div>
       {/* <p className="text-center italic text-gray-500 mb-8">Developed by iam_p2</p> */}
 
-      <div className="flex flex-col border-2 border-b-4 border-black p-2">
-        <div className="flex gap-2">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            Trenches oracle
-            <FaEye />
-          </h2>
-          <h2 className="text-xl font-bold"> - Pay small fee to ask the oracle</h2>
-        </div>
-        <form onSubmit={handleAskOracle}>
-          <input onChange={handleUserInput} className="w-full h-32" placeholder="Ask the oracle about the Algorand trenches" type="text" />
-        </form>
-        <div className="border-2 border-gray-950 p-2">
-          <h2 className="font-bold">Oracle response - Responds like a trench advisor:</h2>
-          <h3 className="text-gray-800">{trenchOracleState.text}</h3>
-        </div>
-      </div>
-      <div className="flex flex-col border-2 border-b-4 border-black p-2">
-        <div>
-          <h2 className="text-xl font-bold underline">
-            Trenches Agent - Make 5 posts + pay price to mint agent level 1 (Add user context)
-          </h2>
-        </div>
-        <div>
-          <h3>Create agent</h3>
-          <form onSubmit={handleCreateUserAgent}>
-            <input onChange={handleUserAgentInput} className="" placeholder="What is your agent name?" type="text" />
+      <div className="flex gap-4 ">
+        <div className="flex flex-col border-2 border-b-4 border-black p-2 w-1/2">
+          <div className="flex gap-2">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              Trenches oracle
+              <FaEye />
+            </h2>
+            <h2 className="text-xl font-bold"> - Pay small fee to ask the oracle</h2>
+          </div>
+          <div className="flex flex-col h-96 overflow-y-auto border-2 border-gray-950 p-4 mb-4" ref={chatContainerRef}>
+            <div className="flex flex-col gap-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`${message.sender === 'user'
+                    ? 'self-end bg-blue-500 text-white'
+                    : 'self-start bg-gray-200'
+                    } rounded-lg p-3 max-w-[80%]`}
+                >
+                  <p className="text-sm font-bold">{message.sender === 'user' ? 'You' : 'Oracle'}</p>
+                  <p>{message.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <form onSubmit={handleAskOracle} className="flex gap-2">
+            <input
+              value={oracleInputText}
+              onChange={handleUserInput}
+              className="flex-1 p-2 border-2 border-gray-300 rounded"
+              placeholder="Type your message..."
+              type="text"
+              disabled={isOracleLoading}
+            />
+            <Button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+              buttonText={isOracleLoading ? 'Sending...' : 'Send'}
+            />
           </form>
         </div>
-        <div className="p-2">
-          <h2 className="font-bold text-xl">Your trench agents:</h2>
+        <div className="flex flex-col border-2 gap-12 border-b-4 border-black p-2">
           <div>
-            <div className="h-32">
-              <img className="h-full" src="/images/pixel_anon74.png" alt="" />
+            <h2 className="text-xl font-bold underline">
+              Trenches Agent - Make 5 posts + pay price to mint agent level 1 (Add user context)
+            </h2>
+          </div>
+          <div>
+            <h3>Create agent</h3>
+            <form onSubmit={handleCreateUserAgent} className="flex flex-col gap-2">
+              <input
+                onChange={handleUserAgentInput}
+                className=""
+                placeholder="What is your agent name?"
+                type="text"
+                disabled={isAgentCreating}
+              />
+              <Button
+                type="submit"
+                buttonText={isAgentCreating ? 'Creating Agent...' : 'Create Agent'}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+              />
+            </form>
+          </div>
+          <div className="p-2">
+            <h2 className="font-bold text-xl">Your trench agents:</h2>
+            <div>
+              <div className="h-32">
+                <img className="h-full" src="/images/pixel_anon74.png" alt="" />
+              </div>
+              <h3 className='text-xl'>Curupira agent</h3>
+              <h5 className='text-gray-700 text-sm'>Updated at: 23/01/2025</h5>
             </div>
-            <h3 className='text-xl'>Curupira agent</h3>
-            <h5 className='text-gray-700 text-sm'>Updated at: 23/01/2025</h5>
           </div>
         </div>
       </div>
