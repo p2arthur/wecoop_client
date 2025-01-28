@@ -79,6 +79,12 @@ const DropDown = ({ options, buttonText, icon, type, address }: DropDownOption) 
             </button>
             <button
               className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
+              onClick={() => navigate(`/the-trenches`)}
+            >
+              the trenches
+            </button>
+            <button
+              className="w-full hover:bg-gray-300 hover:dark:bg-gray-800 flex gap-2 justify-center items-center dark:hover:text-gray-100 border-t-2 border-gray-900 dark:border-gray-100 h-8"
               onClick={handleShareProfile}
             >
               share profile
