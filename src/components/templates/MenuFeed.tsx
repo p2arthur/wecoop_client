@@ -116,10 +116,7 @@ export const MenuFeed = ({ hasFeedPosts, handleChangeFeed, activeFeed, handleCha
           ))}
         </div>
       )}
-
-      <div className="fixed bottom-0 p-3 right-0 w-auto md:left-0 md:right-auto">
-        <p className="text-gray-600">Version: {version}</p>
-      </div>
+      <p className="text-gray-600">Version: {version}</p>
     </div>
   )
 }

@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FeedComponent from '../components/Feed'
 import MobileSidebar from '../components/interface/MobileSidebar'
-import PostInput from '../components/PostInput'
 import { ProfileMenu } from '../components/templates/FeaturedMenu'
 import { MenuFeed } from '../components/templates/MenuFeed'
 import { usePosts } from '../context/Posts/Posts'
@@ -59,7 +58,7 @@ const Feed = () => {
   return (
     <div className="flex pt-14 dark:bg-gray-950 bg-gray-100 overflow-hidden max-h-screen w-full">
       <MobileSidebar />
-      <div className="hidden md:flex border-t-0 flex-col w-3/12 items-start justify-between border-2 border-b-0 dark:border-gray-800 border-gray-950">
+      <div className="hidden md:flex overflow-y-scroll border-t-0 flex-col w-3/12 items-start justify-between border-2 border-b-0 dark:border-gray-800 border-gray-950">
         <MenuFeed
           openByParams={params.get('activeFeed') === 'coinFeed' && params.get('activeAssetId') !== null}
           hasFeedPosts={activeAccount !== null}
