@@ -10,6 +10,7 @@ interface ITrenchesContext {
   makeRagQuery: (prompt: string, chat_history: Message[]) => Promise<void>
   createUserAgent: (walletAddress: string, agentName: string) => Promise<void>
   appendUserTrenchesData: (walletAddress: string | null) => Promise<void>
+  getUserAgent: (walletAddress: string) => Promise<void>
 }
 
 interface ITrenchesProviderProps {
@@ -19,7 +20,16 @@ interface ITrenchesProviderProps {
 interface ITrenchUser {
   walletAddress: string | null
   posts: PostCreateMongo[] | null
-  ai_agent: string | null
+  ai_agent: IAIUserAgent | null
+}
+
+interface IAIUserAgent {
+  _id: string,
+  agent_name: string,
+  agent_wallet_address: string,
+  created_at: string,
+  updated_at: string,
+  user_wallet_address: string
 }
 
 const TrenchesContext = createContext<ITrenchesContext>({} as ITrenchesContext)
@@ -31,16 +41,16 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
 
   const createUserAgent = async (walletAddress: string, agentName: string) => {
     try {
-      const { data: response_ai_server } = await axios.post('http://localhost:5000/create-user-agent', {
+      const { data: response_ai_server } = await axios.post(`${import.meta.env.VITE_APP_AI_API}/create-user-agent`, {
         wallet_address: walletAddress,
         agent_name: agentName,
       })
-      const { data: response_mongodb } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ai-agents/create-user-agent`, {
-        wallet_address: walletAddress,
-        agent_name: agentName,
-      })
+      // const { data: response_mongodb } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ai-agents/create-user-agent`, {
+      //   wallet_address: walletAddress,
+      //   agent_name: agentName,
+      // })
 
-      console.log('Response:', response_mongodb.data)
+      // console.log('Response:', response_mongodb.data)
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error:', error.response?.data || error.message)
@@ -51,7 +61,7 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
   }
 
   const makeRagQuery = async (prompt: string, chat_history: Message[]) => {
-    const { data } = await axios.post(`${import.meta.env.VITE_APP_RAG_API}/ask-oracle`, { question: prompt, chat_history: chat_history })
+    const { data } = await axios.post(`${import.meta.env.VITE_APP_AI_API}/ask-oracle`, { question: prompt, chat_history: chat_history })
     console.log('data', data)
     setOracleState({
       text: data.trenches_oracle,
@@ -69,8 +79,13 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
       return
     }
     const userPosts = await getUserPosts(walletAddress)
+    const userAiAgent = await getUserAgent(walletAddress)
+    setTrenchUser({ walletAddress, posts: userPosts, ai_agent: userAiAgent })
+  }
 
-    setTrenchUser({ walletAddress, posts: userPosts, ai_agent: "aSA" })
+  const getUserAgent = async (walletAddress: string) => {
+    const { data } = await axios.get(`${import.meta.env.VITE_APP_AI_API}/user-agents/${walletAddress}`)
+    return data
   }
 
   useEffect(() => {
@@ -89,6 +104,7 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
       makeRagQuery: makeRagQuery,
       createUserAgent: createUserAgent,
       appendUserTrenchesData: appendUserTrenchesData,
+      getUserAgent: getUserAgent,
     }
   }, [trenchUser, trenchOracleState])
 
