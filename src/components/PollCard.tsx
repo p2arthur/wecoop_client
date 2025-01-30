@@ -426,28 +426,26 @@ const VoteCard = ({ poll, type }: PollCardPropsInterface) => {
                         </div>
                       ) : (
                         <>
-                          {(user.balance[poll.assetId || 0]) ? (
-                            <h1>Buy {usableAssetsList.find((asset) => asset.assetId === poll.assetId)?.name} to vote!</h1>
-                          ) : (
-                            <>
-                              <button
-                                className={
-                                  'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
-                                }
-                                onClick={() => handleVoteClick(true, Number(poll.pollId), poll.creator_address)}
-                              >
-                                YES
-                              </button>
-                              <button
-                                className={
-                                  'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
-                                }
-                                onClick={() => handleVoteClick(false, Number(poll.pollId), poll.creator_address)}
-                              >
-                                NO
-                              </button>
-                            </>
-                          )}
+
+                          <>
+                            <button
+                              className={
+                                'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-green-600 dark:bg-green-600 hover:border-b-2 active:border-b active:bg-green-700 dark:active:bg-green-700 dark:hover:text-white font-bold'
+                              }
+                              onClick={() => handleVoteClick(true, Number(poll.pollId), poll.creator_address)}
+                            >
+                              YES
+                            </button>
+                            <button
+                              className={
+                                'w-1/2 h-10 border-b-4 text-white border-gray-900 dark:border-white bg-red-600 dark:bg-red-600 hover:border-b-2 active:border-b active:bg-red-700 dark:active:bg-red-700 dark:hover:text-white font-bold'
+                              }
+                              onClick={() => handleVoteClick(false, Number(poll.pollId), poll.creator_address)}
+                            >
+                              NO
+                            </button>
+                          </>
+
                         </>
                       )}
                     </div>
