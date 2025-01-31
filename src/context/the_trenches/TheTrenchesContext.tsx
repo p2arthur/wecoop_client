@@ -7,10 +7,14 @@ import { PostCreateMongo } from '../../services/api/types'
 interface ITrenchesContext {
   trenchOracleState: { text: string }
   trenchUser: ITrenchUser
+  isOracleLoading: boolean
+  isAgentCreating: boolean
+  isAgentUpdating: boolean
   makeRagQuery: (prompt: string, chat_history: Message[]) => Promise<void>
   createUserAgent: (walletAddress: string, agentName: string) => Promise<void>
   appendUserTrenchesData: (walletAddress: string | null) => Promise<void>
   getUserAgent: (walletAddress: string) => Promise<void>
+  updateUserAgent: (walletAddress: string) => Promise<void>
 }
 
 interface ITrenchesProviderProps {
@@ -24,53 +28,92 @@ interface ITrenchUser {
 }
 
 interface IAIUserAgent {
-  _id: string,
-  agent_name: string,
-  agent_wallet_address: string,
-  created_at: string,
-  updated_at: string,
+  _id: string
+  agent_name: string
+  agent_wallet_address: string
+  created_at: string
+  updated_at: string
   user_wallet_address: string
 }
 
 const TrenchesContext = createContext<ITrenchesContext>({} as ITrenchesContext)
 
 const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
-  const [trenchUser, setTrenchUser] = useState<ITrenchUser>({ walletAddress: null, posts: null, ai_agent: null }) // Replace with your initial state
+  const [trenchUser, setTrenchUser] = useState<ITrenchUser>({ walletAddress: null, posts: null, ai_agent: null })
   const [trenchOracleState, setOracleState] = useState({ text: 'I will tell you all about the trenches' })
+  const [isOracleLoading, setIsOracleLoading] = useState(false)
+  const [isAgentCreating, setIsAgentCreating] = useState(false)
+  const [isAgentUpdating, setIsAgentUpdating] = useState(false)
   const { activeAccount } = useWallet()
 
   const createUserAgent = async (walletAddress: string, agentName: string) => {
     try {
-      const { data: response_ai_server } = await axios.post(`${import.meta.env.VITE_APP_AI_API}/create-user-agent`, {
+      setIsAgentCreating(true)
+      await axios.post(`${import.meta.env.VITE_APP_AI_API}/create-user-agent`, {
         wallet_address: walletAddress,
         agent_name: agentName,
       })
-      // const { data: response_mongodb } = await axios.post(`${import.meta.env.VITE_WECOOP_API}/ai-agents/create-user-agent`, {
-      //   wallet_address: walletAddress,
-      //   agent_name: agentName,
-      // })
-
-      // console.log('Response:', response_mongodb.data)
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error:', error.response?.data || error.message)
-      } else {
-        console.error('Error:', error)
-      }
+      console.error('Error:', error)
+    } finally {
+      setIsAgentCreating(false)
     }
   }
 
   const makeRagQuery = async (prompt: string, chat_history: Message[]) => {
-    const { data } = await axios.post(`${import.meta.env.VITE_APP_AI_API}/ask-oracle`, { question: prompt, chat_history: chat_history })
-    console.log('data', data)
-    setOracleState({
-      text: data.trenches_oracle,
-    })
+    try {
+      setIsOracleLoading(true)
+      const { data } = await axios.post(`${import.meta.env.VITE_APP_AI_API}/ask-oracle`, {
+        question: prompt,
+        chat_history,
+      })
+      setOracleState({ text: data.trenches_oracle })
+    } catch (error) {
+      console.error('Error fetching oracle response:', error)
+    } finally {
+      setIsOracleLoading(false)
+    }
   }
 
-  const getUserPosts = async (walletAddress: String) => {
-    const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/ai-agents/user-posts/${walletAddress}`)
-    return data
+  const getUserPosts = async (walletAddress: string) => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/ai-agents/user-posts/${walletAddress}`)
+      return data
+    } catch (error) {
+      console.error('Error fetching user posts:', error)
+      return null
+    }
+  }
+
+  const getUserAgent = async (walletAddress: string): Promise<void> => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_APP_AI_API}/user-agents/${walletAddress}`)
+
+      console.log('User agent:', data)
+      setTrenchUser((prev) => ({ ...prev, ai_agent: data }))
+
+
+    } catch (error) {
+      console.error('Error fetching user agent:', error)
+
+    }
+  }
+
+  const updateUserAgent = async (walletAddress: string) => {
+    setIsAgentUpdating(true)
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_APP_AI_API}/user-agents/${walletAddress}/update`,
+        { wallet_address: walletAddress },
+        { headers: { 'Content-Type': 'application/json' } }
+      )
+      // ✅ Update local state with the new AI agent
+      setTrenchUser((prev) => ({ ...prev, ai_agent: data }))
+    } catch (error) {
+      console.error('Error updating user agent:', error)
+    } finally {
+      setIsAgentUpdating(false)
+    }
   }
 
   const appendUserTrenchesData = async (walletAddress: string | null) => {
@@ -78,14 +121,15 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
       setTrenchUser({ walletAddress: null, posts: null, ai_agent: null })
       return
     }
-    const userPosts = await getUserPosts(walletAddress)
-    const userAiAgent = await getUserAgent(walletAddress)
-    setTrenchUser({ walletAddress, posts: userPosts, ai_agent: userAiAgent })
-  }
+    try {
+      const [userPosts, userAiAgent] = await Promise.all([
+        getUserPosts(walletAddress),
+        getUserAgent(walletAddress),
+      ])
 
-  const getUserAgent = async (walletAddress: string) => {
-    const { data } = await axios.get(`${import.meta.env.VITE_APP_AI_API}/user-agents/${walletAddress}`)
-    return data
+    } catch (error) {
+      console.error('Error appending user trenches data:', error)
+    }
   }
 
   useEffect(() => {
@@ -98,15 +142,18 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
 
   const contextValue = useMemo(() => {
     return {
-      state: trenchUser,
-      trenchOracleState: trenchOracleState,
-      trenchUser: trenchUser,
-      makeRagQuery: makeRagQuery,
-      createUserAgent: createUserAgent,
-      appendUserTrenchesData: appendUserTrenchesData,
-      getUserAgent: getUserAgent,
+      trenchOracleState,
+      trenchUser,
+      isOracleLoading,
+      isAgentCreating,
+      isAgentUpdating,
+      makeRagQuery,
+      createUserAgent,
+      appendUserTrenchesData,
+      getUserAgent,
+      updateUserAgent,
     }
-  }, [trenchUser, trenchOracleState])
+  }, [trenchUser, trenchOracleState, isOracleLoading, isAgentCreating, isAgentUpdating])
 
   return <TrenchesContext.Provider value={contextValue}>{children}</TrenchesContext.Provider>
 }
@@ -114,4 +161,3 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
 const useTrenches = () => useContext(TrenchesContext)
 
 export { TrenchesProvider, useTrenches }
-
