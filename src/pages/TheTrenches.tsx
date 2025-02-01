@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { FaBiohazard, FaEye, FaWallet } from 'react-icons/fa'
 import Button from '../components/Button'
 import Footer from '../components/Footer'
+import TrenchAgentsList from '../components/the-trenches/TrenchAgentsList'
 import { useTrenches } from '../context/the_trenches/TheTrenchesContext'
 import { usableAssetsList } from '../data/usableAssetsList'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -110,7 +111,7 @@ export default function TheTrenches() {
           <h2 className="text-2xl">You're in</h2>
           <h1 className="text-4xl font-bold mb-4 text-center underline">The trenches</h1>
         </div>
-        <div className="h-32">
+        <div className="h-24">
           <img className="h-full" src="/images/trench.jpg" alt="trenches-image" />
         </div>
       </div>
@@ -134,7 +135,7 @@ export default function TheTrenches() {
                 <div
                   key={index}
                   className={`${message.sender === 'user' ? 'self-end bg-blue-500 text-white rounded-br-none' : 'self-start bg-lime-500 rounded-bl-none'
-                    } rounded-lg p-3 max-w-[80%]`}
+                    } rounded-lg p-3 max-w-[80%] border-t-4 border-black dark:border-white`}
                 >
                   <p className="text-sm font-bold">{message.sender === 'user' ? 'You' : 'Oracle'}</p>
                   <p>{message.content}</p>
@@ -143,7 +144,7 @@ export default function TheTrenches() {
             </div>
           </div>
           <form onSubmit={handleAskOracle} className="flex gap-2">
-            <div className="flex p-2 border-2 border-b-4 border-gray-100 rounded dark:bg-gray-900 dark:text-gray-100 w-full justify-between">
+            <div className="flex p-2 border-2 border-b-4 bg-white border-gray-900 rounded dark:bg-gray-900 dark:text-gray-100 w-full justify-between">
               <textarea
                 value={oracleInputText}
                 onChange={handleUserInput}
@@ -188,7 +189,7 @@ export default function TheTrenches() {
                             buttonFunction={handleUpdateUserAgent}
                             type="submit"
                             buttonText={isAgentUpdating ? 'Updating Agent...' : 'Update Agent'}
-                            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+                            className="mt-2 px-4 py-2 bg-blue-500 border-t-2 border-black text-white rounded disabled:bg-gray-400"
                           />{' '}
                         </div>
                       </div>
@@ -373,7 +374,7 @@ export default function TheTrenches() {
           </div>
         </div>
       </div>
-
+      <TrenchAgentsList />
       <Footer />
     </div>
   )
