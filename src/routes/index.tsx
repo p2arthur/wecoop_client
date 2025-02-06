@@ -11,6 +11,7 @@ import { PollFeed } from '../pages/PollFeed'
 import PostPage from '../pages/PostPage'
 import ProfilePage from '../pages/ProfilePage'
 import TheTrenches from '../pages/TheTrenches'
+import TrenchesWhitepaper from '../pages/trenches/ReadmeTrenches'
 import { User } from '../services/User'
 import { User as UserInterface } from '../services/api/types'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
@@ -71,6 +72,7 @@ export const Router = () => {
         { path: '/post', element: <PostPage /> },
         { path: '/polls', element: <PollFeed /> },
         { path: '/the-trenches', element: <TheTrenches /> },
+        { path: '/the-trenches/read-me', element: <TrenchesWhitepaper /> },
       ],
     },
   ])
