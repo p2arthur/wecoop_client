@@ -16,9 +16,11 @@ export interface Message {
 
 export default function TheTrenches() {
   const chatContainerRef = useRef<HTMLDivElement>(null)
+  const agentChatRef = useRef<HTMLDivElement>(null) // ✅ Added ref for agent chat
   const [oracleInputText, setOracleInputText] = useState('')
   const [agentName, setAgentName] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
+
   const {
     makeRagQuery,
     createUserAgent,
@@ -32,12 +34,19 @@ export default function TheTrenches() {
   } = useTrenches()
   const { activeAccount } = useWallet()
 
-  // Auto scroll to bottom when messages change
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages, isOracleLoading]); // ✅ Trigger scrolling when messages change
+
+
+  // ✅ Auto-scroll for agent chat messages (if needed in the future)
+  useEffect(() => {
+    if (agentChatRef.current) {
+      agentChatRef.current.scrollTop = agentChatRef.current.scrollHeight
+    }
+  }, [messages]) // Adjust this if agent chat has a different message state
 
   // Set initial welcome message
   useEffect(() => {
@@ -51,12 +60,11 @@ export default function TheTrenches() {
   }, [trenchOracleState.text])
 
   const handleUserInput = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const userInput = event.target.value
-    setOracleInputText(userInput)
+    setOracleInputText(event.target.value)
   }
+
   const handleUserAgentInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const userInput = event.target.value
-    setAgentName(userInput)
+    setAgentName(event.target.value)
   }
 
   const handleAskOracle = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,10 +82,10 @@ export default function TheTrenches() {
       // Clear input
       setOracleInputText('')
     } catch (error) {
-      // Optionally add an error message to the chat
       setMessages((prev) => [...prev, { sender: 'oracle', content: 'Sorry, I encountered an error. Please try again.' }])
     }
   }
+
   const handleCreateUserAgent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!activeAccount) return
@@ -90,7 +98,6 @@ export default function TheTrenches() {
 
   const handleUpdateUserAgent = async () => {
     if (!activeAccount) return
-
     try {
       updateUserAgent(activeAccount.address)
     } catch (error) {
@@ -127,22 +134,35 @@ export default function TheTrenches() {
             <h2 className="text-xl font-bold"> - Pay small fee to ask the oracle</h2>
           </div>
           <div
-            className="flex flex-col h-96 overflow-y-auto border-2 border-gray-950 bg-white dark:bg-gray-900 p-4 mb-4"
-            ref={chatContainerRef}
+            className="flex flex-col h-96 overflow-y-auto border-2 border-gray-950 bg-white dark:bg-gray-900 p-4 mb-4 scroll-smooth"
+            ref={chatContainerRef} // ✅ Keeps auto-scrolling when new messages arrive
           >
             <div className="flex flex-col gap-4">
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`${message.sender === 'user' ? 'self-end bg-blue-500 text-white rounded-br-none' : 'self-start bg-lime-500 rounded-bl-none'
-                    } rounded-lg p-3 max-w-[80%] border-t-4 border-black dark:border-white`}
+                  className={`${message.sender === 'user'
+                    ? 'self-end bg-blue-500 text-white rounded-br-none'
+                    : 'self-start bg-lime-500 rounded-bl-none'
+                    } rounded-lg p-3 max-w-[80%] border-t-4 border-black dark:border-white shadow-md`}
                 >
-                  <p className="text-sm font-bold">{message.sender === 'user' ? 'You' : 'Oracle'}</p>
+                  <p className="text-sm font-bold">
+                    {message.sender === 'user' ? 'You' : 'Oracle'}
+                  </p>
                   <p>{message.content}</p>
                 </div>
               ))}
+
+              {/* ✅ Spinner for Loading Message */}
+              {isOracleLoading && (
+                <div className="flex justify-center items-center">
+                  <div className="w-6 h-6 border-4 border-gray-300 border-t-lime-500 rounded-full animate-spin"></div>
+                </div>
+              )}
             </div>
           </div>
+
+
           <form onSubmit={handleAskOracle} className="flex gap-2">
             <div className="flex p-2 border-2 border-b-4 bg-white border-gray-900 rounded dark:bg-gray-900 dark:text-gray-100 w-full justify-between">
               <textarea
@@ -161,7 +181,7 @@ export default function TheTrenches() {
               /></div>
           </form>
         </div>
-        <div className="flex w-1/2 flex-col border-2 border-b-4 border-black dark:bg-lime-600 p-2 gap-2">
+        <div className="flex w-1/2 flex-col border-2 border-b-4 border-black dark:bg-lime-600 p-2">
           <div className="flex gap-2 text-lg font-bold">
             <h3 className="">Trenches Agent - </h3>
             <h4 className="underline">{defineAgentCreationMessage(trenchUser.posts?.length!)}</h4>
@@ -178,20 +198,21 @@ export default function TheTrenches() {
                       <div className="flex justify-between">
                         <h3 className="text-xl font-bold">{trenchUser.ai_agent.agent_name || 'no agent'}</h3>
 
-                        <div className="flex gap-2">
-                          <div className="flex items-center gap-2">
-                            <p>32tc</p>
-                            <div className="w-8 h-8 overflow-hidden rounded-full">
-                              <img className="w-full h-full" src="/coins/trench_coin_v0.1.webp" alt="" />
-                            </div>
+                      </div>
+
+                      <div className="flex gap-2 justify-between">
+                        <div className="flex items-center gap-2">
+                          <p>32tc</p>
+                          <div className="w-8 h-8 overflow-hidden rounded-full">
+                            <img className="w-full h-full" src="/coins/trench_coin_v0.1.webp" alt="" />
                           </div>
-                          <Button
-                            buttonFunction={handleUpdateUserAgent}
-                            type="submit"
-                            buttonText={isAgentUpdating ? 'Updating Agent...' : 'Update Agent'}
-                            className="mt-2 px-4 py-2 bg-blue-500 border-t-2 border-black text-white rounded disabled:bg-gray-400"
-                          />{' '}
                         </div>
+                        <Button
+                          buttonFunction={handleUpdateUserAgent}
+                          type="submit"
+                          buttonText={isAgentUpdating ? 'Updating Agent...' : 'Update Agent'}
+                          className="mt-2 px-4 py-2 bg-blue-500 border-t-2 border-black text-white rounded disabled:bg-gray-400"
+                        />{' '}
                       </div>
                       <div className="flex justify-between">
                         <div className="flex flex-col">
@@ -327,8 +348,8 @@ export default function TheTrenches() {
               </div>
             </div>
           )}
-          <div className="w-full">
-            <div className="flex flex-col border-2 border-b-4 border-black p-2 dark:bg-lime-600 ">
+          <div className="w-full h-full">
+            <div className="flex flex-col border-2 border-b-4 h-full border-black p-2 dark:bg-lime-600 ">
               <div className="flex gap-2">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   Agent chat
