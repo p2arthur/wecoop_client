@@ -1,10 +1,10 @@
+import { useWallet } from '@txnlab/use-wallet'
 import { MdOutlineMenu } from 'react-icons/md'
 import { useMobileSidebar } from '../context/Interface/MobileSidebar'
 import { User as UserInterface } from '../services/api/types'
 import ConnectWallet from './ConnectWallet'
-import ThemeSwitcher from './ThemeSwitcher'
-import { useWallet } from '@txnlab/use-wallet'
 import { Notifications } from './Notifications'
+import ThemeSwitcher from './ThemeSwitcher'
 
 interface NavBarProps {
   user: UserInterface
@@ -19,10 +19,16 @@ const NavBar = ({ user }: NavBarProps) => {
         <img className="w-2/3 dark:hidden" src="/images/logoblack.png" alt="wecoop_mascot" />
         <img className="w-2/3 hidden dark:block" src="/images/logowhite.png" alt="wecoop_mascot" />
       </a>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 ">
+        <a className='flex gap-1 bg-black text-white p-1' href="/the-trenches">
+          <span className=' text-white text-lg animate-bounce'>!</span>
+          <p className="font-bold text-md md:text-md underline hidden md:block">The trenches</p>
+
+        </a>
         <a href="/about">
           <p className="font-bold text-md md:text-md underline hidden md:block">About us</p>
         </a>
+
         {activeAccount && (
           <div>
             <Notifications walletAddress={activeAccount.address} />

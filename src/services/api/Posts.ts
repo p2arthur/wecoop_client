@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { GetFeedByMongo, IGetAllPosts, LikeCreateMongo, Poll, Post, PostCreateMongo, ReplyCreateMongo, VoterCreateMongo } from './types'
 import { GetPollsByMongo } from '../../types/Feed'
+import { GetFeedByMongo, IGetAllPosts, LikeCreateMongo, Poll, Post, PostCreateMongo, ReplyCreateMongo, VoterCreateMongo } from './types'
 
 export const getAllPosts = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
@@ -71,7 +71,9 @@ export const useGetFeedByMongo = () =>
   })
 
 const createPost = async (newPost: PostCreateMongo): Promise<PostCreateMongo> => {
-  const response = await axios.post(`${import.meta.env.VITE_WECOOP_API}/post`, newPost) // Substitua pela URL da sua API
+  const response = await axios.post(`${import.meta.env.VITE_WECOOP_API}/post`, newPost)
+  const responseAi = await axios.post(`${import.meta.env.VITE_APP_AI_API}/ai-posts/create`, newPost)
+  console.log('responseAi:', responseAi)
   return response.data
 }
 
