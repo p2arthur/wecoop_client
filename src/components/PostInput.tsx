@@ -303,7 +303,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const handleCreateFilePost = async () => {
     const country = await getUserCountry()
 
-    console.log('creating file post')
+    console.log('creating file posst')
 
     try {
       setLoadingText('Uploading image to IPFS Network...')
