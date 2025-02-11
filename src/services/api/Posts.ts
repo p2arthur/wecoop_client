@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { GetFeedByMongo, IGetAllPosts, LikeCreateMongo, Poll, Post, PostCreateMongo, ReplyCreateMongo, VoterCreateMongo } from './types'
 import { GetPollsByMongo } from '../../types/Feed'
+import { GetFeedByMongo, IGetAllPosts, LikeCreateMongo, Poll, Post, PostCreateMongo, ReplyCreateMongo, VoterCreateMongo } from './types'
 
 export const getAllPosts = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/global`)
@@ -164,5 +164,17 @@ export const useGetPollsByVoterAddress = (voterAddress: string, enabled: boolean
     queryKey: ['getPollsByVoterAddress', voterAddress],
     queryFn: () => getlPollsByVoterAddress(voterAddress),
     enabled,
+  })
+}
+
+export const getMongoPostsByWallet = async (walletAddress : string) => {
+  const { data } = await axios.get(`${import.meta.env.VITE_WECOOP_API}/feed/by/mongodb/${walletAddress}`)
+  return data
+}
+
+export const useGetMongoPostsByWallet = (walletAddress: string) => {
+  return useQuery<GetFeedByMongo>({
+    queryKey: ['getMongoPostsByWallet', walletAddress],
+    queryFn: () => getMongoPostsByWallet(walletAddress),
   })
 }
