@@ -15,6 +15,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { MobileSidebarProvider } from './context/Interface/MobileSidebar'
 import { UsableAssetProvider } from './context/UsableAsset/UsableAssetContext'
 import { AnalyticsProvider } from './context/analytics/Analytics'
+import { TrenchesProvider } from './context/the_trenches/TheTrenchesContext'
 
 const TRACKING_ID = 'G-V7TZ80M30M'
 
@@ -55,8 +56,10 @@ export default function App() {
             <WalletProvider value={walletProviders}>
               <QueryClientProvider client={queryClient}>
                 <PostsProvider>
-                  <Router />
-                  <ToastContainer toastStyle={{ fontFamily: 'SF Pixelate', fontSize: '16px' }} />
+                  <TrenchesProvider>
+                    <Router />
+                    <ToastContainer toastStyle={{ fontFamily: 'SF Pixelate', fontSize: '16px' }} />
+                  </TrenchesProvider>
                 </PostsProvider>
               </QueryClientProvider>
             </WalletProvider>

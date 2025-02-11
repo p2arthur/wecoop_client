@@ -25,8 +25,8 @@ export class Reply {
 
     const splitFee = splitFeeByInteractionType({ totalFee: feePrice || 0.1, type: InteractionMultipliers.Reply })
 
-    const finalPlatformFee = Math.floor(splitFee.platformFee * 1000 * 1000)
-    const finalUserFee = Math.floor(splitFee.creatorFee * 1000 * 1000)
+    const finalPlatformFee = Math.floor(splitFee.platformFee)
+    const finalUserFee = Math.floor(splitFee.creatorFee)
 
     const country = await getUserCountry()
     const note = `${NotePrefix.WeCoopReply}${country}:${transactionId}:${text}`

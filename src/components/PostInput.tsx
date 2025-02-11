@@ -303,7 +303,7 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
   const handleCreateFilePost = async () => {
     const country = await getUserCountry()
 
-    console.log('creating file posst')
+
 
     try {
       setLoadingText('Uploading image to IPFS Network...')
@@ -604,7 +604,6 @@ const PostInput = ({ postTypeProp = 'post' }: PostInputProps) => {
               {activeAccount?.address &&
                 inputText !== '' &&
                 inputText.length <= 300 &&
-                userData.balance[selectedAsset.assetId] > 0.1 &&
                 !loadingSubmit ? (
                 <Button buttonText={`${postType === 'post' ? 'Send message' : 'Create poll'}`} full justify={'center'} />
               ) : (
