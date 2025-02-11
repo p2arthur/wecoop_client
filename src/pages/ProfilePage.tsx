@@ -7,7 +7,7 @@ import FeedComponent from '../components/Feed'
 import FollowButton from '../components/FollowButton'
 import LoaderSpinner from '../components/LoaderSpinner'
 import { usableAssetsList } from '../data/usableAssetsList'
-import { useGetPostsByAddress } from '../services/api/Posts'
+import { useGetMongoPostsByWallet } from '../services/api/Posts'
 import { Daum, User } from '../services/api/types'
 import { useGetUserInfo } from '../services/api/Users'
 import { ellipseAddress } from '../utils/ellipseAddress'
@@ -30,7 +30,7 @@ const ProfilePage = () => {
   // Get the current logged-in user data
   const { data: currentUserData, isLoading: isLoadingCurrentUser } = useGetUserInfo(activeAccount?.address as string)
 
-  const { data, isLoading } = useGetPostsByAddress(walletAddress as string)
+  const { data, isLoading } = useGetMongoPostsByWallet(walletAddress as string)
 
   // Set user and currentUser separately
   useEffect(() => {
@@ -45,7 +45,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (data) {
       // @ts-ignore
-      setPostsList(updateRepliesStatus(data))
+      setPostsList(updateRepliesStatus(data.data))
     }
   }, [data])
 
