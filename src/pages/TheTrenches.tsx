@@ -29,6 +29,8 @@ export default function TheTrenches() {
     isAgentCreating,
     isAgentUpdating,
     isOracleLoading,
+    createdAgents,
+    getCreatedAgents,
   } = useTrenches()
   const { activeAccount } = useWallet()
 
@@ -118,7 +120,7 @@ export default function TheTrenches() {
       {/* <p className="text-center italic text-gray-500 mb-8">Developed by iam_p2</p> */}
 
       <div className="flex gap-4">
-        <div className="flex flex-col border-2 border-b-4 border-black dark:bg-lime-600 p-2 w-1/2">
+        <div className="flex flex-col border-2 border-b-4 border-black dark:bg-gray-900 p-2 w-1/2">
           <div className="flex gap-2">
             <h2 className="text-xl font-bold flex items-center gap-2">
               Trenches oracle
@@ -161,7 +163,7 @@ export default function TheTrenches() {
               /></div>
           </form>
         </div>
-        <div className="flex w-1/2 flex-col border-2 border-b-4 border-black dark:bg-lime-600 p-2 gap-2">
+        <div className="flex w-1/2 flex-col border-2 border-b-4 border-black dark:bg-gray-900 p-2 gap-2">
           <div className="flex gap-2 text-lg font-bold">
             <h3 className="">Trenches Agent - </h3>
             <h4 className="underline">{defineAgentCreationMessage(trenchUser.posts?.length!)}</h4>
@@ -172,7 +174,7 @@ export default function TheTrenches() {
                 <div className="flex gap-2">
                   <div className="flex w-full gap-2 border-r-2 border-black pr-2">
                     <div className="w-44 h-32">
-                      <img className="h-full" src="/images/pixel_anon74.png" alt="" />
+                      <img className="h-full" src={`https://gateway.pinata.cloud/ipfs/${trenchUser.ai_agent.image_ipfs_hash}` || "/images/pixel_anon74.png"} alt="" />
                     </div>
                     <div className="flex flex-col justify-between gap-2 w-full">
                       <div className="flex justify-between">
@@ -328,7 +330,7 @@ export default function TheTrenches() {
             </div>
           )}
           <div className="w-full">
-            <div className="flex flex-col border-2 border-b-4 border-black p-2 dark:bg-lime-600 ">
+            <div className="flex flex-col border-2 border-b-4 border-black p-2 dark:bg-gray-900 ">
               <div className="flex gap-2">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   Agent chat
@@ -374,7 +376,7 @@ export default function TheTrenches() {
           </div>
         </div>
       </div>
-      <TrenchAgentsList />
+      <TrenchAgentsList createdAgents={createdAgents} />
       <Footer />
     </div>
   )

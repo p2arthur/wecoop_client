@@ -1,28 +1,17 @@
+import { format } from "date-fns";
 import { useEffect, useRef } from "react";
+import { IAIUserAgent } from "../../context/the_trenches/TheTrenchesContext";
 
-export default function TrenchAgentsList() {
-  const agents = [
-    { id: 1, name: "Shadow Walker", createdAt: "2024-01-15", image: "/images/pixel_anon74.png" },
-    { id: 2, name: "Cipher Nomad", createdAt: "2023-12-22", image: "/images/pixel_anon74.png" },
-    { id: 3, name: "Neon Ronin", createdAt: "2024-02-03", image: "/images/pixel_anon74.png" },
-    { id: 4, name: "Obsidian Ghost", createdAt: "2023-11-29", image: "/images/pixel_anon74.png" },
-    { id: 5, name: "Quantum Phantom", createdAt: "2024-01-02", image: "/images/pixel_anon74.png" },
-    { id: 6, name: "Silent Hash", createdAt: "2023-10-18", image: "/images/pixel_anon74.png" },
-    { id: 7, name: "Vortex Seeker", createdAt: "2024-03-08", image: "/images/pixel_anon74.png" },
-    { id: 8, name: "Iron Oracle", createdAt: "2023-09-27", image: "/images/pixel_anon74.png" },
-    { id: 9, name: "Echo Drifter", createdAt: "2024-02-15", image: "/images/pixel_anon74.png" },
-    { id: 10, name: "Binary Revenant", createdAt: "2024-04-01", image: "/images/pixel_anon74.png" },
-    { id: 1, name: "Shadow Walker", createdAt: "2024-01-15", image: "/images/pixel_anon74.png" },
-    { id: 2, name: "Cipher Nomad", createdAt: "2023-12-22", image: "/images/pixel_anon74.png" },
-    { id: 3, name: "Neon Ronin", createdAt: "2024-02-03", image: "/images/pixel_anon74.png" },
-    { id: 4, name: "Obsidian Ghost", createdAt: "2023-11-29", image: "/images/pixel_anon74.png" },
-    { id: 5, name: "Quantum Phantom", createdAt: "2024-01-02", image: "/images/pixel_anon74.png" },
-    { id: 6, name: "Silent Hash", createdAt: "2023-10-18", image: "/images/pixel_anon74.png" },
-    { id: 7, name: "Vortex Seeker", createdAt: "2024-03-08", image: "/images/pixel_anon74.png" },
-    { id: 8, name: "Iron Oracle", createdAt: "2023-09-27", image: "/images/pixel_anon74.png" },
-    { id: 9, name: "Echo Drifter", createdAt: "2024-02-15", image: "/images/pixel_anon74.png" },
-    { id: 10, name: "Binary Revenant", createdAt: "2024-04-01", image: "/images/pixel_anon74.png" }
-  ];
+interface ExtendedIAIUserAgent extends IAIUserAgent {
+  agent_nft_id: string;
+}
+
+interface TrenchAgentsListProps {
+  createdAgents: ExtendedIAIUserAgent[];
+}
+
+const TrenchAgentsList = ({ createdAgents }: TrenchAgentsListProps) => {
+
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const speed = 2; // Adjust scroll speed
@@ -61,7 +50,7 @@ export default function TrenchAgentsList() {
   return (
     <div className="relative w-full py-2">
       <div className="w-full flex justify-between">
-        <h3 className="text-2xl font-bold">Agents in the Trenches: 354</h3>
+        <h3 className="text-2xl font-bold">Agents in the Trenches: {createdAgents.length}</h3>
       </div>
 
       {/* Carousel Container */}
@@ -80,18 +69,21 @@ export default function TrenchAgentsList() {
           className="flex gap-4 overflow-x-hidden px-4 scroll-smooth"
           style={{ whiteSpace: "nowrap" }}
         >
-          {agents.map((agent) => (
+          {createdAgents.map((agent) => (
             <div
-              key={agent.id}
-              className="flex-shrink-0 w-64 bg-gray-100 border-2 border-t-4 border-black shadow-md text-center"
+              key={agent._id}
+              onClick={() => window.open(`https://testnet.explorer.perawallet.app/asset/${agent.agent_nft_id}/`, '_blank')}
+              className="flex-shrink-0 w-64 bg-gray-100 border-2 border-t-4 border-black shadow-md text-center dark:bg-gray-900 hover:scale-105 transition-all cursor-pointer"
             >
               <img
-                src={agent.image}
-                alt={agent.name}
+                src={`https://gateway.pinata.cloud/ipfs/${agent.image_ipfs_hash}`}
+                alt={agent.agent_name}
                 className="object-cover rounded-md mx-auto mb-2"
               />
-              <h4 className="text-lg font-semibold">{agent.name}</h4>
-              <p className="text-sm text-gray-500">Created: {agent.createdAt}</p>
+              <div className="flex flex-col gap-2 p-2">
+                <h4 className="text-lg font-semibold">{agent.agent_name}</h4>
+                <p className="text-sm text-gray-500">Created: {format(new Date(agent.created_at), "dd/MM/yyyy")}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -107,3 +99,6 @@ export default function TrenchAgentsList() {
     </div>
   );
 }
+
+
+export default TrenchAgentsList;

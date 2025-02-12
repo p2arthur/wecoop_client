@@ -7,6 +7,7 @@ import { PostCreateMongo } from '../../services/api/types'
 interface ITrenchesContext {
   trenchOracleState: { text: string }
   trenchUser: ITrenchUser
+  createdAgents: IAIUserAgent[]
   isOracleLoading: boolean
   isAgentCreating: boolean
   isAgentUpdating: boolean
@@ -15,6 +16,7 @@ interface ITrenchesContext {
   appendUserTrenchesData: (walletAddress: string | null) => Promise<void>
   getUserAgent: (walletAddress: string) => Promise<void>
   updateUserAgent: (walletAddress: string) => Promise<void>
+  getCreatedAgents: () => Promise<void>
 }
 
 interface ITrenchesProviderProps {
@@ -27,13 +29,14 @@ interface ITrenchUser {
   ai_agent: IAIUserAgent | null
 }
 
-interface IAIUserAgent {
+export interface IAIUserAgent {
   _id: string
   agent_name: string
   agent_wallet_address: string
   created_at: string
   updated_at: string
   user_wallet_address: string
+  image_ipfs_hash: string
 }
 
 const TrenchesContext = createContext<ITrenchesContext>({} as ITrenchesContext)
@@ -44,21 +47,10 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
   const [isOracleLoading, setIsOracleLoading] = useState(false)
   const [isAgentCreating, setIsAgentCreating] = useState(false)
   const [isAgentUpdating, setIsAgentUpdating] = useState(false)
+  const [createdAgents, setCreatedAgents] = useState<IAIUserAgent[]>([])
   const { activeAccount } = useWallet()
 
-  const createUserAgent = async (walletAddress: string, agentName: string) => {
-    try {
-      setIsAgentCreating(true)
-      await axios.post(`${import.meta.env.VITE_APP_AI_API}/create-user-agent`, {
-        wallet_address: walletAddress,
-        agent_name: agentName,
-      })
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setIsAgentCreating(false)
-    }
-  }
+
 
   const makeRagQuery = async (prompt: string, chat_history: Message[]) => {
     try {
@@ -88,7 +80,7 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
   const getUserAgent = async (walletAddress: string): Promise<void> => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_APP_AI_API}/user-agents/${walletAddress}`)
-
+      await getCreatedAgents()
       console.log('User agent:', data)
       setTrenchUser((prev) => ({ ...prev, ai_agent: data }))
 
@@ -96,6 +88,32 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
     } catch (error) {
       console.error('Error fetching user agent:', error)
 
+    }
+  }
+
+  const createUserAgent = async (walletAddress: string, agentName: string) => {
+    try {
+      setIsAgentCreating(true)
+      await axios.post(`${import.meta.env.VITE_APP_AI_API}/create-user-agent`, {
+        wallet_address: walletAddress,
+        agent_name: agentName,
+      }).then(() => {
+        getUserAgent(walletAddress).then()
+      })
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setIsAgentCreating(false)
+    }
+  }
+
+  const getCreatedAgents = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_APP_AI_API}/user-agents`)
+      console.log('User agents:', data)
+      setCreatedAgents(data)
+    } catch (error) {
+      console.error('Error fetching user agents:', error)
     }
   }
 
@@ -151,9 +169,11 @@ const TrenchesProvider = ({ children }: ITrenchesProviderProps) => {
       createUserAgent,
       appendUserTrenchesData,
       getUserAgent,
+      createdAgents,
+      getCreatedAgents,
       updateUserAgent,
     }
-  }, [trenchUser, trenchOracleState, isOracleLoading, isAgentCreating, isAgentUpdating])
+  }, [trenchUser, trenchOracleState, getCreatedAgents, createdAgents, isOracleLoading, isAgentCreating, isAgentUpdating])
 
   return <TrenchesContext.Provider value={contextValue}>{children}</TrenchesContext.Provider>
 }
