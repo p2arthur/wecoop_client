@@ -32,6 +32,7 @@ interface PostPropsInterface {
   variant?: 'default' | 'reply'
   handleNewReply?: (newReply: Daum, transactionCreatorId: string) => void
   imagesVisible: boolean
+  handleSetViewImages: () => void;
 }
 
 interface PostInputPropsInterface {
@@ -80,7 +81,7 @@ export const handleTextPost = (text: string) => {
   })
 }
 
-const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: PostPropsInterface) => {
+const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible, handleSetViewImages }: PostPropsInterface) => {
   const queryClient = useQueryClient()
   const { handleNewLike } = usePosts()
   const { activeAccount, signer } = useWallet()
@@ -320,8 +321,8 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                 {post.file_1_cid && post.file_1_format ? (
                   <div className="relative flex  py-3">
                     <div
-                      className={`w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${imagesVisible ? 'hidden' : ''
-                        }`}
+                      className={`z-10 w-[400px] rounded-2xl h-full bg-white/50 absolute backdrop-blur-md flex gap-2 items-center justify-center ${imagesVisible ? 'hidden' : ''
+                        }`} onClick={handleSetViewImages}
                     >
                       <p>View image</p>
                       <FaMagnifyingGlass />
@@ -393,7 +394,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                       .sort((a, b) => {
                         return a.timestamp! - b.timestamp!
                       })
-                      .map((reply) => <PostCard imagesVisible={false} post={reply} variant={'reply'} />)}
+                      .map((reply) => <PostCard handleSetViewImages={handleSetViewImages} imagesVisible={false} post={reply} variant={'reply'} />)}
                   {isLoadingReply && (
                     <PostCard
                       imagesVisible={false}
@@ -412,6 +413,7 @@ const PostCard = ({ post, variant = 'default', handleNewReply, imagesVisible }: 
                         assetId: 0,
                       }}
                       variant={'reply'}
+                      handleSetViewImages={handleSetViewImages}
                     />
                   )}
 

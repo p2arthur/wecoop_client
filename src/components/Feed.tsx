@@ -71,11 +71,10 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
   return (
     <div
       ref={feedContainerRef}
-      className={`relative ${
-        type === 'post'
-          ? 'flex flex-col gap-4 w-full overflow-y-scroll h-full overflow-x-hidden'
-          : 'grid grid-cols-3 items-center  overflow-y-scroll gap-4 w-full h-full no-scrollbar overflow-x-hidden pb-24'
-      } relative`}
+      className={`relative ${type === 'post'
+        ? 'flex flex-col gap-4 w-full overflow-y-scroll h-full overflow-x-hidden'
+        : 'grid grid-cols-3 items-center  overflow-y-scroll gap-4 w-full h-full no-scrollbar overflow-x-hidden pb-24'
+        } relative`}
     >
       {showGoToTop && (
         <button
@@ -90,7 +89,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
       <div className="w-full bg-white dark:bg-gray-900 p-4">
         <div className="flex gap-2 text-lg items-center">
           {viewImages ? <FaEye onClick={handleSetViewImage} /> : <FaEyeSlash onClick={handleSetViewImage} />}
-          <label htmlFor="view-images-switch" className=" flex w-full items-center gap-2">
+          <label htmlFor="view-images-switch" className="flex w-full items-center gap-2">
             <p>View images</p>
           </label>
         </div>
@@ -100,7 +99,7 @@ const FeedComponent = ({ postList, handleNewReply, isLoading, type = 'post' }: F
         paginatedPosts.length > 0 &&
         paginatedPosts.map((post, index) =>
           post.type === 'post' || post.type === 'filepost' ? (
-            <PostCard key={index} imagesVisible={viewImages} handleNewReply={handleNewReply} post={post} />
+            <PostCard handleSetViewImages={handleSetViewImage} key={index} imagesVisible={viewImages} handleNewReply={handleNewReply} post={post} />
           ) : (
             <VoteCard
               type={type === 'poll' ? 'poll' : 'feed'}
