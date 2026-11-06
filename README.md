@@ -1,79 +1,71 @@
-# scoop_media
+# WeCoop
 
-This starter React project has been generated using AlgoKit. See below for default getting started instructions.
+**A wallet-connected social app for the Algorand community.**
 
-# Setup
+WeCoop brings a social feed, wallet profiles, replies, reactions, and community polls into one React application. It combines a conventional API for indexed social data with Algorand transactions and application clients for on-chain interactions.
 
-### Initial setup
+Arthur Rabelo was the primary builder, with the project later developed alongside collaborators. This repository contains the web client; the [smart contracts](https://github.com/p2arthur/wecoop_smart_contracts) are maintained separately.
 
-1. Clone this repository locally
-2. Install pre-requisites:
-   - Make sure to have [Docker](https://www.docker.com/) installed and running on your machine.
-   - Install `AlgoKit` - [Link](https://github.com/algorandfoundation/algokit-cli#install): The minimum required version is `1.1`. Ensure you can execute `algokit --version` and get `1.1` or later.
-   - Bootstrap your local environment; run `algokit bootstrap all` within this folder, which will run `npm install` to install NPM packages and dependencies for your frontend component/webapp.
-   - Run `algokit localnet start` to start a local Algorand network in Docker. If you are using VS Code launch configurations provided by the template, this will be done automatically for you.
-3. Open the project and start debugging / developing via:
-   - VS Code
-     1. Open the repository root in VS Code
-     2. Install recommended extensions
-     3. Hit F5 (or whatever you have debug mapped to) and it should start running with breakpoint debugging.
-   - JetBrains WebStorm
-     1. Open the repository root in WebStorm
-     2. Hit Shift+F10|Ctrl+R (or whatever you have debug mapped to). Then Shift+CMD|Ctrl+Click on the link in the console to open the browser with debugger attached.
-   - Other
-     1. Open the repository root in your text editor of choice
-     2. In a terminal run `npm run dev`
+## Explore the product
 
-### Subsequently
+- Browse posts, follow wallet activity, reply, and react in the social feed.
+- Connect supported wallets and inspect account-linked profile information.
+- Participate in poll and posting flows backed by Algorand applications.
+- Work with file-post content and transaction-backed metadata.
 
-1. If you update to the latest source code and there are new dependencies you will need to run `algokit bootstrap all` again
-2. Follow step 3 above
+The code separates social API queries from wallet transactions. [`src/services/api/`](src/services/api/) handles backend reads, while [`src/services/`](src/services/) and [`src/contracts/`](src/contracts/) contain the social and contract integration logic. TanStack Query manages server-state caching; React context holds application state.
 
-> Please note, by default frontend is pre configured to run against Algorand LocalNet. If you want to run against TestNet or MainNet, comment out the current environment variable and uncomment the relevant one in [`.env`](.env) file that is created after running bootstrap command and based on [`.env.template`](.env.template).
+## Run the client
 
-### Continuous Integration
+Use **Node.js 18 or later** and npm. The historical dependency versions are recorded in `package-lock.json`.
 
-This project uses [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions) to define CI workflows, which are located in the [`.github/workflows`](./.github/workflows) folder.
+```sh
+git clone https://github.com/p2arthur/wecoop_client.git
+cd wecoop_client
+npm ci
+cp .env.template .env
+```
 
-For pull requests and pushes to `main` branch against this repository the following checks are automatically performed by GitHub Actions:
+Before starting, edit `.env` for the environment you intend to use. The template contains overlapping network blocks and ends with MainNet values; consolidate it into a single consistent network configuration.
 
-- `install`: Installs dependencies using `npm`
-- `lint`: Lints the codebase using `ESLint`
-- `build`: Builds the codebase using `vite`
+| Setting | Purpose |
+| --- | --- |
+| `VITE_ALGOD_*` | Algorand node endpoint, token, port, and network |
+| `VITE_INDEXER_*` | Indexer endpoint, token, and port |
+| `VITE_WECOOP_API` | WeCoop backend base URL, absent from the starter template |
+| `VITE_WECOOP_MAIN_ADDRESS` | Application recipient address |
+| `VITE_WECOOP_FILEPOST_APP_ID` | File-post application ID |
+| `VITE_WECOOP_POLL_APP_ID` | Poll application ID |
+| `VITE_WECOOP_BASE_PRICE` | Posting price configuration |
 
-### Continuous Deployment
+Some flows also use `VITE_COUNTRY_API`. Match contract IDs, assets, node endpoints, and wallet network before submitting transactions. The wallet initialization in [`src/App.tsx`](src/App.tsx) also contains a network setting; changing environment variables alone does not reconcile it.
 
-The project template provides base Github Actions workflows for continuous deployment to [Netlify](https://www.netlify.com/) or [Vercel](https://vercel.com/). These workflows are located in the [`.github/workflows`](./.github/workflows) folder.
+```sh
+npm run dev
+```
 
-> Please note: when configuring the github repository for the first time. Depending on selected provider you will need to set the provider secrets in the repository settings. For netlify you can pass the project specific environment variables as part of Github actions secrets, while for vercel you will need to set the secrets on your site instance (refer to the [Vercel documentation](https://vercel.com/docs/cli#commands/secrets) for more details).
+Open the URL printed by Vite. A configured backend and matching deployed contracts are required for the complete application; this client repository does not start those services. Variables prefixed with `VITE_` are exposed to the browser and must not contain server credentials.
 
-# Algorand Wallet integrations
+## Code map
 
-The template comes with [`use-wallet`](https://github.com/txnlab/use-wallet) integration, which provides a React hook for connecting to an Algorand wallet providers. The following wallet providers are included by default:
-- LocalNet:
-- - [KMD/Local Wallet](https://github.com/TxnLab/use-wallet#kmd-algorand-key-management-daemon) - Algorand's Key Management Daemon (KMD) is a service that manages Algorand private keys and signs transactions. Works best with AlgoKit LocalNet and allows you to easily test and interact with your dApps locally.
-- TestNet and others:
-- - [Pera Wallet](https://perawallet.app).
-- - [Defly Wallet](https://defly.app).
-- - [Exodus Wallet](https://www.exodus.com).
-- - [Daffi Wallet](https://www.daffi.me).
+| Path | What to look at |
+| --- | --- |
+| [`src/routes/index.tsx`](src/routes/index.tsx) | Home, feed, profile, posting, and poll routes |
+| [`src/pages/`](src/pages/) | Product screens |
+| [`src/components/`](src/components/) | Social and wallet interface components |
+| [`src/services/api/`](src/services/api/) | Typed backend access and query hooks |
+| [`src/contracts/`](src/contracts/) | Generated contract clients and integration notes |
+| [`src/context/`](src/context/) | Feed, asset, analytics, and interface state |
 
-Refer to official [`use-wallet`](https://github.com/txnlab/use-wallet) documentation for detailed guidelines on how to integrate with other wallet providers (such as WalletConnect v2). Too see implementation details on the use wallet hook and initialization of extra wallet providers refer to [`App.tsx`](./src/App.tsx).
+## Development commands
 
-# Tools
+| Command | Purpose |
+| --- | --- |
+| `npm run build` | Type-check and build with Vite |
+| `npm run lint` | Check TypeScript and React source |
+| `npm test` | Run the configured Jest command with coverage |
+| `npm run preview` | Serve a completed build locally |
 
-This project makes use of React and Tailwind to provider a base project configuration to develop frontends for your Algorand dApps and interactions with smart contracts. The following tools are in use:
+## Project status
 
-- [AlgoKit Utils](https://github.com/algorandfoundation/algokit-utils-ts) - Various TypeScript utilities to simplify interactions with Algorand and AlgoKit.
-- [React](https://reactjs.org/) - A JavaScript library for building user interfaces.
-- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
-- [use-wallet](https://github.com/txnlab/use-wallet) - A React hook for connecting to an Algorand wallet providers.
-- [npm](https://www.npmjs.com/): Node.js package manager
-- [Prettier](https://prettier.io/): Opinionated code formatter
-- [ESLint](https://eslint.org/): Tool for identifying and reporting on patterns in JavaScript
-- Github Actions workflows for build validation
-It has also been configured to have a productive dev experience out of the box in [VS Code](https://code.visualstudio.com/), see the [.vscode](./.vscode) folder.
-# Integrating with smart contracts and application clients
-
-Refer to the detailed guidance on [integrating with smart contracts and application clients](./src/contracts/README.md). In essence, for any smart contract codebase generated with AlgoKit or other tools that produce compile contracts into ARC34 compliant app specifications, you can use the `algokit generate` command to generate TypeScript or Python typed client. Once generated simply drag and drop the generated client into `./src/contracts` and import it into your React components as you see fit.
-
+This is the historical WeCoop client, built with React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, and the Algorand SDK. The repository preserves a substantial product implementation; availability of its original hosted API and deployments is not guaranteed. Review the service configuration before connecting a funded wallet.
